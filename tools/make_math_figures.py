@@ -615,16 +615,18 @@ def fig_lagrange():
     xs = np.linspace(-0.5, 4.5, 100)
     ax.plot(xs, 4 - xs, color=C["r"], lw=2.4,
             label="constraint g(x,y)=x+y−4=0")
-    opt = (2.0, 2.0)                          # point on line closest to (4,3)
+    opt = (2.5, 1.5)                     # exact: x−4=y−3 ∧ x+y=4 → (2.5, 1.5)
     ax.plot(*opt, "*", color=C["o"], ms=18,
-            label="constrained optimum")
-    ax.annotate("", xy=(3.4, 3.4), xytext=opt,
-                arrowprops=dict(arrowstyle="-|>", color=C["b"], lw=2.4))
-    ax.text(3.5, 3.1, "∇f", color=C["b"], fontsize=11, weight="bold")
-    ax.annotate("", xy=(1.4, 2.6), xytext=opt,
+            label="constrained optimum (2.5, 1.5)")
+    ax.annotate("", xy=(opt[0] + 1.1, opt[1] + 1.1), xytext=opt,
                 arrowprops=dict(arrowstyle="-|>", color=C["g"], lw=2.4))
-    ax.text(1.1, 2.7, "∇g", color=C["g"], fontsize=11, weight="bold")
-    ax.set_title("at the optimum ∇f = λ·∇g  — the Lagrange multiplier λ\n"
+    ax.text(opt[0] + 1.15, opt[1] + 0.85, "∇g=(1,1)", color=C["g"],
+            fontsize=10, weight="bold")
+    ax.annotate("", xy=(opt[0] - 1.65, opt[1] - 1.65), xytext=opt,
+                arrowprops=dict(arrowstyle="-|>", color=C["b"], lw=2.4))
+    ax.text(opt[0] - 3.0, opt[1] - 1.5, "∇f=(−3,−3)", color=C["b"],
+            fontsize=10, weight="bold")
+    ax.set_title("at the optimum ∇f = λ·∇g with λ = −3 — the multiplier\n"
                  "(SVMs & RLHF's KL-constraint live here)", fontsize=9)
     ax.set_aspect("equal"); ax.legend(fontsize=8, loc="lower left")
     return save(fig, "24_lagrange.png")

@@ -4,7 +4,7 @@ SHELL := /bin/bash
 PY := python3
 export PYTHONPATH := $(CURDIR)/packages:$(CURDIR)
 
-.PHONY: setup run run-all test serve ui bench clean
+.PHONY: setup run run-all test serve ui bench notebook notebook-run clean
 
 setup: ## Verify environment (deps already present on this machine)
 	$(PY) -c "import numpy,pandas,sklearn,scipy,matplotlib,pytest; print('env OK: all core deps present')"
@@ -21,6 +21,14 @@ test: ## Pytest smoke suite over all examples
 
 bench: ## Benchmark NumPy vs PyTorch: make bench [DEVICE=mps]
 	$(PY) benchmarks/bench_backends.py --device $(or $(DEVICE),cpu)
+
+notebook: ## Open the module-00 math notebook in JupyterLab
+	jupyter lab notebooks/00-mathematical-foundations.ipynb
+
+notebook-run: ## Rebuild → re-execute → verify the notebook headlessly
+	$(PY) tools/build_math_notebook.py
+	jupyter execute --inplace notebooks/00-mathematical-foundations.ipynb
+	$(PY) tools/verify_math_notebook.py
 
 serve: ## Start the JSON API server (http://127.0.0.1:8000)
 	$(PY) apps/api_server/server.py

@@ -15,7 +15,7 @@ You do **not** need a math degree. You need working intuition for six areas. Thi
 | 5 · Optimization | convexity · learning rate · batch vs SGD · Lagrange · grid/random/Bayesian search | [21](../figures/00-math/21_convex_nonconvex.png) · [22](../figures/00-math/22_learning_rate.png) · [23](../figures/00-math/23_batch_vs_sgd.png) · [24](../figures/00-math/24_lagrange.png) · [25](../figures/00-math/25_grid_random_bayes.png) |
 | 6 · Information theory | entropy · cross-entropy loss · KL divergence · mutual information | [26](../figures/00-math/26_entropy.png) · [27](../figures/00-math/27_cross_entropy.png) · [28](../figures/00-math/28_kl_divergence.png) · [29](../figures/00-math/29_mutual_information.png) |
 
-Regenerate all figures: `python3 tools/make_math_figures.py` · Verify every worked number: `python3 tools/calc_00_math.py` · Executable versions: `make run M=00`
+Regenerate all figures: `python3 tools/make_math_figures.py` · Verify every worked number: `python3 tools/calc_00_math.py` · Executable versions: `make run M=00` · **Jupyter notebook (all of the above, live): [`notebooks/00-mathematical-foundations.ipynb`](../../notebooks/00-mathematical-foundations.ipynb)** — `make notebook` to open · rebuild+execute+verify: `make notebook-run`
 
 ## 1. Linear Algebra — the language of data
 
@@ -311,7 +311,7 @@ Loss falls `5.76 → 0.97` in five tiny steps — training a neural net is exact
 **💡 Simple examples:**
 - **Learning rate (exercise #5):** on `L=x²`, update `x ← x − η·2x` is stable iff `|1−2η| < 1` → **η must be < 1**; `η=1.12` explodes (figure 22).
 - **Batch math:** full-batch epoch = `n` examples per update; pure SGD = 1 → 100× more updates, noisy path, often better generalization (figure 23).
-- **Lagrange:** minimize `(x−4)²+(y−3)²` subject to `x+y=4` → optimum at `(2,2)` where `∇f = λ∇g`; `λ` = price of the constraint (figure 24 — SVMs & RLHF's KL budget use exactly this).
+- **Lagrange:** minimize `(x−4)²+(y−3)²` subject to `x+y=4` → `∇f = λ∇g` requires `x−4 = y−3`, plus the constraint → optimum at **(2.5, 1.5)** with `∇f = (−3,−3) = −3·∇g` (λ = −3) — `λ` = price of the constraint (figure 24 — SVMs & RLHF's KL budget use exactly this).
 - **Search:** 9 evals — grid misses the peak between ticks, random sometimes hits it, Bayesian clusters its budget around the incumbent (figure 25).
 
 ## 6. Information Theory — measuring information

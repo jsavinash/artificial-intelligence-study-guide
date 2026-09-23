@@ -10,6 +10,8 @@ make run M=11              # run ONE example (module 11 — transformers)
 make run-all               # run ALL 28 examples (~2 min) → 28/28 PASS
 make test                  # pytest suite (examples + live API + accelerators) → 12/12
 make bench                 # NumPy vs PyTorch benchmark → when acceleration actually pays
+make notebook              # open the module-00 MATH NOTEBOOK in JupyterLab (49 cells, all graphs)
+make notebook-run          # rebuild → re-execute → verify the notebook headlessly
 make serve                 # JSON API  → http://127.0.0.1:8000
 make ui                    # web UI    → http://127.0.0.1:8080
 export OPENAI_API_KEY=…    # optional: same code switches from MockLLM to a real model
@@ -21,6 +23,7 @@ export OPENAI_API_KEY=…    # optional: same code switches from MockLLM to a re
 |---|---|
 | [`docs/curriculum/`](docs/curriculum/) | **28 theory modules** (`00`–`27`), each with a Mastery Checklist |
 | [`docs/figures/`](docs/figures/) | Generated didactic figures — 31 diagrams for module 00's math topics (`python3 tools/make_math_figures.py`); every worked number verified by `tools/calc_00_math.py` |
+| [`notebooks/`](notebooks/) | **Jupyter notebook for module 00** — every formula/graph/table of the math syllabus, executable: [`00-mathematical-foundations.ipynb`](notebooks/00-mathematical-foundations.ipynb) (source: `00_math_foundations.py` → rebuild with `tools/build_math_notebook.py`) |
 | [`docs/TOPICS-SUMMARY.md`](docs/TOPICS-SUMMARY.md) | One-page map of every topic covered |
 | [`examples/`](examples/) | **28 runnable `main.py`** — one per theory module · **[catalog & sample outputs](docs/EXAMPLES.md)** |
 | [`benchmarks/`](benchmarks/) | NumPy vs PyTorch benchmark (`make bench`) — decides when accelerating pays off |
