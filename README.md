@@ -7,8 +7,9 @@ A complete curriculum covering **every major AI topic** — math foundations →
 ```bash
 make setup                 # verify environment (all deps preinstalled)
 make run M=11              # run ONE example (module 11 — transformers)
-make run-all               # run ALL 27 examples (~2 min) → 27/27 PASS
-make test                  # pytest suite (examples + live API) → 4/4
+make run-all               # run ALL 28 examples (~2 min) → 28/28 PASS
+make test                  # pytest suite (examples + live API + accelerators) → 12/12
+make bench                 # NumPy vs PyTorch benchmark (needs: pip install torch)
 make serve                 # JSON API  → http://127.0.0.1:8000
 make ui                    # web UI    → http://127.0.0.1:8080
 export OPENAI_API_KEY=…    # optional: same code switches from MockLLM to a real model
@@ -18,10 +19,11 @@ export OPENAI_API_KEY=…    # optional: same code switches from MockLLM to a re
 
 | Path | What lives there |
 |---|---|
-| [`docs/curriculum/`](docs/curriculum/) | **27 theory modules** (`00`–`26`), each with a Mastery Checklist |
+| [`docs/curriculum/`](docs/curriculum/) | **28 theory modules** (`00`–`27`), each with a Mastery Checklist |
 | [`docs/TOPICS-SUMMARY.md`](docs/TOPICS-SUMMARY.md) | One-page map of every topic covered |
-| [`examples/`](examples/) | **27 runnable `main.py`** — one per theory module · **[catalog & sample outputs](docs/EXAMPLES.md)** |
-| [`packages/ai_core/`](packages/ai_core/) | Shared lib: datasets, from-scratch metrics, MockLLM/real-LLM factory, vector store (cosine+BM25+RRF), model registry + PSI drift |
+| [`examples/`](examples/) | **28 runnable `main.py`** — one per theory module · **[catalog & sample outputs](docs/EXAMPLES.md)** |
+| [`benchmarks/`](benchmarks/) | NumPy vs PyTorch benchmark (`make bench`) — decides when accelerating pays off |
+| [`packages/ai_core/`](packages/ai_core/) | Shared lib: datasets, from-scratch metrics, MockLLM/real-LLM factory, vector store (cosine+BM25+RRF), model registry + PSI drift, optional **torch accelerator layer** |
 | [`apps/api_server/`](apps/api_server/) | stdlib JSON API: `/health` `/predict` `/rag` `/agents/run` `/generate` |
 | [`apps/web_ui/`](apps/web_ui/) | Full-stack browser client (vanilla JS, CORS-enabled) |
 | [`tests/`](tests/) | pytest: smoke-runs every example + boots & tests the API |
@@ -53,7 +55,7 @@ This machine (**Apple M1 · 8 cores · Python 3.14 · no PyTorch · no API keys*
 | 10 | [RNNs & Sequences](docs/curriculum/10-rnn-and-sequence-modeling.md) | 24 | [Study Plan & Projects](docs/curriculum/24-study-plan-and-projects.md) |
 | 11 | [Transformers & Foundation Models](docs/curriculum/11-transformers-and-foundation-models.md) | 25 | [ML System Design](docs/curriculum/25-ml-system-design.md) |
 | 12 | [Generative Models](docs/curriculum/12-generative-models.md) | 26 | [Interviews & From-Scratch Coding](docs/curriculum/26-ml-interview-prep-and-coding.md) |
-| 13 | [Reinforcement Learning](docs/curriculum/13-reinforcement-learning.md) | | |
+| 13 | [Reinforcement Learning](docs/curriculum/13-reinforcement-learning.md) | 27 | [Accelerated Computing & PyTorch](docs/curriculum/27-accelerated-computing-and-pytorch.md) |
 
 📖 Full topic index: **[docs/TOPICS-SUMMARY.md](docs/TOPICS-SUMMARY.md)** ·
 💻 Every example with concepts + real output: **[docs/EXAMPLES.md](docs/EXAMPLES.md)**

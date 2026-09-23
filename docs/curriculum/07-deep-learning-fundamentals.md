@@ -80,6 +80,8 @@ for Xb, yb in train_loader:            # DataLoader = batching + shuffling
 
 Tensor mechanics: shapes/dtype/device, `requires_grad`, broadcasting, `.to(device)` for GPU, `DataLoader`/`Dataset`, `no_grad()` for inference, mixed precision (`torch.autocast`) in [08](08-training-and-regularizing-networks.md).
 
+**When is a framework worth it at all?** This tutorial's examples stay in pure NumPy so the math is visible and installs stay at zero. The engineering decision behind that — import cost, the amortization rule, when a GPU is *slower*, and what to use instead — is module [27 Accelerated Computing & PyTorch](27-accelerated-computing-and-pytorch.md).
+
 ## 8. Embeddings — learning features from categories/sequences
 
 `nn.Embedding(V, d)` = a trainable lookup table mapping token IDs → dense vectors. Replaces one-hot explosion; learned similarity. Central to NLP, recommenders, and everything after ([10](10-rnn-and-sequence-modeling.md), [11](11-transformers-and-foundation-models.md)).

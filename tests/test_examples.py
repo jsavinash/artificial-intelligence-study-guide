@@ -12,7 +12,7 @@ EXAMPLES = sorted((ROOT / "examples").glob("m*/main.py"))
 
 
 def test_all_examples_exist():
-    assert len(EXAMPLES) >= 27, f"expected 27 examples, found {len(EXAMPLES)}"
+    assert len(EXAMPLES) >= 28, f"expected 28 examples, found {len(EXAMPLES)}"
 
 
 def _ids():

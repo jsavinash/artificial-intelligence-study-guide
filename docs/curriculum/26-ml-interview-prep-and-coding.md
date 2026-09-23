@@ -1,6 +1,6 @@
 # 26 — ML/AI Interviews & From-Scratch Coding
 
-> Back to [index](../../README.md) · Prev: [25 ML System Design](25-ml-system-design.md)
+> Back to [index](../../README.md) · Prev: [25 ML System Design](25-ml-system-design.md) · Next: [27 Accelerated Computing & PyTorch](27-accelerated-computing-and-pytorch.md)
 
 Turning knowledge into interview performance — the six-module structure of FAANG-style ML interviews (AIMLInterviews), mapped onto this tutorial.
 

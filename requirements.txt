@@ -7,8 +7,19 @@ scipy>=1.13
 matplotlib>=3.9
 pytest>=8.4
 
-# Optional (not required — examples fall back to MockLLM when absent):
+# Optional (not required — examples fall back to MockLLM / NumPy when absent):
 # openai>=1.40
 # anthropic>=0.34
-# torch  # intentionally omitted: no preinstalled wheel on this Apple M1 / Py3.14 setup;
-#        # deep-learning examples use pure-NumPy implementations instead.
+#
+# PyTorch is a genuinely optional *accelerator*, not a dependency:
+#   python3 -m pip install torch     # ~590MB, enables m27's accelerated paths
+# Verified installable on this machine (Apple M1, Python 3.14.7, arm64) as
+# torch 2.14.0 with MPS available. The 27 examples still run NumPy-only
+# without it, and m27 prints the NumPy-only PASS branch instead.
+#
+# Why it is not in the required list: importing torch costs ~1.24s, while a
+# typical example runs in ~0.15s. Making it mandatory would slow every example
+# by ~8x to speed up workloads that are already sub-second. See
+# docs/curriculum/27-accelerated-computing-and-pytorch.md and `make bench`.
+# torch>=2.6
+

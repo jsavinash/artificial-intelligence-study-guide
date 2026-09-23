@@ -215,13 +215,26 @@ Reloads your earlier implementations via importlib and re-verifies them (linreg 
 PASS m26 interview | from_scratch[linreg✓ kmeans✓ attention✓ backprop✓ logreg acc=0.95] quiz=6/6 star_stories=4_framework_ready
 ```
 
+### m27 · Accelerators — **when is PyTorch worth it?**
+→ [27](curriculum/27-accelerated-computing-and-pytorch.md) · `make run M=27` · `make bench`
+Measures the import cost (~1.24 s), derives the amortization rule `break-even = C·s/(s−1)`, proves the torch kernels match the NumPy reference numerically, sweeps for a crossover, benchmarks conv/attention/MLP-training head-to-head, and shows the **GPU losing to the CPU** (small batch → launch overhead). Runs and passes with *or* without torch installed.
+```text
+PASS m27 accelerators | torch=2.14.0 mps=True conv=34.29x attn=1.55x mlp_train=3.06x import_cost=1.24s crossover=not_reached rule_ok=True equiv_ok=True device_cpu=0.05s<mps=0.54s
+```
+Key headline: conv is **34× faster** in torch and the rule **still says stay in NumPy** — because 0.05 s of work cannot amortize a 1.24 s import. Speedup is not the decision; the amortization rule is.
+```text
+# without torch (NumPy-only fallback):
+PASS m27 accelerators | backend=numpy-only fallback_ok=True equiv_ok=True import_cost=1.24s crossover=not_reached
+```
+
 ---
 
 ## 🧪 Verifying everything
 
 ```bash
-make run-all     # RESULT: 27 passed, 0 failed
-make test        # 4 passed  (example smoke ×27 + live API endpoint suite)
+make run-all     # RESULT: 28 passed, 0 failed
+make test        # 12 passed  (example smoke ×28 + API endpoints + accelerator layer)
+make bench       # NumPy vs PyTorch report (needs: pip install torch)
 ```
 
 - Each `main.py` asserts its own claims — a changed number **fails loudly**, so the outputs above are executable documentation.

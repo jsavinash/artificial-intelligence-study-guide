@@ -90,6 +90,13 @@ Problem space vs solution space · 11-section design doc · Mercari pattern cata
 Six interview modules · NumPy implementations (linear reg, CART, MLP backprop, attention head, autograd) · fundamentals drill · 45-min system-design framework · agentic/GenAI decision questions · STAR behavioral stories · 4-week prep sprint.
 
 ---
-**Totals:** 30 docs · 27 theory modules · ~2,300 lines · every module ends with a Mastery Checklist · all cross-links verified.
-**Executable monorepo:** 27 runnable examples (m00–m26) + JSON API + web UI + pytest suite — see [monorepo guide](../README.md) · `make run-all` (27/27 green) · `make test` (4/4 green).
+
+## Systems & Performance
+**[27](curriculum/27-accelerated-computing-and-pytorch.md) Accelerated Computing & PyTorch**
+Why frameworks exist · **the amortization rule** (`break-even = import_cost × s/(s−1)`) · what torch gives you over NumPy (autograd, fused kernels, devices, compile) · the async **synchronize()** timing trap · **GPU slower than CPU** · BLAS already makes large matmul optimal · bandwidth vs compute bound · MFU · scaling levers ranked by cost (batch → compile → bf16 → grad-accum → checkpointing → DDP → FSDP) · measurement discipline · decision playbook.
+
+---
+
+**Totals:** 31 docs · 28 theory modules · ~2,400 lines · every module ends with a Mastery Checklist · all cross-links verified.
+**Executable monorepo:** 28 runnable examples (m00–m27) + JSON API + web UI + pytest suite — see [monorepo guide](../README.md) · `make run-all` (28/28 green) · `make test` (12/12 green) · `make bench` (NumPy vs PyTorch).
 
