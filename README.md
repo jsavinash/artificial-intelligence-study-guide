@@ -20,7 +20,7 @@ export OPENAI_API_KEY=…    # optional: same code switches from MockLLM to a re
 |---|---|
 | [`docs/curriculum/`](docs/curriculum/) | **27 theory modules** (`00`–`26`), each with a Mastery Checklist |
 | [`docs/TOPICS-SUMMARY.md`](docs/TOPICS-SUMMARY.md) | One-page map of every topic covered |
-| [`examples/`](examples/) | **27 runnable `main.py`** — one per theory module · **[catalog & sample outputs](examples/README.md)** |
+| [`examples/`](examples/) | **27 runnable `main.py`** — one per theory module · **[catalog & sample outputs](docs/EXAMPLES.md)** |
 | [`packages/ai_core/`](packages/ai_core/) | Shared lib: datasets, from-scratch metrics, MockLLM/real-LLM factory, vector store (cosine+BM25+RRF), model registry + PSI drift |
 | [`apps/api_server/`](apps/api_server/) | stdlib JSON API: `/health` `/predict` `/rag` `/agents/run` `/generate` |
 | [`apps/web_ui/`](apps/web_ui/) | Full-stack browser client (vanilla JS, CORS-enabled) |
@@ -56,7 +56,7 @@ This machine (**Apple M1 · 8 cores · Python 3.14 · no PyTorch · no API keys*
 | 13 | [Reinforcement Learning](docs/curriculum/13-reinforcement-learning.md) | | |
 
 📖 Full topic index: **[docs/TOPICS-SUMMARY.md](docs/TOPICS-SUMMARY.md)** ·
-💻 Every example with concepts + real output: **[examples/README.md](examples/README.md)**
+💻 Every example with concepts + real output: **[docs/EXAMPLES.md](docs/EXAMPLES.md)**
 
 ## 🗺️ Suggested paths
 
