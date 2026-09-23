@@ -1,0 +1,90 @@
+"""m20 — Multimodal AI: CLIP-style shared embedding space, cross-modal retrieval,
+and the symmetric contrastive (InfoNCE) loss matrix.
+
+Proves theory doc 20-multimodal-ai.md.
+"""
+import sys
+from pathlib import Path
+
+import numpy as np
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "packages"))
+from ai_core.llm import MockLLM  # noqa: E402
+
+# (image_id, caption) pairs — in CLIP these come from 400M web pairs
+PAIRS = [
+    ("img1", "a photo of a red car on the street"),
+    ("img2", "a photo of a cat sitting on a couch"),
+    ("img3", "a diagram of a neural network architecture"),
+    ("img4", "an aerial photo of a farm field"),
+    ("img5", "a portrait of a smiling person outdoors"),
+    ("img6", "a bowl of fruit on a kitchen table"),
+    ("img7", "a mountain landscape with a lake"),
+    ("img8", "code text on a computer monitor screen"),
+]
+
+
+def clip_style_space(llm):
+    """Both modalities map into ONE space: 'image' described by caption + noise."""
+    r = np.random.default_rng(0)
+    text_vecs = np.array([llm.embed(cap) for _, cap in PAIRS])
+    # synthetic visual features: same semantics + small visual-only noise
+    img_vecs = text_vecs + 0.02 * r.normal(size=text_vecs.shape)
+    return img_vecs, text_vecs
+
+
+def cosine_matrix(A, B):
+    An = A / (np.linalg.norm(A, axis=1, keepdims=True) + 1e-12)
+    Bn = B / (np.linalg.norm(B, axis=1, keepdims=True) + 1e-12)
+    return An @ Bn.T
+
+
+def info_nce(S, labels):
+    """Symmetric contrastive loss: (row CE + col CE)/2 over the similarity matrix."""
+    p_r = np.exp(S - S.max(1, keepdims=True)); p_r /= p_r.sum(1, keepdims=True)
+    p_c = np.exp(S - S.max(0, keepdims=True)); p_c /= p_c.sum(0, keepdims=True)
+    return float(-(np.log(p_r[np.arange(len(labels)), labels] + 1e-12).mean() +
+                   np.log(p_c[labels, np.arange(len(labels))] + 1e-12).mean()) / 2)
+
+
+def main():
+    llm = MockLLM()
+    imgs, txts = clip_style_space(llm)
+    n = len(PAIRS)
+    labels = np.arange(n)
+
+    # ---- 1) one similarity matrix governs both directions (CLIP's trick) ----
+    S = cosine_matrix(txts, imgs)                  # text->image scores
+    assert S.shape == (n, n)
+    diag = np.diag(S)
+    assert (S.argmax(axis=1) == labels).all(), "text->image retrieval@1 failed"
+    assert (S.argmax(axis=0) == labels).all(), "image->text retrieval@1 failed"
+
+    # ---- 2) zero-shot classification: map label text into the same space ----
+    class_names = ["car", "cat", "network", "field", "person", "fruit",
+                   "mountain", "code"]
+    class_vecs = np.array([llm.embed(f"a photo of a {c}") for c in class_names])
+    zs_pred = cosine_matrix(class_vecs, imgs).argmax(axis=1)
+    hits = int((zs_pred == labels).sum())
+    assert hits >= n * 0.5, hits     # hashed embeds: >> chance (1/8), >=50% recall
+
+    # ---- 3) InfoNCE: aligned pairs beat shuffled pairs ----
+    loss_aligned = info_nce(S, labels)
+    shuffled = np.roll(labels, 1)
+    loss_shuffled = info_nce(S, shuffled)
+    assert loss_aligned < loss_shuffled, (loss_aligned, loss_shuffled)
+
+    # ---- 4) temperature sharpens the contrastive distribution ----
+    sharp = info_nce(S * 5, labels)
+    assert sharp <= loss_aligned + 1e-9            # higher scale = lower loss on diag
+
+    # ---- 5) embedding dim consistency (the API contract real CLIP needs) ----
+    assert imgs.shape[1] == txts.shape[1] == 64
+
+    print(f"PASS m20 multimodal | retrieval@1=8/8 both directions "
+          f"zero_shot={hits}/{n} InfoNCE aligned={loss_aligned:.3f}"
+          f"<shuffled={loss_shuffled:.3f} temp5={sharp:.3f} dim=64")
+
+
+if __name__ == "__main__":
+    main()

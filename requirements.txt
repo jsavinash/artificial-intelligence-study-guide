@@ -1,0 +1,14 @@
+# Runtime deps for the AI tutorial monorepo (capacity check:
+# ALL of these are already installed on this machine — `make setup` verifies)
+numpy>=2.0
+pandas>=2.3
+scikit-learn>=1.6
+scipy>=1.13
+matplotlib>=3.9
+pytest>=8.4
+
+# Optional (not required — examples fall back to MockLLM when absent):
+# openai>=1.40
+# anthropic>=0.34
+# torch  # intentionally omitted: no preinstalled wheel on this Apple M1 / Py3.14 setup;
+#        # deep-learning examples use pure-NumPy implementations instead.

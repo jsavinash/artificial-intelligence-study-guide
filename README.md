@@ -2,6 +2,8 @@
 
 A complete, self-contained curriculum covering **every major topic in artificial intelligence** — from mathematical foundations to LLMs, AI agents, and production systems. All modules are plain Markdown, readable in order or by reference.
 
+> **🖥️ Want running code?** This repo is now a **monorepo**: every theory module has an executable implementation (27 examples), plus a JSON API, web UI, and test suite — see **[REPO-README.md](REPO-README.md)** (`make run-all` · `make test` · `make serve`).
+
 ## How to use this tutorial
 
 - **Complete beginner path:** 00 → 01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09 → 10 → 11 → then pick 14–19.

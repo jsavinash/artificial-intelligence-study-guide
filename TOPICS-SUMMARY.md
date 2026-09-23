@@ -90,5 +90,6 @@ Problem space vs solution space · 11-section design doc · Mercari pattern cata
 Six interview modules · NumPy implementations (linear reg, CART, MLP backprop, attention head, autograd) · fundamentals drill · 45-min system-design framework · agentic/GenAI decision questions · STAR behavioral stories · 4-week prep sprint.
 
 ---
-**Totals:** 29 files · 27 modules · ~2,300 lines · every module ends with a Mastery Checklist · all cross-links verified.
+**Totals:** 30 docs · 27 theory modules · ~2,300 lines · every module ends with a Mastery Checklist · all cross-links verified.
+**Executable monorepo:** 27 runnable examples (m00–m26) + JSON API + web UI + pytest suite — see [REPO-README.md](REPO-README.md) · `make run-all` (27/27 green) · `make test` (4/4 green).
 
