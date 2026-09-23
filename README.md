@@ -10,7 +10,7 @@ make run M=11              # run ONE example (module 11 — transformers)
 make run-all               # run ALL 28 examples (~2 min) → 28/28 PASS
 make test                  # pytest suite (examples + live API + accelerators) → 12/12
 make bench                 # NumPy vs PyTorch benchmark → when acceleration actually pays
-make notebook              # open the module-00 MATH NOTEBOOK in JupyterLab (49 cells, all graphs)
+make notebook              # open the module-00 MATH NOTEBOOK in JupyterLab (50 cells, all graphs)
 make notebook-run          # rebuild → re-execute → verify the notebook headlessly
 make serve                 # JSON API  → http://127.0.0.1:8000
 make ui                    # web UI    → http://127.0.0.1:8080

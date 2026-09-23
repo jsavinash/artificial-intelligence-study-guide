@@ -49,6 +49,18 @@ print(f"numpy {np.__version__} · matplotlib ready · seed=0 set")
 # | Shape rule | `(m×n) · (n×p) → (m×p)` | the middle numbers must be equal |
 # | Linear layer | `Y = W·X + b` | `W` = learned weights, `X` = one column per sample |
 
+# %% [markdown]
+# **📋 Linear Algebra Cheatsheet (Plain English)** — quick-reference card:
+#
+# | Concept | Mathematical Formula | Plain English Meaning |
+# |---|---|---|
+# | Dot Product | \(a \cdot b = a_1b_1 + a_2b_2 + \dots\) | Multiply matching entries of two vectors, then add them all up to get a single number. |
+# | Length (Norm) | \(\Vert a\Vert = \sqrt{a_1^2 + a_2^2 + \dots}\) | The straight-line distance from the origin to the vector's tip. |
+# | Cosine Similarity | \(\cos \theta = \frac{a \cdot b}{\Vert a\Vert \cdot \Vert b\Vert}\) | Measures how aligned two vectors are. **1** = they point in the same direction; **0** = unrelated / perpendicular. |
+# | Matrix Multiplication | \(C[i,j] = \sum_k A[i,k] \cdot B[k,j]\) | To find the item at row *i*, column *j* in the new matrix, take row *i* of matrix A and dot product it with column *j* of matrix B. |
+# | Shape Rule | \((m \times n) \cdot (n \times p) \to (m \times p)\) | To multiply two matrices, the inner dimensions (**n**) must match. The result keeps the outer dimensions (**m × p**). |
+# | Linear Layer | \(Y = W \cdot X + b\) | The foundation of neural networks. **W** = learned weights, **b** = the bias, **X** = data with one column per sample. |
+
 # %%
 # --- Matrix multiply BY HAND: every cell, expanded -------------------------
 A = np.array([[1, 2, 3],
