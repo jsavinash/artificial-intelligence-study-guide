@@ -2,6 +2,14 @@
 and the symmetric contrastive (InfoNCE) loss matrix.
 
 Proves theory doc 20-multimodal-ai.md.
+
+Two paths:
+  1. Embedding space (NumPy) — the similarity matrix, zero-shot classification
+     and the InfoNCE objective, with no learning involved.
+  2. Two-tower CLIP (PyTorch) — image and text go through *separate* projection
+     heads trained end-to-end with symmetric InfoNCE. The raw inputs are
+     deliberately misaligned first, so this proves the heads learn the shared
+     space rather than reading it off the input.
 """
 import sys
 from pathlib import Path
@@ -10,6 +18,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "packages"))
 from ai_core.llm import MockLLM  # noqa: E402
+from ai_core import torch_backend as TB  # noqa: E402
 
 # (image_id, caption) pairs — in CLIP these come from 400M web pairs
 PAIRS = [
@@ -45,6 +54,46 @@ def info_nce(S, labels):
     p_c = np.exp(S - S.max(0, keepdims=True)); p_c /= p_c.sum(0, keepdims=True)
     return float(-(np.log(p_r[np.arange(len(labels)), labels] + 1e-12).mean() +
                    np.log(p_c[labels, np.arange(len(labels))] + 1e-12).mean()) / 2)
+
+
+def torch_path(imgs, txts):
+    """Train real projection heads with symmetric InfoNCE — CLIP in miniature.
+
+    The inputs are first pushed through a fixed random linear map plus noise.
+    That destroys the trivial alignment, so if retrieval works afterwards it is
+    because the two towers *learned* to meet in a shared space.
+    """
+    if not TB.HAS_TORCH:
+        print("\n[torch] not installed — embedding-space path only (CLIP skipped)")
+        return None
+    rng = np.random.default_rng(7)
+    n, d = txts.shape
+    warp = rng.normal(size=(d, d)) * 0.3             # fixed, unknown transform
+    img_raw = imgs @ warp + 0.30 * rng.normal(size=(n, d))
+    txt_raw = txts + 0.30 * rng.normal(size=(n, d))
+
+    # baseline: naive cosine on the *misaligned* raw features
+    S_before = cosine_matrix(img_raw, txt_raw)
+    top1_before = float((S_before.argmax(1) == np.arange(n)).mean())
+
+    print(f"\n[torch] two-tower CLIP on {TB.get_device()} — "
+          f"InfoNCE over a {n}x{n} similarity matrix")
+    res = TB.train_clip(img_raw, txt_raw, temperature=0.07, epochs=400,
+                        lr=0.02, embed_dim=32, seed=0)
+    print(f"    raw cosine top1={top1_before:.2f} -> trained "
+          f"i2t={res['i2t_top1']:.2f} t2i={res['t2i_top1']:.2f} "
+          f"loss {res['losses'][0]:.2f}->{res['losses'][-1]:.2f} "
+          f"params={res['n_params']}")
+
+    # 1) the towers learned a shared space that raw features did not have
+    if top1_before < 1.0:
+        assert res["i2t_top1"] > top1_before, (top1_before, res["i2t_top1"])
+    # 2) both directions must succeed (CLIP is symmetric by construction)
+    assert res["i2t_top1"] >= 0.75, res["i2t_top1"]
+    assert res["t2i_top1"] >= 0.75, res["t2i_top1"]
+    # 3) the contrastive loss actually went down
+    assert res["losses"][-1] < res["losses"][0]
+    return {"before": top1_before, **res}
 
 
 def main():

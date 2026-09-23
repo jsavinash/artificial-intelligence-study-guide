@@ -9,6 +9,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "packages"))
+from ai_core import torch_backend as TB  # noqa: E402
 
 
 def attention(Q, K, V, causal=False, scale=True):
@@ -33,6 +34,43 @@ def multi_head(X, Wq, Wk, Wv, heads=2):
                          V[:, h * d:(h + 1) * d], causal=True)
         outs.append(o)
     return np.concatenate(outs, axis=1)
+
+
+def torch_path(data, vocab_size, np_loss):
+    """The framework equivalent — a real decoder-only transformer.
+
+    1) one attention head via F.scaled_dot_product_attention (the fused kernel)
+    2) a 2-layer GPT-style LM trained with autograd, compared to the NumPy
+       bigram-style model above on the SAME corpus.
+    """
+    if not TB.HAS_TORCH:
+        print("\n[torch] not installed — NumPy attention/LM path only")
+        return None
+    print(f"\n[torch] fused attention + transformer LM on {TB.get_device()}")
+
+    # 1) fused attention: same math as our softmax(QK^T/sqrt(d))V, one kernel
+    x = np.random.default_rng(0).normal(size=(8, 16)).astype(np.float32)
+    out = TB.attention_output(x, d_head=16, causal=True, seed=0)
+    assert out.shape == (8, 16)
+    # batched + causal must also work (what real training uses)
+    xb = np.random.default_rng(1).normal(size=(4, 6, 16)).astype(np.float32)
+    outb = TB.attention_output(xb, d_head=16, causal=True, seed=1)
+    assert outb.shape == (4, 6, 16)
+    print(f"  SDPA   : head out {out.shape} batched={outb.shape} (is_causal=True)")
+
+    # 2) real transformer LM on the same corpus.
+    #    Note device: this model is ~60K params — far too small to amortize GPU
+    #    kernel launches, so module 27's rule says run it on the CPU. Same
+    #    accuracy, less overhead.
+    res = TB.train_tiny_lm(data, vocab=vocab_size, block_size=16, epochs=60,
+                           lr=3e-3, d_model=48, n_heads=4, n_layers=2, seed=0,
+                           device="cpu")
+    print(f"  tinyLM : loss {res['losses'][0]:.3f}->{res['losses'][-1]:.3f} "
+          f"next-tok acc={res['acc']:.3f} params={res['n_params']} "
+          f"({res['backend']}, {res['seconds']:.2f}s)")
+    print(f"  numpy  : loss {np_loss:.3f}  (the hand-written model above)")
+    return res
+
 
 
 def main():
@@ -98,6 +136,16 @@ def main():
     print(f"PASS m11 transformers | causal_mask=True rows_sum=1 "
           f"kv_cache_equiv=True mh={mh.shape} "
           f"nxttok_loss {losses[0]:.3f}->{losses[-1]:.3f} < uniform={uniform:.3f}")
+
+    res = torch_path(data, V, losses[-1])
+    if res:
+        print(f"PASS m11 transformer_torch | backend={TB.backend_label()} "
+              f"sdpa_ok=True lm_loss={res['losses'][-1]:.3f} "
+              f"lm_nexttok_acc={res['acc']:.3f} lm_params={res['n_params']}")
+    else:
+        print("SKIP m11 transformer_torch | torch absent — NumPy attention/LM "
+              "path above is complete")
+
 
 
 if __name__ == "__main__":

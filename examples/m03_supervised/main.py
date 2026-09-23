@@ -15,6 +15,39 @@ from sklearn.tree import DecisionTreeClassifier
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "packages"))
 from ai_core.datasets import classification  # noqa: E402
+from ai_core import torch_backend as TB  # noqa: E402
+
+
+def torch_path(X, yb):
+    """The two gradient-based learners via autograd instead of hand-written math.
+
+    Trees/forests/boosting stay in sklearn on purpose — gradient boosting is not
+    a GPU/tensor problem, and the [27] decision table says so.
+    """
+    if not TB.HAS_TORCH:
+        print("\n[torch] not installed — scratch + sklearn path only")
+        return None
+    print(f"\n[torch] autograd learners on {TB.get_device()}")
+    out = {}
+
+    yv = X[:, 0] * 2.0 + 1.0                      # a known linear target
+    lr = TB.fit_linear_regression(X, yv, epochs=400, lr=0.05, seed=0)
+    print(f"      linear (GD)   mse={lr['mse']:.4f} weights_ok="
+          f"{lr['agrees_with_closed_form']} ({lr['backend']})")
+
+    lg = TB.train_logistic_regression(X, yb, epochs=300, lr=0.1, l2=0.01, seed=0)
+    print(f"      logistic      acc={lg['acc']:.3f} params={lg['n_params']} "
+          f"({lg['backend']})")
+
+    out = {"linreg_mse": lr["mse"], "logreg_acc": lg["acc"]}
+    assert lr["mse"] < 0.05, f"GD should fit a linear target ({lr['mse']})"
+    assert lr["agrees_with_closed_form"], "GD must converge to the OLS solution"
+    assert lg["acc"] > 0.75, lg["acc"]
+    # the loss curves must actually descend — the signature of a working optimizer
+    assert lg["losses"][-1] < lg["losses"][0]
+    assert lr["losses"][-1] < lr["losses"][0]
+    return out
+
 
 
 def linreg_gd(X, y, lr=0.1, iters=300):
@@ -99,6 +132,12 @@ def main():
     fmt = " ".join(f"{k}={v:.3f}" for k, v in results.items())
     print(f"PASS m03 supervised | scratch: linreg={lr_acc:.3f} logreg={log_acc:.3f} "
           f"knn={knn_acc:.3f} tree_split(j={j},g={g:.3f}) | {fmt}")
+
+    tp = torch_path(X, y)
+    if tp:
+        print(f"PASS m03 torch | linreg_mse={tp['linreg_mse']:.4f} "
+              f"logreg_acc={tp['logreg_acc']:.3f} "
+              f"backend={TB.backend_label()}")
 
 
 if __name__ == "__main__":

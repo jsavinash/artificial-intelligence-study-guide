@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 # Run every example sequentially; tally PASS/FAIL.  Usage: ./scripts/run_all.sh [mXX]
+#   Extra PYTHONPATH prefix (used to test the torch-free fallback path):
+#     EXTRA_PYTHONPATH=/tmp/no_torch: ./scripts/run_all.sh
 set -u
 cd "$(dirname "$0")/.."
-export PYTHONPATH="$PWD/packages:$PWD"
+export PYTHONPATH="${EXTRA_PYTHONPATH:-}$PWD/packages:$PWD"
 pass=0; fail=0; failed=()
 
 for dir in examples/m*/; do

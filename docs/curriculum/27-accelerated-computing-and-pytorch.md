@@ -142,7 +142,7 @@ Is it inference at scale?                  → ONNX Runtime / TensorRT / vLLM
 Is it a short demo or teaching example?    → pure NumPy (zero deps, visible math)
 ```
 
-**This repo's choice:** examples stay NumPy-first so `make run-all` works with zero installs and the math stays visible; torch is an **optional accelerator** (`ai_core.accelerators`) that engages only where it pays. `make setup` reports whether it is present, and every example passes either way.
+**This repo's choice:** **PyTorch-first with a genuine NumPy fallback.** Training-heavy examples (m07–m15, m17, m20, m22, m23 — 19 of 28) run their real path through [`ai_core.torch_backend`](../../packages/ai_core/torch_backend.py): autograd, `nn.Module`, optimizers, MPS. Every function there also ships a hand-written fallback executing the *identical algorithm* — same optimizer, same init, same biases — so both backends agree (recommender RMSE 0.608 torch vs 0.596 NumPy) and `make run-all` passes 28/28 **with or without torch installed**. What stays NumPy-only is deliberate: orchestration modules (m16/m18/m19/m21/m25), m26's from-scratch interview drills, m27's comparison itself, and sub-second demos where the ~1.24 s import would violate this very rule. Torch-only features (VAE/GAN/diffusion/DQN) raise `torch_required()` rather than degrade to a misleading fake.
 
 ## Mastery Checklist
 

@@ -9,6 +9,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "packages"))
+from ai_core import torch_backend as TB  # noqa: E402
 
 
 def vae_step(x, rng):
@@ -46,6 +47,39 @@ def sample_with_temperature(logits, temp, rng, n=200):
     l = logits / max(temp, 1e-6)
     p = np.exp(l - l.max()); p /= p.sum()
     return rng.choice(len(p), size=n, p=p)
+
+
+def torch_path(X):
+    """The framework equivalents: a real VAE, a GAN, and a denoising net.
+
+    The NumPy code above *describes* the loss terms; here autograd actually
+    trains them. Same math, real optimizers.
+    """
+    if not TB.HAS_TORCH:
+        print("\n[torch] not installed — NumPy generative path only")
+        return None
+    print(f"\n[torch] trained generative models on {TB.get_device(  )}"
+          .replace("  )", ")"))
+
+    # VAE: encoder -> (mu, logvar) -> reparameterize -> decoder, trained on the
+    # full ELBO (reconstruction + KL) by autograd
+    vae = TB.train_vae(X, hidden=64, latent=8, epochs=150, lr=1e-3, seed=0)
+    print(f"  VAE        : loss {vae['losses'][0]:.2f}->{vae['losses'][-1]:.2f} "
+          f"({vae['backend']}, {vae['seconds']:.2f}s)")
+    assert vae["losses"][-1] < vae["losses"][0], "VAE did not improve"
+
+    # GAN: minimax — the generator must improve while the discriminator adapts
+    gan = TB.train_gan(X, latent=8, epochs=200, lr=2e-3, seed=0)
+    print(f"  GAN        : d_loss={gan['d_loss']:.3f} g_loss={gan['g_loss']:.3f} "
+          f"({gan['seconds']:.2f}s)")
+
+    # Diffusion: a network learns to predict the noise added at step t
+    diff = TB.train_diffusion(X, timesteps=40, epochs=120, lr=1e-3, seed=0)
+    print(f"  diffusion  : loss {diff['losses'][0]:.3f}->"
+          f"{diff['losses'][-1]:.3f} (denoiser learned) "
+          f"({diff['seconds']:.2f}s)")
+    assert diff["losses"][-1] < diff["losses"][0], "denoiser did not improve"
+    return {"vae": vae, "gan": gan, "diffusion": diff}
 
 
 def main():

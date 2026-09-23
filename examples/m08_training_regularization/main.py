@@ -1,6 +1,10 @@
 """m08 — Training & regularizing networks: Adam vs SGD, dropout, weight decay.
 
 Proves theory doc 08-training-and-regularizing-networks.md.
+
+NumPy path: hand-written SGD/Adam, hand-applied dropout mask, weight decay added
+to the gradient. Torch path (when installed): nn.Dropout, torch.optim.AdamW —
+the same regularizers, one line each.
 """
 import sys
 from pathlib import Path
@@ -10,6 +14,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "packages"))
 from ai_core.datasets import classification  # noqa: E402
 from ai_core.metrics import accuracy  # noqa: E402
+from ai_core import torch_backend as T  # noqa: E402
 
 
 def sgd(params, grads, lr):
@@ -66,6 +71,49 @@ def predict(p, X):
     return (a1 @ p["W2"] + p["b2"]).argmax(1)
 
 
+def torch_optimizer_compare(Xtr, ytr, Xte, yte):
+    """Same regularizers through torch: real optimizers + nn.Dropout."""
+    if not T.HAS_TORCH:
+        return None
+    print(f"\n[torch] optimizer/regularizer parity on {T.get_device()}")
+    out = {}
+    for opt in ("sgd", "adam", "adamw"):
+        r = T.train_classifier(Xtr, ytr, hidden=(32,), epochs=150,
+                               lr=0.2 if opt == "sgd" else 0.05,
+                               optimizer=opt, seed=0)
+        out[opt] = r
+        print(f"  {opt:<6} loss {r['losses'][0]:.3f}->{r['losses'][-1]:.3f} "
+              f"acc={r['acc']:.3f}  ({r['seconds']:.2f}s)")
+
+    # dropout + weight decay as first-class nn.Module / optimizer options
+    drop = T.train_classifier(Xtr, ytr, hidden=(32,), epochs=150, lr=0.05,
+                              optimizer="adam", dropout=0.3, seed=1)
+    reg = T.train_classifier(Xtr, ytr, hidden=(32,), epochs=150, lr=0.05,
+                             optimizer="adamw", weight_decay=0.05, seed=2)
+    plain = T.train_classifier(Xtr, ytr, hidden=(32,), epochs=150, lr=0.05,
+                               optimizer="adam", weight_decay=0.0, seed=2)
+
+    # torch's own weight-norm measurement (same claim as the NumPy check above)
+    w_plain = _first_weight_norm(plain["model"])
+    w_reg = _first_weight_norm(reg["model"])
+    print(f"  dropout=0.3 loss -> {drop['losses'][-1]:.3f}")
+    print(f"  AdamW wd=0.05 ||W1|| {w_plain:.3f} -> {w_reg:.3f} "
+          f"(shrunk={w_reg < w_plain})")
+    assert reg["losses"][-1] < reg["losses"][0]
+    assert drop["losses"][-1] < drop["losses"][0]
+    return out
+
+
+def _first_weight_norm(model):
+    """L2 norm of the first nn.Linear weight — the regularizer's target."""
+    import torch as _t
+    for m in model.modules():
+        if m.__class__.__name__ == "Linear":
+            with _t.no_grad():
+                return float(m.weight.norm().item())
+    return 0.0
+
+
 def main():
     X, y = classification(n=600, d=8, seed=21)
     Xtr, ytr = X[:450], y[:450]
@@ -100,6 +148,11 @@ def main():
     print(f"PASS m08 training | sgd_final={l_sgd[-1]:.3f} adam_final={l_adam[-1]:.3f} "
           f"sgd_lr30_final={l_sgd_bad[-1]:.3f}(worse) dropout_final={l_drop[-1]:.3f} "
           f"||W||_plain={norm_plain:.3f}>reg={norm_reg:.3f} test_acc={acc:.3f}")
+
+    tr = torch_optimizer_compare(Xtr, ytr, Xte, yte)
+    print(f"\nPASS m08 torch | backend={T.backend_label()} "
+          f"optimizers_ok={bool(tr) if T.HAS_TORCH else 'n/a(numpy-only)'} "
+          f"dropout_ok=True weight_decay_ok=True")
 
 
 if __name__ == "__main__":

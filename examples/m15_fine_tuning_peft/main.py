@@ -1,7 +1,13 @@
-"""m15 — Fine-tuning & PEFT: LoRA dW = B@A low-rank math + merge, rank sweep,
-knowledge distillation (teacher soft labels), quantization error.
+"""m15 — Fine-tuning & PEFT: LoRA low-rank math, merge, distillation, quantization.
 
 Proves theory doc 15-fine-tuning-and-peft.md.
+
+Two paths:
+  1. NumPy from-scratch — SVD rank sweep, merge equivalence, teacher/student
+     distillation, int8 quantization error. The math with nothing hidden.
+  2. PyTorch — the *real* LoRA: nn.Linear layers frozen in place, trainable
+     low-rank adapters attached via module replacement, then merged back into
+     the base weights so inference cost returns to zero.
 """
 import sys
 from pathlib import Path
@@ -11,6 +17,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "packages"))
 from ai_core.datasets import classification  # noqa: E402
 from ai_core.metrics import accuracy  # noqa: E402
+from ai_core import torch_backend as TB  # noqa: E402
 
 
 def lora_decompose(dW, r):
@@ -19,6 +26,47 @@ def lora_decompose(dW, r):
     B = U[:, :r] * S[:r]          # d x r
     A = Vt[:r, :]                 # r x d
     return B, A
+
+
+def torch_path():
+    """Real LoRA: freeze an nn.Module, attach adapters, fine-tune, merge back."""
+    if not TB.HAS_TORCH:
+        print("\n[torch] not installed — SVD-based LoRA math only")
+        return None
+    X, y = classification(n=600, d=16, classes=4, seed=3)
+    print(f"\n[torch] real LoRA on {TB.get_device()} — freeze nn.Linear, "
+          f"train only A and B")
+    res = TB.train_peft(X, y, hidden=(64, 64), r=8, alpha=16.0,
+                        epochs=120, lr=1e-2, seed=0)
+    lo = res["lora"]
+    print(f"    adapters={lo['adapters']} trainable={lo['trainable']}/"
+          f"{lo['total']} ({lo['percent']:.1f}%) frozen={lo['frozen']} "
+          f"acc={res['acc']:.3f} (pretrain {lo['pretrain_acc']:.3f})")
+
+    # 1) LoRA really does shrink the trainable budget
+    assert lo["adapters"] > 0, "expected adapters on the hidden layers"
+    assert lo["frozen"] > lo["trainable"], (lo["frozen"], lo["trainable"])
+    assert lo["percent"] < 30.0, lo["percent"]
+    # 2) fine-tuning on adapters alone kept us at (or above) pretrain accuracy
+    assert res["acc"] >= lo["pretrain_acc"] - 0.05, (res["acc"],
+                                                     lo["pretrain_acc"])
+
+    # 3) merge: output must be numerically unchanged, adapters must disappear
+    import torch
+    model = res["model"]
+    dev = next(model.parameters()).device          # model may live on mps/cuda
+    probe = torch.as_tensor(X[:8], dtype=torch.float32, device=dev)
+    with torch.no_grad():
+        before = model(probe).clone()
+    merged = TB.merge_lora(model)
+    with torch.no_grad():
+        after = model(probe)
+    max_diff = float((before - after).abs().max().item())
+    print(f"    merged_layers={merged} max_output_diff={max_diff:.2e} "
+          f"(0 => zero inference overhead)")
+    assert merged == lo["adapters"], (merged, lo["adapters"])
+    assert max_diff < 1e-4, max_diff
+    return {"lora": lo, "merged": merged, "max_diff": max_diff}
 
 
 def main():
@@ -92,10 +140,17 @@ def main():
     # ---- 5) frozen-base check: only A,B would receive gradients ----
     assert W.shape == (d, d) and trainable[8] == 2 * d * 8
 
+    real = torch_path()
+    real_note = ""
+    if real:
+        real_note = (f" real_lora_trainable={real['lora']['percent']:.1f}%"
+                     f" merged={real['merged']} merge_diff={real['max_diff']:.1e}")
+
     print(f"PASS m15 peft | lora trainable {trainable[8]}/{params_full}="
           f"{trainable[8]/params_full:.1%} rank_err 2:{errs[2]:.2f}->32:{errs[32]:.2f} "
           f"merge_equal=True distill_loss {losses[0]:.3f}->{losses[-1]:.3f} "
-          f"student_acc={acc_student:.3f} teacher_acc={acc_teacher:.3f} int8_err={rel_err:.3f}")
+          f"student_acc={acc_student:.3f} teacher_acc={acc_teacher:.3f} "
+          f"int8_err={rel_err:.3f}{real_note}")
 
 
 if __name__ == "__main__":

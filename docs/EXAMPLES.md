@@ -1,11 +1,11 @@
-# 💻 Examples Catalog — 27 runnable implementations
+# 💻 Examples Catalog — 28 runnable implementations
 
 One `main.py` per theory module in [`curriculum/`](curriculum/).
 Every example is **self-contained, offline-capable, and assertion-checked** — it prints `PASS …` and exits 0 only if every teaching claim actually holds.
 
 ```bash
 make run M=11        # one example          # or: python3 examples/m11_transformers/main.py
-make run-all         # all 27 (~2 min) → tally
+make run-all         # all 28 (~2 min) → tally
 ```
 
 **Reading an entry:** `→ doc` = theory it proves · `Shows` = key implementations · `Output` = the real PASS line this example prints (captured from a live run).
@@ -18,7 +18,7 @@ make run-all         # all 27 (~2 min) → tally
 → [00](curriculum/00-mathematical-foundations.md) · `make run M=00`
 Gradient descent on f(x)=x², by-hand 2-layer chain rule, Bayes medical-test posterior (base-rate trap), CE punishing confident-wrong, KL divergence, layer shape law.
 ```text
-PASS m00 math | gd_min=-0.000000 bayes_post=0.154 backprop_L=0.000 kl_diff=0.583
+PASS m00 math | gd_min=-0.000000 bayes_post=0.154 backprop_L=0.000 kl_diff=0.583 autograd_gd=-0.0000 gradcheck_err=3.2e-03 ce_grad_err=7.5e-09 kl_match=True backend=torch-2.14.0-mps
 ```
 
 ### m01 · Python & Data Tooling
@@ -60,18 +60,18 @@ PASS m05 eval | acc=0.887 P=0.934 R=0.814 F1=0.870 ROC-AUC=0.969 cv=0.878 imbala
 → [06](curriculum/06-feature-engineering.md) · `make run M=06`
 **Safe target encoding** (in-fold + smoothing) vs leaky version, log de-skew, cyclical hour sin/cos, TF-IDF, permutation-importance selection.
 ```text
-PASS m06 features | tfidf_nnz=17 safe_vs_leaky_differs=True acc=0.928 top_feature=f5
+PASS m06 features | tfidf_nnz=17 safe_vs_leaky_differs=True acc=0.928 top_feature=f5 emb_holdout=0.297 onehot_holdout=0.296 param_saving=6.25x
 ```
 
 ---
 
-## Deep Learning from scratch (07–13) — pure NumPy
+## Deep Learning (07–13) — PyTorch autograd + from-scratch checks
 
 ### m07 · DL Fundamentals — **MLP + backprop + gradient check**
 → [07](curriculum/07-deep-learning-fundamentals.md) · `make run M=07`
 Forward/ReLU/softmax + manual backward; 400 descent steps; analytic gradient vs central finite differences — identical to 5 decimals.
 ```text
-PASS m07 dl_fundamentals | loss 1.101->0.064 acc=0.991 gradcheck_analytic=0.00177 numeric=0.00177
+PASS m07 dl_fundamentals | numpy loss 1.101->0.064 acc=0.991 gradcheck_analytic=0.00177 numeric=0.00177
 ```
 
 ### m08 · Training & Regularization
@@ -85,7 +85,7 @@ PASS m08 training | sgd_final=0.072 adam_final=0.131 sgd_lr30_final=2.672(worse)
 → [09](curriculum/09-convolutional-networks-and-vision.md) · `make run M=09`
 `conv2d` sliding-window from scratch, shape law (8→6; stride 2→3), **translation equivariance**, Sobel edge detection, max-pool, conv gradient check.
 ```text
-PASS m09 cnn | conv_out=6x6 stride2=3x3 equivariant=True edge_resp=1.298>flat=0.000 pool=3x3 gradcheck_max_err=1.22e-09
+PASS m09 cnn | conv_out=6x6 stride2=3x3 equivariant=True edge_resp=1.298>flat=0.000 pool=3x3 gradcheck_max_err=1.22e-09 backend=torch-2.14.0-mps
 ```
 
 ### m10 · RNNs & Sequences
@@ -113,7 +113,7 @@ PASS m12 generative | vae_kl=0.632 recon=2.153 diffusion_sig 1.00->0.00 a_bar_T=
 → [13](curriculum/13-reinforcement-learning.md) · `make run M=13`
 Q-learning (TD + ε-decay) on a 4×4 gridworld: return −0.48→+0.67, greedy policy finds the 6-step path, avoids the hole; final policy arrows printed.
 ```text
-PASS m13 rl | return early=-0.48 -> late=0.67 path_len=6 goal_reached=True V_start=0.729 V_goal=0.000 policy=↓←↓↓↓·↓↓↓→→↓→→→·
+PASS m13 rl | return early=-0.48 -> late=0.67 path_len=6 goal_reached=True V_start=0.729 V_goal=0.000 policy=↓←↓↓↓·↓↓↓→→↓→→→· dqn_return=-15.0->4.7 dqn_params=5508
 ```
 
 ---
@@ -131,7 +131,7 @@ PASS m14 llm | bpe_merges=25 vocab=44 encode('the cat sat')=8tok vs 21chars | 7B
 → [15](curriculum/15-fine-tuning-and-peft.md) · `make run M=15`
 SVD low-rank ΔW = B·A (r=8 → 25% of params, rank-error sweep 0.94→0.32), **merge equivalence** (adapter ≡ merged), teacher→student soft-label distillation, int8 error 0.8%.
 ```text
-PASS m15 peft | lora trainable 1024/4096=25.0% rank_err 2:0.94->32:0.32 merge_equal=True distill_loss 0.670->0.261 student_acc=0.992 teacher_acc=0.994 int8_err=0.008
+PASS m15 peft | lora trainable 1024/4096=25.0% rank_err 2:0.94->32:0.32 merge_equal=True distill_loss 0.670->0.261 student_acc=0.992 teacher_acc=0.994 int8_err=0.008 real_lora_trainable=28.6% merged=3 merge_diff=7.6e-06
 ```
 
 ### m16 · Prompt Engineering — **golden-set eval harness**
@@ -143,9 +143,9 @@ PASS m16 prompt-engineering | golden 5/5 (summarize=OK classify=OK extract_json=
 
 ### m17 · RAG — **chunk → embed → hybrid search → citations**
 → [17](curriculum/17-retrieval-augmented-generation.md) · `make run M=17`
-Overlap chunking, hashed embeddings, **cosine + BM25 fused with RRF**, retrieval benchmark hit@1=3/3 (LoRA/BM25/Chinchilla queries), grounded answers cite `[dN]`.
+Overlap chunking, hashed embeddings, **cosine + BM25 fused with RRF**, retrieval benchmark hit@1=3/3 (LoRA/BM25/Chinchilla queries), grounded answers cite `[dN]`, plus a **trained two-tower neural retriever (InfoNCE) — untrained 0/6 → 6/6**.
 ```text
-PASS m17 rag | chunks=8 hit@1=3/3 top_doc=d2 citations_in_answer=True hybrid=cosine+BM25+RRF provider=mock-llm
+PASS m17 rag | chunks=8 hit@1=3/3 top_doc=d2 citations_in_answer=True hybrid=cosine+BM25+RRF provider=mock-llm neural_retriever=0->6/6 backend=torch-2.14.0
 ```
 
 ### m18 · Agents — **tool loop with ReAct trace + evals**
@@ -159,7 +159,7 @@ PASS m18 agents | tools=['calculator', 'search_docs'] goal1_steps=2 tool_calls=1
 → [19](curriculum/19-llm-application-engineering.md) · `make run M=19`
 Golden-set harness with latency + $ cost per case, injection/PII input guards, output leak checks, LLM-as-judge rubric score, semantic cache (1 hit saved).
 ```text
-PASS m19 llm-app | eval_pass=100% p95=0.11ms total_cost=$0.000122 guards[injection_blocked=True pii_flagged=True] judge=1.0 cache_hits=1 provider=mock-llm
+PASS m19 llm-app | eval_pass=100% p95=0.14ms total_cost=$0.000122 guards[injection_blocked=True pii_flagged=True] judge=1.0 cache_hits=1 provider=mock-llm
 ```
 
 ---
@@ -177,14 +177,14 @@ PASS m20 multimodal | retrieval@1=8/8 both directions zero_shot=4/8 InfoNCE alig
 → [21](curriculum/21-mlops-and-production-ml.md) · `make run M=21`
 Save→load→**promote staging→production** in the filesystem registry, PSI drift verdicts (stable / retrain), batch vs per-row latency, prediction logging to CSV.
 ```text
-PASS m21 mlops | acc=0.960 registry=production drift[stable=stable,shifted=retrain] batch=0.09ms vs online_avg=0.05ms pred_log=150 rows
+PASS m21 mlops | acc=0.960 registry=production drift[stable=stable,shifted=retrain] batch=0.14ms vs online_avg=0.05ms pred_log=150 rows
 ```
 
 ### m22 · Safety — **injection detector, PII redaction, fairness audit**
 → [22](curriculum/22-ai-safety-security-ethics.md) · `make run M=22`
-Regex injection patterns (P=R=1.0 on fixture), email/SSN/phone redaction, **demographic-parity bias measured 0.251 → 0.027 after debiasing**, equalized-odds gaps.
+Regex injection patterns (P=R=1.0 on fixture), **learned char-3-gram guardrail catches 9/10 character-obfuscated attacks vs regex 4/10 (train/eval strings disjoint, 0 false positives)**, email/SSN/phone redaction, **demographic-parity bias measured 0.251 → 0.027 after debiasing**, per-group thresholds cut it to **0.001**, equalized-odds gaps.
 ```text
-PASS m22 safety | injection P=1.00 R=1.00 pii_redacted=['email', 'ssn', 'phone'] bias_DP=0.251>fair_DP=0.027 EO_tpr=0.265
+PASS m22 safety | injection P=1.00 R=1.00 pii_redacted=['email', 'ssn', 'phone'] bias_DP=0.251>fair_DP=0.027 EO_tpr=0.265 learned=9/10>regex=4/10 mitigated_DP=0.001 backend=torch-2.14.0-mps
 ```
 
 ### m23 · Advanced — **recommender + time series + GNN**
@@ -198,7 +198,7 @@ PASS m23 advanced | mf_rmse=0.015<baseline=0.346 walkforward_splits=9 (causal=Tr
 → [24](curriculum/24-study-plan-and-projects.md) · `make run M=24`
 Runs the whole project ladder in one process — data→baseline→split→GBM→metrics→register→drift→RAG index→design doc→**verifies all other 26 examples still green**.
 ```text
-PASS m24 capstone | checklist 10/10 acc=0.925>baseline=0.521 registry=capstone-gbm drift=investigate store=8 examples=26green | ✅…✅examples_green
+PASS m24 capstone | checklist 10/10 acc=0.925>baseline=0.521 f1=0.923 registry=capstone-gbm drift=investigate store=8 examples=27green | ✅problem_framed ✅baseline_defined ✅split_is_clean ✅model_trained ✅eval_reported ✅model_registered ✅drift_checked ✅rag_indexed ✅design_doc_written ✅examples_green
 ```
 
 ### m25 · ML System Design — **11-section design-doc generator**
@@ -219,9 +219,9 @@ PASS m26 interview | from_scratch[linreg✓ kmeans✓ attention✓ backprop✓ l
 → [27](curriculum/27-accelerated-computing-and-pytorch.md) · `make run M=27` · `make bench`
 Measures the import cost (~1.24 s), derives the amortization rule `break-even = C·s/(s−1)`, proves the torch kernels match the NumPy reference numerically, sweeps for a crossover, benchmarks conv/attention/MLP-training head-to-head, and shows the **GPU losing to the CPU** (small batch → launch overhead). Runs and passes with *or* without torch installed.
 ```text
-PASS m27 accelerators | torch=2.14.0 mps=True conv=34.29x attn=1.55x mlp_train=3.06x import_cost=1.24s crossover=not_reached rule_ok=True equiv_ok=True device_cpu=0.05s<mps=0.54s
+PASS m27 accelerators | torch=2.14.0 mps=True conv=36.78x attn=0.97x mlp_train=3.0x import_cost=1.24s crossover=not_reached rule_ok=True equiv_ok=True device_cpu=0.05s<mps=0.27s
 ```
-Key headline: conv is **34× faster** in torch and the rule **still says stay in NumPy** — because 0.05 s of work cannot amortize a 1.24 s import. Speedup is not the decision; the amortization rule is.
+Key headline: conv is **~37× faster** in torch (34–90× depending on run) and the rule **still says stay in NumPy** — because 0.05 s of work cannot amortize a 1.24 s import. Speedup is not the decision; the amortization rule is.
 ```text
 # without torch (NumPy-only fallback):
 PASS m27 accelerators | backend=numpy-only fallback_ok=True equiv_ok=True import_cost=1.24s crossover=not_reached

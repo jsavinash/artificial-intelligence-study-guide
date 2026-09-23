@@ -1,6 +1,12 @@
-"""m07 — Deep learning fundamentals: MLP + backpropagation from scratch (NumPy).
+"""m07 — Deep learning fundamentals: MLP + backpropagation.
 
-Proves theory doc 07-deep-learning-fundamentals.md — no framework, just math.
+Proves theory doc 07-deep-learning-fundamentals.md.
+
+Two paths, both exercised:
+  1. NumPy from-scratch  — forward/backward by hand + gradient check. This is
+     the part that teaches you what the framework is doing.
+  2. PyTorch autograd    — the same model via nn.Module + loss.backward().
+     Runs when torch is installed; the example then asserts both agree.
 """
 import sys
 from pathlib import Path
@@ -10,6 +16,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "packages"))
 from ai_core.datasets import classification  # noqa: E402
 from ai_core.metrics import accuracy  # noqa: E402
+from ai_core import torch_backend as T  # noqa: E402
 
 
 def relu(z): return np.maximum(z, 0.0)
@@ -39,6 +46,21 @@ def backward(params, cache, y, logits):
     grads["b1"] = (d_a1 * (z1 > 0)).sum(0) / n
     loss = -np.log(softmax(logits)[np.arange(n), y] + 1e-12).mean()
     return grads, loss
+
+
+def torch_path(X, y3, n_classes, np_acc):
+    """The framework equivalent: autograd replaces our hand-written backward().
+
+    This is what you actually ship — the NumPy version above is the explanation.
+    """
+    res = T.train_classifier(X, y3, hidden=(16,), epochs=400, lr=0.5,
+                             optimizer="sgd", seed=0)
+    print(f"  torch   : loss {res['losses'][0]:.3f}->{res['losses'][-1]:.3f} "
+          f"acc={res['acc']:.3f} params={res['n_params']} "
+          f"({res['backend']}/{res['device']}, {res['seconds']:.2f}s)")
+    print(f"  numpy   : acc={np_acc:.3f}  -> "
+          f"agreement={abs(res['acc'] - np_acc) < 0.15}")
+    return res
 
 
 def main():
@@ -78,8 +100,21 @@ def main():
     num = (lp - lm) / (2 * eps)
     assert abs(num - g["W1"][0, 0]) < 1e-4, (num, g["W1"][0, 0])
 
-    print(f"PASS m07 dl_fundamentals | loss {losses[0]:.3f}->{losses[-1]:.3f} "
-          f"acc={acc:.3f} gradcheck_analytic={g['W1'][0,0]:.5f} numeric={num:.5f}")
+    print(f"PASS m07 dl_fundamentals | numpy loss {losses[0]:.3f}->"
+          f"{losses[-1]:.3f} acc={acc:.3f} gradcheck_analytic="
+          f"{g['W1'][0,0]:.5f} numeric={num:.5f}")
+
+    if T.HAS_TORCH:
+        print(f"\n[torch] autograd path (same model, loss.backward() instead of "
+              f"hand-derived grads) on {T.get_device()}")
+        res = torch_path(X, y3, n_classes, acc)
+        assert res["losses"][-1] < res["losses"][0], "torch path did not learn"
+        assert res["acc"] > 0.8, res["acc"]
+        assert abs(res["acc"] - acc) < 0.15, (res["acc"], acc)
+
+    print(f"PASS m07 torch | backend={T.backend_label()} "
+          f"torch_available={T.HAS_TORCH} device={T.get_device()}")
+
 
 
 if __name__ == "__main__":

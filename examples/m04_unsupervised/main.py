@@ -12,6 +12,51 @@ from sklearn.metrics import adjusted_rand_score, silhouette_score
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "packages"))
 from ai_core.datasets import moons, rng  # noqa: E402
+from ai_core import torch_backend as TB  # noqa: E402
+
+
+def torch_path(X, y):
+    """Same three algorithms as tensors — K-Means and PCA in torch, GMM by SGD.
+
+    K-Means and PCA are not gradient methods, so torch is used as a *tensor
+    engine* (broadcast distances, `svd`) rather than for autograd. The GMM is
+    the interesting case: EM's M-step becomes a real optimizer step on the
+    log-likelihood, which is how mixtures scale to high dimensions.
+    """
+    if not TB.HAS_TORCH:
+        print("\n[torch] not installed — NumPy/scikit-learn path only")
+        return None
+    print(f"\n[torch] tensor implementations on {TB.get_device()}")
+    out = {}
+
+    km = TB.kmeans(X, k=2, epochs=60, seed=0)
+    ari_t = adjusted_rand_score(y, km["labels"])
+    print(f"      kmeans      ari={ari_t:.3f} inertia={km['inertia']:.1f} "
+          f"iters={km['iterations']} ({km['backend']})")
+
+    pc = TB.pca(X, n_components=1)
+    pc1 = float(pc["explained_variance_ratio"][0])
+    print(f"      pca         pc1_var_ratio={pc1:.3f} "
+          f"cumulative={pc['cumulative']:.3f} ({pc['backend']})")
+
+    gm = TB.train_gmm(X, k=2, epochs=250, lr=0.02, seed=0)
+    nll0, nll1 = gm["losses"][0], gm["losses"][-1]
+    llh = [float(v) for v in gm["log_likelihood"]]     # mean loglik per sample
+    print(f"      gmm (SGD)   nll {nll0:.2f} -> {nll1:.2f}  "
+          f"loglik {llh[0]:.2f} -> {llh[-1]:.2f}  "
+          f"weights_sum={float(np.sum(gm['weights'])):.3f} ({gm['backend']})")
+
+    out = {"kmeans_ari": ari_t, "pca_ratio": pc1, "gmm_gain": nll0 - nll1}
+    assert ari_t > 0.9, f"torch kmeans should also recover the blobs ({ari_t})"
+    assert pc1 > 0.4
+    # log-likelihood and NLL are negatives of each other — check both move the
+    # right way, and that they stay consistent (same fit, two conventions).
+    assert nll1 < nll0, "NLL must decrease"
+    assert llh[-1] > llh[0], "mean log-likelihood must increase"
+    assert abs(llh[-1] + nll1) < 1e-6, "loglik and NLL must be exact negatives"
+    assert abs(float(np.sum(gm["weights"])) - 1.0) < 1e-3, "mixture weights sum to 1"
+    return out
+
 
 
 def kmeans(X, k=2, iters=50, seed=0):
@@ -70,6 +115,13 @@ def main():
     print(f"PASS m04 unsupervised | kmeans_ari={ari:.3f} silhouette={sil:.3f} "
           f"pca_var={ratio:.3f} dbscan_k={n_clusters} noise={noise:.2f} "
           f"elbow={'->'.join(f'{i:.0f}' for i in inertias)}")
+
+    tp = torch_path(X, y)
+    if tp:
+        print(f"PASS m04 torch | kmeans_ari={tp['kmeans_ari']:.3f} "
+              f"pca_pc1={tp['pca_ratio']:.3f} gmm_gain={tp['gmm_gain']:.2f} "
+              f"backend={TB.backend_label()}")
+
 
 
 if __name__ == "__main__":

@@ -9,6 +9,42 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "packages"))
+from ai_core import torch_backend as TB  # noqa: E402
+
+
+def torch_path(R, obs, R_true, holdout, adj, X, community):
+    """The same three ideas as learned models: embeddings, GCN layers, autograd.
+
+    Matrix factorisation via nn.Embedding (learned by SGD, not ALS) and label
+    propagation via a real two-layer GCN trained with cross-entropy on the
+    labelled nodes. Walk-forward CV stays NumPy — it is about *splitting*, not
+    about compute.
+    """
+    if not TB.HAS_TORCH:
+        print("\n[torch] not installed — ALS + message-passing path only")
+        return None
+    print(f"\n[torch] learned recommenders and graphs on {TB.get_device()}")
+
+    # --- recommender: nn.Embedding + bias terms, trained by gradient descent ---
+    R_nan = np.where(obs, R_true, np.nan)
+    mf = TB.train_matrix_factorization(R_nan, n_factors=8, epochs=300, lr=0.05,
+                                       mask=obs, seed=0)
+    pred = mf["predictions"]
+    mf_holdout = float(np.sqrt(np.mean((pred[holdout] - R_true[holdout]) ** 2)))
+    print(f"      recsys(MF)    holdout_rmse={mf_holdout:.3f} "
+          f"(observed_rmse={mf['rmse']:.3f} < baseline={mf['baseline_rmse']:.3f})")
+    assert mf["rmse"] < mf["baseline_rmse"], "learned MF must beat the mean"
+    assert mf_holdout < 1.2, mf_holdout
+
+    # --- GNN: two GCN layers, trained on the labelled nodes only ---
+    train_mask = community >= 0                       # all nodes carry a label
+    gnn = TB.train_gnn(adj, X, community, train_mask=train_mask,
+                       hidden=16, epochs=150, lr=0.05, seed=0)
+    print(f"      gnn(GCN)      node_acc={gnn['acc']:.3f} "
+          f"params={gnn['n_params']} ({gnn['backend']})")
+    assert gnn["acc"] >= 0.875, gnn["acc"]        # at most one node wrong
+    return {"mf_rmse": mf_holdout, "gnn_acc": gnn["acc"]}
+
 
 
 def alsratings(R, k=8, iters=40, lam=0.1, seed=0):
@@ -110,6 +146,11 @@ def main():
           f"walkforward_splits={len(splits)} (causal=True) "
           f"ts_err naive={err_naive:.2f} mean={err_mean:.2f} "
           f"gnn_label_acc={acc:.3f}")
+
+    tp = torch_path(R, obs, R_true, holdout, adj, X, community)
+    if tp:
+        print(f"PASS m23 torch | mf_holdout_rmse={tp['mf_rmse']:.3f} "
+              f"gnn_node_acc={tp['gnn_acc']:.3f} backend={TB.backend_label()}")
 
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@ make setup                 # verify environment (all deps preinstalled)
 make run M=11              # run ONE example (module 11 — transformers)
 make run-all               # run ALL 28 examples (~2 min) → 28/28 PASS
 make test                  # pytest suite (examples + live API + accelerators) → 12/12
-make bench                 # NumPy vs PyTorch benchmark (needs: pip install torch)
+make bench                 # NumPy vs PyTorch benchmark → when acceleration actually pays
 make serve                 # JSON API  → http://127.0.0.1:8000
 make ui                    # web UI    → http://127.0.0.1:8080
 export OPENAI_API_KEY=…    # optional: same code switches from MockLLM to a real model
@@ -23,7 +23,7 @@ export OPENAI_API_KEY=…    # optional: same code switches from MockLLM to a re
 | [`docs/TOPICS-SUMMARY.md`](docs/TOPICS-SUMMARY.md) | One-page map of every topic covered |
 | [`examples/`](examples/) | **28 runnable `main.py`** — one per theory module · **[catalog & sample outputs](docs/EXAMPLES.md)** |
 | [`benchmarks/`](benchmarks/) | NumPy vs PyTorch benchmark (`make bench`) — decides when accelerating pays off |
-| [`packages/ai_core/`](packages/ai_core/) | Shared lib: datasets, from-scratch metrics, MockLLM/real-LLM factory, vector store (cosine+BM25+RRF), model registry + PSI drift, optional **torch accelerator layer** |
+| [`packages/ai_core/`](packages/ai_core/) | Shared lib: datasets, from-scratch metrics, MockLLM/real-LLM factory, vector store (cosine+BM25+RRF), model registry + PSI drift, **`torch_backend`** — PyTorch-first training for 19 examples with automatic NumPy fallback |
 | [`apps/api_server/`](apps/api_server/) | stdlib JSON API: `/health` `/predict` `/rag` `/agents/run` `/generate` |
 | [`apps/web_ui/`](apps/web_ui/) | Full-stack browser client (vanilla JS, CORS-enabled) |
 | [`tests/`](tests/) | pytest: smoke-runs every example + boots & tests the API |
@@ -32,11 +32,12 @@ export OPENAI_API_KEY=…    # optional: same code switches from MockLLM to a re
 
 ## 🖥️ Capacity-aware design decisions
 
-This machine (**Apple M1 · 8 cores · Python 3.14 · no PyTorch · no API keys**) drove the architecture:
+This machine (**Apple M1 · 8 cores · Python 3.14 · PyTorch 2.14 w/ MPS · no API keys**) drove the architecture:
 
-- **Pure NumPy/sklearn** for all ML/DL — backprop, attention, CNN, RNN, VAE, diffusion, Q-learning implemented from scratch (nothing to install, everything inspectable)
+- **PyTorch-first training with a genuine NumPy fallback** — MLP/CNN/RNN/transformer/VAE/GAN/diffusion/DQN/LoRA/CLIP/InfoNCE train via autograd in [`torch_backend`](packages/ai_core/torch_backend.py); when torch is absent every function runs the *same algorithm* by hand (verified parity — e.g. recommender RMSE torch 0.608 vs NumPy 0.596), so `make run-all` needs zero installs. `make setup` reports which backend is active
 - **MockLLM fallback** — every LLM example (prompts/RAG/agents/evals) runs fully offline and transparently upgrades to OpenAI/Anthropic when a key exists
 - **stdlib-only serving** — no FastAPI install; vanilla-JS UI — no npm build
+- **Acceleration is measured, not assumed** — module [27](docs/curriculum/27-accelerated-computing-and-pytorch.md) derives the amortization rule (torch wins past ~1.5 s of NumPy work; its own sub-second kernels don't qualify)
 
 ## 🧠 Theory curriculum — [`docs/curriculum/`](docs/curriculum/)
 

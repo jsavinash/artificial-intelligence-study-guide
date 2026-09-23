@@ -1,7 +1,11 @@
 """m10 — RNNs & sequences: vanilla RNN forward pass, vanishing-gradient demo,
-and skip-gram-style embedding learning (word2vec intuition).
+skip-gram embedding learning, and a trained LSTM/GRU.
 
 Proves theory doc 10-rnn-and-sequence-modeling.md (incl. classical NLP toolkit).
+
+NumPy path: literal recurrence loop — you can see the hidden state carry. Torch
+path (when installed): nn.LSTM/GRU/RNN with real gradients through time, plus
+nn.Embedding, on a task that actually requires memory of the sequence.
 """
 import sys
 from pathlib import Path
@@ -10,6 +14,8 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "packages"))
 from ai_core.metrics import accuracy  # noqa: E402
+from ai_core import torch_backend as TB  # noqa: E402
+# NOTE: imported as TB, not T — this module uses T for the timestep count.
 
 
 def rnn_forward(seq, Wx, Wh, Wy, h0=None):
@@ -60,15 +66,51 @@ def skip_gram_train(steps=600, dim=16, seed=0):
     return vocab, E
 
 
+def memory_dataset(n=200, timesteps=6, seed=0):
+    """Sequence task needing memory: class = sign of the FIRST step's value.
+
+    A model that only looks at the last timestep cannot solve this — so a high
+    accuracy proves the recurrence is carrying information forward.
+    """
+    rng = np.random.default_rng(seed)
+    X = rng.normal(scale=0.3, size=(n, timesteps, 4)).astype(np.float32)
+    X[:, 0, 0] = rng.choice([-1.0, 1.0], size=n)      # the signal, only at t=0
+    y = (X[:, 0, 0] > 0).astype(int)
+    return X, y
+
+
+def torch_path():
+    """nn.LSTM / nn.GRU / nn.RNN with autograd through time."""
+    if not TB.HAS_TORCH:
+        print("\n[torch] not installed — NumPy recurrence path only")
+        return None
+    X, y = memory_dataset()
+    print(f"\n[torch] recurrent cells on {TB.get_device()} "
+          f"(task: remember the FIRST timestep)")
+    out = {}
+    for cell in ("lstm", "gru", "rnn"):
+        res = TB.train_rnn(X, y, hidden=32, cell=cell, epochs=120, lr=0.01,
+                           seed=0)
+        out[cell] = res
+        print(f"  {cell:<4} loss {res['losses'][0]:.3f}->{res['losses'][-1]:.3f} "
+              f"acc={res['acc']:.3f} params={res['n_params']} "
+              f"({res['seconds']:.2f}s)")
+        assert res["acc"] > 0.8, (cell, res["acc"])
+    # LSTM/GRU gates exist to fight the vanishing gradient we measured above
+    print("  -> all cells learned the dependency; the gates in LSTM/GRU help "
+          "when horizons\n     get long (see the |g|_5 > |g|_60 measurement above)")
+    return out
+
+
 def main():
     r = np.random.default_rng(0)
-    T, D, H, K = 10, 4, 8, 3
-    seq = r.normal(size=(T, D))
+    n_steps, D, H, K = 10, 4, 8, 3
+    seq = r.normal(size=(n_steps, D))
     Wx, Wh, Wy = r.normal(size=(H, D)) * 0.3, r.normal(size=(H, H)) * 0.3, \
         r.normal(size=(K, H)) * 0.3
 
     hs, ys = rnn_forward(seq, Wx, Wh, Wy)
-    assert hs.shape == (T, H) and ys.shape == (T, K)
+    assert hs.shape == (n_steps, H) and ys.shape == (n_steps, K)
 
     # 1) state persists: feeding the same prefix twice gives identical hidden state
     h_a, _ = rnn_forward(seq[:5], Wx, Wh, Wy)
@@ -99,9 +141,23 @@ def main():
     pred = (counts @ logp > np.log(pos_rate.sum() / neg_rate.sum())).astype(int)
     assert accuracy(y, pred) == 1.0
 
-    print(f"PASS m10 sequences | rnn_T={T} vanishing: |g|_5={g5:.2e}>|g|_60={g60:.2e} "
-          f"word2vec_sim(cat,dog)={related:.3f}>sim(cat,the)={unrelated:.3f} "
-          f"nb_sentiment_acc={accuracy(y, pred):.2f}")
+    print(f"PASS m10 sequences | rnn_T={n_steps} vanishing: |g|_5={g5:.2e}>"
+          f"|g|_60={g60:.2e} word2vec_sim(cat,dog)={related:.3f}>"
+          f"sim(cat,the)={unrelated:.3f} nb_sentiment_acc={accuracy(y, pred):.2f}")
+
+    cells = torch_path()
+    # report the torch cells in the SAME summary line so the runner shows one
+    # verdict per example (run_all greps the first ^PASS)
+    cell_note = ""
+    if cells:
+        cell_note = " torch_cells=" + ",".join(
+            f"{c}={r['acc']:.2f}" for c, r in cells.items())
+    else:
+        cell_note = " torch_cells=skipped(torch absent)"
+    print(f"PASS m10 rnn_torch | sequence_memory_ok={cells is not None} "
+          f"torch_available={TB.HAS_TORCH} "
+          f"backend={TB.backend_label()}{cell_note}")
+
 
 
 if __name__ == "__main__":

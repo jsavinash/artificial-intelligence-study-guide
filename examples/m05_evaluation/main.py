@@ -1,5 +1,6 @@
 """m05 — Evaluation & tuning: metrics from scratch, stratified CV, PR-AUC vs ROC,
-imbalanced handling with class weights, random-search tuning.
+imbalanced handling with class weights, random-search tuning, and — where torch
+is available — probability *calibration* fitted by autograd.
 
 Proves theory doc 05-model-evaluation-and-tuning.md.
 """
@@ -15,6 +16,56 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "packages"))
 from ai_core.datasets import classification, imbalanced  # noqa: E402
 from ai_core.metrics import (accuracy, binary_auc as auc, confusion_matrix,
                              f1, precision, recall)  # noqa: E402
+from ai_core import torch_backend as TB  # noqa: E402
+
+
+def torch_path(y_te, score):
+    """Calibration: is a 0.9 really a 90% chance? Fit a temperature to fix it.
+
+    Accuracy and calibration are different properties. A model can be right
+    often and still report meaningless confidences — and for decisions with
+    costs (m05 §calibration) the *numbers* matter as much as the ranking.
+    Torch is the right tool: one scalar parameter, autograd, done.
+    """
+    if not TB.HAS_TORCH:
+        print("\n[torch] not installed — calibration section skipped")
+        return None
+
+    # Temperature is fitted on a validation split; report on a held-out split
+    n = len(y_te)
+    cut = n // 2
+    val_y, val_s = y_te[:cut], score[:cut]
+    te_y, te_s = y_te[cut:], score[cut:]
+
+    # two-class logits from a probability score: [log(1-p), log(p)]
+    def to_logits(p):
+        p = np.clip(np.asarray(p, dtype=np.float64), 1e-6, 1 - 1e-6)
+        return np.stack([np.log1p(-p), np.log(p)], axis=1)
+
+    cal = TB.temperature_scale(to_logits(val_s), val_y)
+    ece_before = TB.expected_calibration_error(
+        np.stack([1 - te_s, te_s], axis=1), te_y)
+    scaled = TB.F.softmax(
+        TB.torch.tensor(to_logits(te_s), dtype=TB.torch.float32)
+        / cal["temperature"], dim=-1).numpy()
+    ece_after = TB.expected_calibration_error(scaled, te_y)
+
+    # threshold choice: accuracy-optimal vs F1-optimal are different operating pts
+    th = TB.sweep_thresholds(te_y, te_s, n=40)
+    print(f"\n[torch] calibration on {TB.backend_label()}")
+    print(f"    temperature fitted  T={cal['temperature']:.3f}  "
+          f"(val NLL {cal['nll_before']:.4f} -> {cal['nll_after']:.4f})")
+    print(f"    ECE held-out        {ece_before:.4f} -> {ece_after:.4f}  "
+          f"({'better calibrated' if ece_after <= ece_before else 'no gain'})")
+    print(f"    best-F1 threshold   {th['best_f1_threshold']:.3f} "
+          f"(F1={th['best_f1']:.3f}) vs accuracy-optimal "
+          f"{th['best_acc_threshold']:.3f} (acc={th['best_acc']:.3f})")
+
+    assert cal["temperature"] > 0
+    assert 0.0 <= ece_after <= 1.0 and 0.0 <= ece_before <= 1.0
+    return {"temperature": cal["temperature"], "ece_before": ece_before,
+            "ece_after": ece_after, "f1_thr": th["best_f1_threshold"],
+            "acc_thr": th["best_acc_threshold"]}
 
 
 def main():

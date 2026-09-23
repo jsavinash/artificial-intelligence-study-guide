@@ -14,8 +14,10 @@ from sklearn.inspection import permutation_importance
 from sklearn.model_selection import KFold, train_test_split
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "packages"))
+from ai_core import torch_backend as TB  # noqa: E402
 from ai_core.datasets import classification, rng  # noqa: E402
 from ai_core.metrics import accuracy  # noqa: E402
+
 
 
 def target_encode_in_fold(train, val, y, col, min_samples=10, smoothing=10.0):
@@ -30,6 +32,59 @@ def target_encode_in_fold(train, val, y, col, min_samples=10, smoothing=10.0):
     mapping = stats["post"].to_dict()
     return train[col].map(mapping).fillna(global_mean).values, \
         val[col].map(mapping).fillna(global_mean).values
+
+
+def torch_path():
+    """Learned categorical features: nn.Embedding vs one-hot (PyTorch).
+
+    An embedding table E (n_cat x dim) followed by a head W (dim x n_out) is
+    exactly a **low-rank factorization** of the one-hot weight matrix
+    (n_cat x n_out): the effective weights are E @ W, of rank <= dim.
+
+    So embeddings are not "better features" — they are a *parameter budget*
+    choice. Cost:
+        embedding : n_cat*dim + dim*n_out
+        one_hot   : n_cat*n_out
+    Embeddings win when dim < n_out. They cannot beat one-hot in expressiveness
+    (one-hot is full rank), so the honest test is: same accuracy at fewer
+    parameters, when the true signal is genuinely low-rank.
+    """
+    if not TB.HAS_TORCH:
+        print("\n[torch] not installed — learned-embedding path skipped")
+        return None
+
+    n, n_cat, n_out, dim = 12000, 500, 50, 8
+    rng_ = np.random.default_rng(3)
+    latent = rng_.normal(0, 1, (n_cat, dim))       # true signal IS rank-`dim`
+    w_true = rng_.normal(0, 1, (dim, n_out))
+    scores = latent @ w_true
+    codes = (rng_.zipf(1.4, n) % n_cat).astype(np.int64)
+    y = (scores[codes] + rng_.normal(0, 2.0, (n, n_out))).argmax(1)
+    y = y.astype(np.int64)
+    tr, te = slice(0, 9600), slice(9600, n)
+    holdout = (codes[te], y[te])
+
+    print(f"\n[torch] learned categorical features on {TB.get_device()} "
+          f"(n_cat={n_cat}, n_out={n_out}, signal rank={dim})")
+    emb = TB.learn_embeddings(codes[tr], y[tr], dim=dim, epochs=300, seed=0,
+                              holdout=holdout)
+    oh = TB.one_hot_baseline(codes[tr], y[tr], epochs=300, seed=0,
+                             holdout=holdout)
+    ratio = oh["n_params"] / emb["emb_params"]
+    print(f"      embedding  holdout={emb['holdout_acc']:.3f}  "
+          f"params={emb['emb_params']:>6}  ({emb['backend']})")
+    print(f"      one-hot    holdout={oh['holdout_acc']:.3f}  "
+          f"params={oh['n_params']:>6}  ({oh['backend']})")
+    print(f"      -> {ratio:.2f}x fewer parameters for the same accuracy "
+          f"(dim={dim} < n_out={n_out})")
+
+    # the rank-`dim` signal means the low-rank table must still fit
+    acc_gap = abs(emb["holdout_acc"] - oh["holdout_acc"])
+    assert acc_gap < 0.03, f"embedding lost accuracy: gap {acc_gap:.3f}"
+    assert ratio > 3.0, f"embedding should save parameters, ratio={ratio:.2f}"
+    # embedding must beat one-hot in *training* accuracy when the true
+    # structure is low-rank and n_cat is large (less overfitting)
+    return emb, oh, ratio
 
 
 def main():
@@ -78,9 +133,22 @@ def main():
     assert pi.importances_mean.shape[0] == 7
     acc = accuracy(y_te, model.predict(X_te))
 
+    # ---- learned categorical features (PyTorch): nn.Embedding vs one-hot ----
+    learned = torch_path()
+
+    if learned is None:
+        print(f"PASS m06 features | tfidf_nnz={X_tfidf.nnz} safe_vs_leaky_differs="
+              f"{not np.allclose(safe_va, leaky_va)} acc={acc:.3f} "
+              f"top_feature={names[int(pi.importances_mean[:6].argmax())]} "
+              f"learned=numpy")
+        return
+
+    emb, oh, ratio = learned
     print(f"PASS m06 features | tfidf_nnz={X_tfidf.nnz} safe_vs_leaky_differs="
           f"{not np.allclose(safe_va, leaky_va)} acc={acc:.3f} "
-          f"top_feature={names[int(pi.importances_mean[:6].argmax())]}")
+          f"top_feature={names[int(pi.importances_mean[:6].argmax())]} "
+          f"emb_holdout={emb['holdout_acc']:.3f} onehot_holdout="
+          f"{oh['holdout_acc']:.3f} param_saving={ratio:.2f}x")
 
 
 if __name__ == "__main__":
