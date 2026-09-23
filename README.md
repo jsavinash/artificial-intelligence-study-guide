@@ -20,7 +20,7 @@ export OPENAI_API_KEY=…    # optional: same code switches from MockLLM to a re
 | Path | What lives there |
 |---|---|
 | [`docs/curriculum/`](docs/curriculum/) | **28 theory modules** (`00`–`27`), each with a Mastery Checklist |
-| [`docs/figures/`](docs/figures/) | Generated didactic figures — 29 diagrams for module 00's math topics (`python3 tools/make_math_figures.py`) |
+| [`docs/figures/`](docs/figures/) | Generated didactic figures — 31 diagrams for module 00's math topics (`python3 tools/make_math_figures.py`); every worked number verified by `tools/calc_00_math.py` |
 | [`docs/TOPICS-SUMMARY.md`](docs/TOPICS-SUMMARY.md) | One-page map of every topic covered |
 | [`examples/`](examples/) | **28 runnable `main.py`** — one per theory module · **[catalog & sample outputs](docs/EXAMPLES.md)** |
 | [`benchmarks/`](benchmarks/) | NumPy vs PyTorch benchmark (`make bench`) — decides when accelerating pays off |

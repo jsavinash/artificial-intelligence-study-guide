@@ -4,18 +4,18 @@
 
 You do **not** need a math degree. You need working intuition for six areas. This file is the pragmatic syllabus: what to learn, why it matters in AI, and the minimum you must be able to *do*.
 
-### 📊 Visual guide — 29 figures, one per topic
+### 📊 Visual guide — 31 figures, one per topic
 
 | § | Topics | Figures |
 |---|---|---|
 | 1 · Linear algebra | vectors/dot/cosine · matmul shapes · eigen→PCA · SVD/low-rank | [01](../figures/00-math/01_vectors_dot.png) · [02](../figures/00-math/02_matmul_shapes.png) · [03](../figures/00-math/03_eigen_pca.png) · [04](../figures/00-math/04_svd_lowrank.png) |
-| 2 · Calculus | derivative · gradient field · chain rule/backprop · partials · Hessian/saddle | [05](../figures/00-math/05_derivative_tangent.png) · [06](../figures/00-math/06_gradient_field.png) · [07](../figures/00-math/07_chain_graph.png) · [08](../figures/00-math/08_partials.png) · [09](../figures/00-math/09_hessian_curvature.png) |
-| 3 · Probability | Bayes medical test · 5 distributions · E/Var · joint/marginal · likelihood/MLE · Monte Carlo | [10](../figures/00-math/10_bayes_test.png) · [11](../figures/00-math/11_distributions.png) · [12](../figures/00-math/12_expectation_variance.png) · [13](../figures/00-math/13_joint_marginal.png) · [14](../figures/00-math/14_likelihood.png) · [15](../figures/00-math/15_monte_carlo.png) |
+| 2 · Calculus | derivative · gradient field · chain rule/backprop · partials · Hessian/saddle | [05](../figures/00-math/05_derivative_tangent.png) · [06](../figures/00-math/06_gradient_field.png) · [07](../figures/00-math/07_chain_graph.png) · [08](../figures/00-math/08_partials.png) · [09](../figures/00-math/09_hessian_curvature.png) · [31](../figures/00-math/31_learning_loop.png) |
+| 3 · Probability | Bayes medical test · 5 distributions · E/Var · joint/marginal · likelihood/MLE · Monte Carlo | [10](../figures/00-math/10_bayes_test.png) · [11](../figures/00-math/11_distributions.png) · [12](../figures/00-math/12_expectation_variance.png) · [13](../figures/00-math/13_joint_marginal.png) · [14](../figures/00-math/14_likelihood.png) · [15](../figures/00-math/15_monte_carlo.png) · [30](../figures/00-math/30_probability_tree.png) |
 | 4 · Statistics | estimator bias–variance · CI/p-value · correlation≠causation · MLE vs MAP · covariance | [16](../figures/00-math/16_estimator_biasvar.png) · [17](../figures/00-math/17_ci_pvalue.png) · [18](../figures/00-math/18_correlation_causation.png) · [19](../figures/00-math/19_mle_map.png) · [20](../figures/00-math/20_covariance_correlation.png) |
 | 5 · Optimization | convexity · learning rate · batch vs SGD · Lagrange · grid/random/Bayesian search | [21](../figures/00-math/21_convex_nonconvex.png) · [22](../figures/00-math/22_learning_rate.png) · [23](../figures/00-math/23_batch_vs_sgd.png) · [24](../figures/00-math/24_lagrange.png) · [25](../figures/00-math/25_grid_random_bayes.png) |
 | 6 · Information theory | entropy · cross-entropy loss · KL divergence · mutual information | [26](../figures/00-math/26_entropy.png) · [27](../figures/00-math/27_cross_entropy.png) · [28](../figures/00-math/28_kl_divergence.png) · [29](../figures/00-math/29_mutual_information.png) |
 
-Regenerate all figures: `python3 tools/make_math_figures.py` · Executable versions of these concepts: `make run M=00`
+Regenerate all figures: `python3 tools/make_math_figures.py` · Verify every worked number: `python3 tools/calc_00_math.py` · Executable versions: `make run M=00`
 
 ## 1. Linear Algebra — the language of data
 
@@ -31,6 +31,39 @@ Regenerate all figures: `python3 tools/make_math_figures.py` · Executable versi
 | SVD / low-rank | Compression, embeddings geometry, LoRA in 15 |
 
 **You should be able to:** multiply matrices by hand once, know shapes must align, understand broadcasting, explain what a linear layer computes.
+
+**🧮 Formula sheet**
+
+| What | Formula | Plain English |
+|---|---|---|
+| Dot product | `a·b = a₁b₁ + a₂b₂ + …` | multiply matching entries, add them up |
+| Length (norm) | `‖a‖ = √(a₁² + a₂² + …)` | distance from the origin |
+| Cosine similarity | `cos θ = a·b / (‖a‖·‖b‖)` | 1 = same direction, 0 = unrelated |
+| Matrix multiply | `C[i,j] = Σₖ A[i,k]·B[k,j]` | row *i* of A dotted with column *j* of B |
+| Shape rule | `(m×n) · (n×p) → (m×p)` | the middle numbers must be equal |
+| Linear layer | `Y = W·X + b` | `W` = learned weights, `X` = one column per sample |
+
+**🔢 Worked calculation — `[[1,2,3],[4,5,6]] · [[7,8],[9,10],[11,12]]`**
+
+| cell | row · column | expand | result |
+|---|---|---|---|
+| C[0,0] | `1·7 + 2·9 + 3·11` | 7 + 18 + 33 | **58** |
+| C[0,1] | `1·8 + 2·10 + 3·12` | 8 + 20 + 36 | **64** |
+| C[1,0] | `4·7 + 5·9 + 6·11` | 28 + 45 + 66 | **139** |
+| C[1,1] | `4·8 + 5·10 + 6·12` | 32 + 50 + 72 | **154** |
+
+→ `[[58,64],[139,154]]` — each cell is just four multiplications and three additions.
+
+**🔢 Worked calculation — cosine of `a=(3,1)`, `b=(1,3)`**
+
+| step | formula | numbers | result |
+|---|---|---|---|
+| 1 · dot | `Σ aᵢ·bᵢ` | `3·1 + 1·3` | 6 |
+| 2 · norms | `√(a₁²+a₂²)` | `√10` each | 3.162 |
+| 3 · cosine | `a·b / (‖a‖·‖b‖)` | `6 / (3.162×3.162)` | **0.60** |
+| 4 · angle | `arccos(0.60)` | — | **53.13°** |
+
+> ✅ every number on this page is machine-checked by `python3 tools/calc_00_math.py`
 
 **🖼️ Figures — dot product & cosine similarity · matmul shape flow · eigenvectors = PCA · SVD truncation:**
 
@@ -58,7 +91,35 @@ Regenerate all figures: `python3 tools/make_math_figures.py` · Executable versi
 
 **Minimum bar:** compute `d/dx` of polynomials and `exp`, apply the chain rule to a 2-layer toy network by hand.
 
-**🖼️ Figures — derivative as tangent slope · gradient field (red = uphill, green = learning) · chain-rule computation graph · partial derivatives · Hessian curvature:**
+**🧮 Formula sheet**
+
+| Rule | Formula | Says |
+|---|---|---|
+| Power rule | `d/dx xⁿ = n·xⁿ⁻¹` | bring the exponent down, drop one |
+| Exponential | `d/dx eˣ = eˣ` | its slope equals its value |
+| Chain rule | `dL/dx = (dL/dg)·(dg/dx)` | multiply the local slopes along the way |
+| Partial | `∂f/∂xᵢ` | slope along ONE axis, others frozen |
+| Gradient | `∇f = (∂f/∂x₁, …, ∂f/∂xₙ)` | full vector of slopes = steepest climb |
+| Learning step | `w ← w − η·∇L` | subtract gradient × learning rate |
+
+**🔢 Worked — chain rule for `L = (2x+1)³` at `x = 1`**
+
+| step | what | calculation | value |
+|---|---|---|---|
+| 1 | inner value | `g = 2·1 + 1` | 3 |
+| 2 | inner slope | `dg/dx` | 2 |
+| 3 | outer slope | `dL/dg = 3g² = 3·3²` | 27 |
+| 4 | multiply | `27 × 2` | **54** |
+
+Figure 7 draws exactly this graph; `calc_00_math.py` double-checks it against finite differences.
+
+**🔢 Worked — a derivative and one learning step**
+- `f(x)=x³−2x` → `f'(x)=3x²−2` → `f'(2) = 3·4 − 2 = **10**` (slope at x=2).
+- `L(w)=w²`, `w=3`, `η=0.1` → `∇L = 2w = 6` → `w ← 3 − 0.1·6 = **2.4**`, loss `9 → 5.76` (**−36% in one step**).
+
+![The five-step training loop: forward, loss, backward, update, repeat](../figures/00-math/31_learning_loop.png)
+
+**🖼️ Figures — derivative as tangent slope · gradient field (red = uphill, green = learning) · chain-rule computation graph · partial derivatives · Hessian curvature · the training loop:**
 
 ![Derivative as the slope of the tangent line](../figures/00-math/05_derivative_tangent.png)
 
@@ -84,6 +145,43 @@ Regenerate all figures: `python3 tools/make_math_figures.py` · Executable versi
 - **Joint / marginal / independence:** P(X,Y), P(X)=ΣY P(X,Y).
 - **Likelihood vs probability:** likelihood P(data | model) is what we maximize (MLE) in nearly every training loss.
 - **Sampling:** Monte Carlo, importance sampling (used in diffusion/RL estimators).
+
+**🧮 Formula sheet**
+
+| Rule | Formula | Plain English |
+|---|---|---|
+| Conditional | `P(A\|B) = P(A∩B) / P(B)` | A's share once you restrict to B |
+| Bayes | `P(H\|D) = P(D\|H)·P(H) / P(D)` | update belief after seeing evidence |
+| Total probability | `P(D) = Σₕ P(D\|Hₕ)·P(Hₕ)` | every way the evidence can happen |
+| Independence | `P(A∩B) = P(A)·P(B)` | only if knowing A says nothing about B |
+| Expectation | `E[X] = Σ x·p(x)` | probability-weighted average |
+| Variance | `Var = E[X²] − (E[X])²` | average squared spread around the mean |
+
+**🔢 Worked — the medical test, per 1000 people**
+
+| group | size | P(+ \| group) | expected "+" results |
+|---|---|---|---|
+| sick | 10 (1%) | 0.90 | `10 × 0.90 =` **9** |
+| healthy | 990 (99%) | 0.05 | `990 × 0.05 =` **49.5** |
+| all positives | — | — | **58.5** |
+
+`P(sick|+) = 9 / 58.5 = 0.1538 →` **15.4%**
+
+⚠️ mind the swap: `P(+|sick) = 90%` but `P(sick|+) = 15.4%` — the condition changed sides. The tree below shows exactly why (9 vs 49.5 positives).
+
+![Probability tree: branch from 1000 people and normalize the positive leaves](../figures/00-math/30_probability_tree.png)
+
+**📋 Reference table — the five distributions you must know**
+
+| Distribution | Parameters | E[X] | Var | Used for |
+|---|---|---|---|---|
+| Bernoulli | p | p | p(1−p) | yes/no labels |
+| Categorical | p₁…p_K | — | — | K-class labels |
+| Gaussian | μ, σ² | μ | σ² | noise, VAE priors |
+| Poisson | λ | λ | λ | counting events |
+| Uniform | a, b | (a+b)/2 | (b−a)²/12 | init, sampling |
+
+**🔢 Worked — a fair die:** `E = (1+2+3+4+5+6)/6 = 3.5` · `Var = (6.25+2.25+0.25+0.25+2.25+6.25)/6 = 17.5/6 = 2.917` (= 35/12)
 
 **🖼️ Figures — Bayes medical test · the five distributions · expectation & variance · joint/marginal tables · likelihood & MLE · Monte Carlo π:**
 
@@ -113,6 +211,35 @@ Regenerate all figures: `python3 tools/make_math_figures.py` · Executable versi
 - **Maximum likelihood estimation (MLE)** and **MAP** — connects probability to training objectives.
 - **Covariance & correlation matrices** — input to PCA, portfolio models.
 
+**🧮 Formula sheet**
+
+| Quantity | Formula | Meaning |
+|---|---|---|
+| Mean | `x̄ = Σx / n` | center of the sample |
+| Variance | `s² = Σ(x−x̄)² / n` | average squared distance from center |
+| Std deviation | `s = √s²` | spread in the original units |
+| Standard error | `SE = s / √n` | how wobbly the *mean* is |
+| 95% confidence interval | `x̄ ± 1.96·SE` | range that should capture the truth |
+| Pearson correlation | `r = Sxy / √(Sxx·Syy)` | linear strength: +1 / 0 / −1 |
+| Maximum likelihood | `θ̂ = argmax P(D\|θ)` | best fit using **data only** |
+| Maximum a posteriori | `θ̂ = argmax P(D\|θ)·P(θ)` | best fit = **data × prior** |
+
+**🔢 Worked — dataset {2, 4, 4, 4, 5, 5, 7, 9}**
+
+| step | calculation | result |
+|---|---|---|
+| 1 · count | `n` | 8 |
+| 2 · mean | `(2+4+4+4+5+5+7+9)/8 = 40/8` | **5** |
+| 3 · deviations | `x − 5` | −3, −1, −1, −1, 0, 0, 2, 4 |
+| 4 · squared devs | `9+1+1+1+0+0+4+16` | **32** |
+| 5 · variance | `32 / 8` | **4** |
+| 6 · std dev | `√4` | **2** |
+
+**🔢 Worked — correlation of `x={1,2,3}`, `y={2,4,5}`**
+
+`x̄ = 2`, `ȳ = 11/3 ≈ 3.667` → `Sxy = 3`, `Sxx = 2`, `Syy = 14/3 ≈ 4.667`
+`r = 3 / √(2 × 4.667) = 3 / 3.055 =` **0.982** → strong positive… and *still* not causation (figure 18).
+
 **🖼️ Figures — estimator bias vs variance · confidence intervals & p-values · correlation ≠ causation · MLE vs MAP · covariance/correlation:**
 
 ![Bias and variance of estimators: unbiased but spread vs biased but tight](../figures/00-math/16_estimator_biasvar.png)
@@ -139,6 +266,36 @@ Regenerate all figures: `python3 tools/make_math_figures.py` · Executable versi
 - **Lagrange multipliers / constrained optimization** — at least conceptually (SVMs use them; RLHF optimizes under KL constraints).
 - **Search strategies:** grid vs random vs **Bayesian optimization** (05).
 
+**🧮 Formula sheet**
+
+| Method | Update rule | Note |
+|---|---|---|
+| Batch gradient descent | `w ← w − η·∇L(all data)` | stable, expensive per step |
+| SGD / mini-batch | `w ← w − η·∇L(batch)` | noisy — the practical default |
+| Weight decay | `w ← w − η·(∇L + λw)` | regularization: steadily shrink weights |
+| Adam | `m,v` = running averages of ∇ and ∇²; `w ← w − η·m̂/(√v̂+ε)` | per-parameter step sizes; the most-used default |
+| 1-D stability | `abs(1 − η·L″) < 1` | curvature × step must not over-correct |
+
+**🔢 Worked — gradient descent on `L(w)=w²`, start `w = 2.400`, `η = 0.1`** (here `∇L = 2w`)
+
+| step | w | ∇L = 2w | new w = w − 0.1·∇L | loss = w² |
+|---|---|---|---|---|
+| 0 | 2.400 | 4.800 | **1.920** | 5.760 |
+| 1 | 1.920 | 3.840 | **1.536** | 3.686 |
+| 2 | 1.536 | 3.072 | **1.229** | 2.359 |
+| 3 | 1.229 | 2.458 | **0.983** | 1.510 |
+| 4 | 0.983 | 1.966 | **0.786** | 0.966 |
+
+Loss falls `5.76 → 0.97` in five tiny steps — training a neural net is exactly this, millions of times, with `∇L` computed by backprop.
+
+**⚠️ Stability check** — on this bowl the rule simplifies to `w ← (1−2η)·w`:
+
+| η | `abs(1−2η)` | outcome |
+|---|---|---|
+| 0.10 | 0.80 | ✅ stable but slow |
+| 0.85 | 0.70 | ✅ fast (zig-zags near the bottom) |
+| 1.12 | 1.24 | ❌ **diverges** — each step multiplies the error by 1.24 |
+
 **🖼️ Figures — convex vs non-convex landscapes · learning-rate regimes · batch vs mini-batch vs SGD · Lagrange tangency · grid/random/Bayesian search:**
 
 ![Convex function has one optimum; non-convex loss has many valleys](../figures/00-math/21_convex_nonconvex.png)
@@ -164,6 +321,37 @@ Regenerate all figures: `python3 tools/make_math_figures.py` · Executable versi
 - **KL divergence** — how one distribution differs from another; basis of distillation and RLHF's KL penalty.
 - **Mutual information** — feature selection, information bottleneck.
 
+**🧮 Formula sheet**  (`log₂` = bits · `ln` = nats · 1 nat = 1.44 bits)
+
+| Quantity | Formula | Meaning |
+|---|---|---|
+| Entropy | `H(p) = −Σ p·log₂ p` | expected surprise; max at 50/50 |
+| Cross-entropy | `H(p,q) = −Σ p·log₂ q` | *the* classification loss |
+| KL divergence | `KL(P‖Q) = Σ p·log₂(p/q)` | extra bits to code P using Q (asymmetric!) |
+| Mutual information | `I(X;Y) = H(X) − H(X\|Y)` | how many bits X and Y share |
+
+**🔢 Worked — entropy of coins**
+
+| coin | calculation | H |
+|---|---|---|
+| fair | `−0.5·log₂0.5 − 0.5·log₂0.5 = 0.5 + 0.5` | **1.000 bit** |
+| biased (p=0.9) | `−0.9·log₂0.9 − 0.1·log₂0.1 = 0.137 + 0.332` | **0.469 bits** |
+| always heads | `−1·log₂1` | **0 bits** (no news) |
+
+**🔢 Worked — the cross-entropy sting** (true class has model prob `q`)
+
+| model says q | loss `−log₂ q` | compared to baseline |
+|---|---|---|
+| 0.9 — confident & right | **0.152 bits** | baseline |
+| 0.5 — pure guess | 1.000 bit | 6.6× worse |
+| 0.001 — confident & WRONG | **9.966 bits** | **65.6× worse** |
+
+**🔢 Worked — KL asymmetry** with `P=(0.5, 0.5)`, `Q=(0.25, 0.75)`
+
+- `KL(P‖Q) = 0.5·log₂(2) + 0.5·log₂(2/3) = 0.500 − 0.292 =` **0.208 bits**
+- `KL(Q‖P) = 0.25·log₂(0.5) + 0.75·log₂(1.5) = −0.250 + 0.439 =` **0.189 bits**
+- same two distributions, reversed direction → **different number**. That's why RLHF/distillation must state *which* KL they use (figure 28).
+
 **🖼️ Figures — entropy curve & surprise · cross-entropy loss explosion · asymmetric KL · mutual-information heatmaps:**
 
 ![Entropy of a coin flip peaks at 1 bit and surprise bars for rarer events](../figures/00-math/26_entropy.png)
@@ -180,10 +368,12 @@ Regenerate all figures: `python3 tools/make_math_figures.py` · Executable versi
 - **KL asymmetry:** `P=(.45,.35,.15,.05)`, `Q=(.20,.30,.30,.20)` → `KL(P‖Q) ≠ KL(Q‖P)` though both ≥ 0 — direction matters, which is why distillation and RLHF pick one deliberately (figure 28).
 - **Mutual information:** `I(X;Y) = 0` iff independent — two perfectly separable class clusters have high `I`; white-noise heatmap ≈ 0 bits (figure 29).
 
-Visualize every topic of module 00 with 29 generated figures:
+Visualize every topic of module 00 with 31 generated figures, and machine-check
+every worked number in the tables above:
 
 ```bash
-python3 tools/make_math_figures.py   # writes docs/figures/00-math/*.png (~1.2MB)
+python3 tools/make_math_figures.py   # writes docs/figures/00-math/*.png (~1.3MB)
+python3 tools/calc_00_math.py        # recomputes + asserts every worked calculation
 ```
 
 ## Suggested exercises

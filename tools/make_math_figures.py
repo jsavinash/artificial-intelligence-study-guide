@@ -788,6 +788,75 @@ def fig_mutual_information():
     return save(fig, "29_mutual_information.png")
 
 
+def fig_probability_tree():
+    """Bayes as a probability tree: branch, count, normalize the leaves."""
+    fig, ax = plt.subplots(figsize=(7.8, 4.4))
+    nodes = {
+        "root": (0.0, 0.0, "1000\npeople", "white"),
+        "sick": (2.2, 1.3, "SICK  10\n(1%)", "#fee2e2"),
+        "well": (2.2, -1.3, "HEALTHY  990\n(99%)", "#dcfce7"),
+        "sp": (4.6, 2.1, "+ test\n9  (90%)", "#fecaca"),
+        "sn": (4.6, 0.5, "− test\n1", "white"),
+        "wp": (4.6, -0.5, "+ test\n49.5  (5%)", "#ffedd5"),
+        "wn": (4.6, -2.1, "− test\n940.5", "white"),
+    }
+    edges = [("root", "sick", "1%"), ("root", "well", "99%"),
+             ("sick", "sp", "90%"), ("sick", "sn", "10%"),
+             ("well", "wp", "5%"), ("well", "wn", "95%")]
+    for a, b, lab in edges:
+        xa, ya = nodes[a][0], nodes[a][1]
+        xb, yb = nodes[b][0], nodes[b][1]
+        ax.plot([xa + 0.75, xb - 0.75], [ya, yb], color="gray", lw=1.5,
+                zorder=1)
+        ax.text((xa + xb) / 2, (ya + yb) / 2 + 0.13, lab, fontsize=8,
+                color="gray", ha="center")
+    for x, y, txt, fc in nodes.values():
+        ax.add_patch(plt.Rectangle((x - 0.72, y - 0.34), 1.44, 0.68, fc=fc,
+                                   ec="black", lw=1.2, zorder=2))
+        ax.text(x, y, txt, ha="center", va="center", fontsize=8.5, zorder=3)
+    ax.text(7.2, -0.9,
+            "posterior\nP(sick|+) = 9 / (9 + 49.5)\n= 9 / 58.5 = 15.4%",
+            fontsize=10, weight="bold", ha="center",
+            bbox=dict(fc="#fef9c3", ec="#f59e0b"))
+    ax.set_xlim(-1, 9.6); ax.set_ylim(-3.1, 3.2); ax.axis("off")
+    ax.set_title("Probability tree: multiply along branches, "
+                 "normalize the leaves you care about")
+    return save(fig, "30_probability_tree.png")
+
+
+def fig_learning_loop():
+    """The training loop: forward → loss → backward → update, repeat."""
+    fig, ax = plt.subplots(figsize=(8.8, 3.0))
+    steps = [
+        ("1. forward\nŷ = f_W(x)", "#dbeafe", "#2563eb"),
+        ("2. loss\nL(ŷ, y)", "#fee2e2", "#dc2626"),
+        ("3. backward\n∇W = ∂L/∂W", "#fef3c7", "#f59e0b"),
+        ("4. update\nW ← W − η·∇W", "#dcfce7", "#16a34a"),
+        ("5. repeat\nnext batch", "#f3e8ff", "#7c3aed"),
+    ]
+    w = 1.55
+    for i, (txt, fc, ec) in enumerate(steps):
+        x = 0.4 + i * (w + 0.55)
+        ax.add_patch(plt.Rectangle((x, 1.0), w, 0.95, fc=fc, ec=ec, lw=2))
+        ax.text(x + w / 2, 1.475, txt, ha="center", va="center",
+                fontsize=9, weight="bold")
+        if i < len(steps) - 1:
+            ax.annotate("", xy=(x + w + 0.5, 1.475), xytext=(x + w + 0.03,
+                        1.475), arrowprops=dict(arrowstyle="-|>",
+                        color="black", lw=1.6))
+    x0 = 0.4 + 4 * (w + 0.55) + w / 2
+    x1 = 0.4 + w / 2
+    ax.annotate("", xy=(x1, 0.85), xytext=(x0, 0.85),
+                arrowprops=dict(arrowstyle="-|>", color="#7c3aed", lw=2,
+                                connectionstyle="arc3,rad=0.25"))
+    ax.text((x0 + x1) / 2, 0.42,
+            "next epoch — calculus (step 3) meets optimization (step 4)",
+            ha="center", fontsize=9, color="#7c3aed", style="italic")
+    ax.set_xlim(0, x0 + 1.6); ax.set_ylim(0.2, 2.4); ax.axis("off")
+    ax.set_title("One training step = the whole syllabus in a loop")
+    return save(fig, "31_learning_loop.png")
+
+
 # =========================================================================
 FIGURES = [
     fig_vectors_dot, fig_matmul_shapes, fig_eigen_pca, fig_svd_lowrank,
@@ -801,6 +870,7 @@ FIGURES = [
     fig_lagrange, fig_search_strategies,
     fig_entropy, fig_cross_entropy, fig_kl_divergence,
     fig_mutual_information,
+    fig_probability_tree, fig_learning_loop,
 ]
 
 
