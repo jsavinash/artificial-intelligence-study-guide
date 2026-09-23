@@ -1,6 +1,6 @@
 # 25 — ML System Design & Case Studies
 
-> Back to [index](README.md) · Read after [02](02-machine-learning-foundations.md), [05](05-model-evaluation-and-tuning.md), [21](21-mlops-and-production-ml.md) · Next: [26 Interviews](26-ml-interview-prep-and-coding.md)
+> Back to [index](../../README.md) · Read after [02](02-machine-learning-foundations.md), [05](05-model-evaluation-and-tuning.md), [21](21-mlops-and-production-ml.md) · Next: [26 Interviews](26-ml-interview-prep-and-coding.md)
 
 The discipline of designing *production* ML systems — the gap between "model works in a notebook" and "system delivers value reliably." Synthesis of Chip Huyen's MLSD/DMLS, Mercari's pattern catalog, and the Manning MLSD book.
 

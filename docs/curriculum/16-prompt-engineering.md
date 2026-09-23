@@ -1,6 +1,6 @@
 # 16 — Prompt Engineering
 
-> Back to [index](README.md) · Prev: [15 Fine-Tuning](15-fine-tuning-and-peft.md) · Next: [17 RAG](17-retrieval-augmented-generation.md)
+> Back to [index](../../README.md) · Prev: [15 Fine-Tuning](15-fine-tuning-and-peft.md) · Next: [17 RAG](17-retrieval-augmented-generation.md)
 
 Prompting = programming a model in natural language. Structured, teachable, and the fastest lever in applied GenAI.
 

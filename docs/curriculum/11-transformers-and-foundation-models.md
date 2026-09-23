@@ -1,6 +1,6 @@
 # 11 — Transformers & Foundation Models
 
-> Back to [index](README.md) · Prev: [10 RNNs](10-rnn-and-sequence-modeling.md) · Next: [12 Generative Models](12-generative-models.md)
+> Back to [index](../../README.md) · Prev: [10 RNNs](10-rnn-and-sequence-modeling.md) · Next: [12 Generative Models](12-generative-models.md)
 
 The transformer ("Attention Is All You Need," Vaswani et al. 2017) is the architecture behind **every LLM, CLIP, Whisper, AlphaFold-adjacent model, and modern recommendation system.** Master this module.
 

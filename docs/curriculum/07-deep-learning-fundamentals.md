@@ -1,6 +1,6 @@
 # 07 — Deep Learning Fundamentals
 
-> Back to [index](README.md) · Prev: [06 Feature Engineering](06-feature-engineering.md) · Next: [08 Training & Regularization](08-training-and-regularizing-networks.md)
+> Back to [index](../../README.md) · Prev: [06 Feature Engineering](06-feature-engineering.md) · Next: [08 Training & Regularization](08-training-and-regularizing-networks.md)
 
 ## 1. The neuron (perceptron)
 

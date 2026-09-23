@@ -1,6 +1,6 @@
 # 24 — Study Plan & Projects
 
-> Back to [index](README.md) · Prev: [23 Advanced Topics](23-advanced-and-specialized-topics.md)
+> Back to [index](../../README.md) · Prev: [23 Advanced Topics](23-advanced-and-specialized-topics.md)
 
 Three executable paths + a project ladder + final mastery gate. Assumes ~10–12 hrs/week; compress or stretch accordingly.
 

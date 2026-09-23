@@ -1,6 +1,6 @@
 # 13 — Reinforcement Learning
 
-> Back to [index](README.md) · Prev: [12 Generative Models](12-generative-models.md) · Next: [14 Large Language Models](14-large-language-models.md)
+> Back to [index](../../README.md) · Prev: [12 Generative Models](12-generative-models.md) · Next: [14 Large Language Models](14-large-language-models.md)
 
 RL: an **agent** takes **actions** in an **environment**, receiving **rewards** — learning a **policy** to maximize cumulative reward. No labeled data; delayed, aggregate feedback.
 

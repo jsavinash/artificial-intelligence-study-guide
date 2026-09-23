@@ -1,6 +1,6 @@
 # 20 — Multimodal AI
 
-> Back to [index](README.md) · Prev: [19 LLM App Engineering](19-llm-application-engineering.md) · Next: [21 MLOps](21-mlops-and-production-ml.md)
+> Back to [index](../../README.md) · Prev: [19 LLM App Engineering](19-llm-application-engineering.md) · Next: [21 MLOps](21-mlops-and-production-ml.md)
 
 Models that perceive and/or generate **across modalities** — text, image, audio, video. The dominant direction of frontier research.
 

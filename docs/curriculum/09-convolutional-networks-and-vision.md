@@ -1,6 +1,6 @@
 # 09 — Convolutional Networks & Computer Vision
 
-> Back to [index](README.md) · Prev: [08 Training](08-training-and-regularizing-networks.md) · Next: [10 RNNs & Sequences](10-rnn-and-sequence-modeling.md)
+> Back to [index](../../README.md) · Prev: [08 Training](08-training-and-regularizing-networks.md) · Next: [10 RNNs & Sequences](10-rnn-and-sequence-modeling.md)
 
 ## 1. Convolution — the operation
 

@@ -1,54 +1,69 @@
-# The Exhaustive AI Tutorial
+# 📚 The Exhaustive AI Tutorial — Theory + Executable Monorepo
 
-A complete, self-contained curriculum covering **every major topic in artificial intelligence** — from mathematical foundations to LLMs, AI agents, and production systems. All modules are plain Markdown, readable in order or by reference.
+A complete curriculum covering **every major AI topic** — math foundations → classical ML → deep learning → transformers → LLMs/agents → MLOps/safety → ML system design — **paired with a runnable implementation for every module**, a JSON API, a web UI, and a test suite.
 
-> **🖥️ Want running code?** This repo is now a **monorepo**: every theory module has an executable implementation (27 examples), plus a JSON API, web UI, and test suite — see **[REPO-README.md](REPO-README.md)** (`make run-all` · `make test` · `make serve`).
+## ⚡ Quickstart
 
-## How to use this tutorial
+```bash
+make setup                 # verify environment (all deps preinstalled)
+make run M=11              # run ONE example (module 11 — transformers)
+make run-all               # run ALL 27 examples (~2 min) → 27/27 PASS
+make test                  # pytest suite (examples + live API) → 4/4
+make serve                 # JSON API  → http://127.0.0.1:8000
+make ui                    # web UI    → http://127.0.0.1:8080
+export OPENAI_API_KEY=…    # optional: same code switches from MockLLM to a real model
+```
 
-- **Complete beginner path:** 00 → 01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09 → 10 → 11 → then pick 14–19.
-- **Developer moving into AI (Python already known):** skim 00–02, do 05, 07, 11, then 14–19.
-- **Already know ML basics?** Jump to 11 (transformers), 14 (LLMs), 16–19 (applied GenAI).
-- Each file ends with a **Mastery Checklist** — use it for self-testing.
+## 📁 Repository layout
 
-## Complete Topic Map
+| Path | What lives there |
+|---|---|
+| [`docs/curriculum/`](docs/curriculum/) | **27 theory modules** (`00`–`26`), each with a Mastery Checklist |
+| [`docs/TOPICS-SUMMARY.md`](docs/TOPICS-SUMMARY.md) | One-page map of every topic covered |
+| [`examples/`](examples/) | **27 runnable `main.py`** — one per theory module · **[catalog & sample outputs](examples/README.md)** |
+| [`packages/ai_core/`](packages/ai_core/) | Shared lib: datasets, from-scratch metrics, MockLLM/real-LLM factory, vector store (cosine+BM25+RRF), model registry + PSI drift |
+| [`apps/api_server/`](apps/api_server/) | stdlib JSON API: `/health` `/predict` `/rag` `/agents/run` `/generate` |
+| [`apps/web_ui/`](apps/web_ui/) | Full-stack browser client (vanilla JS, CORS-enabled) |
+| [`tests/`](tests/) | pytest: smoke-runs every example + boots & tests the API |
+| [`scripts/run_all.sh`](scripts/run_all.sh) | Sequential runner with pass/fail tally |
+| [`artifacts/`](artifacts/) | Generated outputs (registry models, prediction logs, design docs) — git-ignored |
 
-| # | File | Topics covered |
-|---|------|----------------|
-| 00 | [Mathematical Foundations](00-mathematical-foundations.md) | Linear algebra, calculus & gradients, probability, statistics, optimization, information theory |
-| 01 | [Python & Data Tooling](01-python-and-data-tooling.md) | Python for AI, NumPy, pandas, visualization, Jupyter, scikit-learn workflow |
-| 02 | [Machine Learning Foundations](02-machine-learning-foundations.md) | What learning is, types of learning, the ML workflow, data splits, leakage |
-| 03 | [Supervised Learning Algorithms](03-supervised-learning-algorithms.md) | Linear/logistic regression, trees, ensembles, boosting, SVM, KNN, Naive Bayes |
-| 04 | [Unsupervised Learning](04-unsupervised-learning.md) | Clustering, dimensionality reduction, anomaly detection, association rules |
-| 05 | [Model Evaluation & Tuning](05-model-evaluation-and-tuning.md) | Metrics, cross-validation, bias-variance, regularization, hyperparameter search, imbalanced data |
-| 06 | [Feature Engineering](06-feature-engineering.md) | Numeric/categorical/text features, encoding, pipelines, target leakage |
-| 07 | [Deep Learning Fundamentals](07-deep-learning-fundamentals.md) | Neuron/MLP, backpropagation, activations, loss functions, gradient descent variants |
-| 08 | [Training & Regularizing Networks](08-training-and-regularizing-networks.md) | Optimizers, initialization, batch norm, dropout, schedules, augmentation, debugging |
-| 09 | [CNNs & Computer Vision](09-convolutional-networks-and-vision.md) | Convolutions, architecture evolution, detection, segmentation, Vision Transformers |
-| 10 | [RNNs & Sequence Modeling](10-rnn-and-sequence-modeling.md) | RNN/LSTM/GRU, word embeddings, seq2seq, beam search, attention's origin |
-| 11 | [Transformers & Foundation Models](11-transformers-and-foundation-models.md) | Self-attention math, transformer block, BERT/GPT/T5, tokenization, pretraining objectives |
-| 12 | [Generative Models](12-generative-models.md) | VAE, GAN, diffusion models, sampling, evaluation of generators |
-| 13 | [Reinforcement Learning](13-reinforcement-learning.md) | MDPs, Q-learning, DQN, policy gradients, PPO, RLHF's RL side |
-| 14 | [Large Language Models](14-large-language-models.md) | LLM anatomy, pretraining, scaling laws, post-training, alignment, reasoning models |
-| 15 | [Fine-Tuning & PEFT](15-fine-tuning-and-peft.md) | Transfer learning, full fine-tuning, LoRA/QLoRA, distillation, quantization |
-| 16 | [Prompt Engineering](16-prompt-engineering.md) | Prompt patterns, chain-of-thought, few-shot, structured output, failure modes |
-| 17 | [Retrieval-Augmented Generation](17-retrieval-augmented-generation.md) | Embeddings, vector DBs, chunking, retrieval/reranking strategies, evaluation, Graph RAG |
-| 18 | [AI Agents & Tool Use](18-ai-agents-and-tool-use.md) | Agent anatomy, ReAct, function calling, memory, multi-agent, frameworks, agent evals |
-| 19 | [LLM Application Engineering](19-llm-application-engineering.md) | API patterns, streaming, eval harnesses, guardrails, observability, cost/latency |
-| 20 | [Multimodal AI](20-multimodal-ai.md) | Vision-language models, image generation, speech, video, omni models |
-| 21 | [MLOps & Production ML](21-mlops-and-production-ml.md) | Lifecycle, serving, scaling, drift monitoring, CI/CD, registry, LLMOps |
-| 22 | [AI Safety, Security & Ethics](22-ai-safety-security-ethics.md) | Alignment, bias/fairness, privacy, prompt injection, interpretability, regulation |
-| 23 | [Advanced & Specialized Topics](23-advanced-and-specialized-topics.md) | Recommenders, time series, GNNs, AutoML, federated learning, self-supervised learning |
-| 24 | [Study Plan & Projects](24-study-plan-and-projects.md) | Week-by-week plans, 24 project ideas, mastery checklists, resource guide |
-| 25 | [ML System Design & Case Studies](25-ml-system-design.md) | Problem framing, design docs, serving/QA/training/operation patterns, antipatterns, case studies, ML technical debt |
-| 26 | [Interviews & From-Scratch Coding](26-ml-interview-prep-and-coding.md) | Interview modules, NumPy implementations, fundamentals drill, system-design interview framework, STAR prep |
+## 🖥️ Capacity-aware design decisions
 
-## Recommended External Resources (paired with this tutorial)
+This machine (**Apple M1 · 8 cores · Python 3.14 · no PyTorch · no API keys**) drove the architecture:
 
-- **Practice math:** 3Blue1Brown *Essence of Linear Algebra* / *Neural Networks*
-- **Structured course:** Andrew Ng *ML Specialization* (with 02–05), *fast.ai* (with 07–09)
-- **LLM depth:** Hugging Face *LLM Course* (with 11, 14, 15)
-- **Applied GenAI:** DeepLearning.AI short courses (with 16–19)
-- **Reference text:** *Dive into Deep Learning* (d2l.ai) for from-scratch implementations
+- **Pure NumPy/sklearn** for all ML/DL — backprop, attention, CNN, RNN, VAE, diffusion, Q-learning implemented from scratch (nothing to install, everything inspectable)
+- **MockLLM fallback** — every LLM example (prompts/RAG/agents/evals) runs fully offline and transparently upgrades to OpenAI/Anthropic when a key exists
+- **stdlib-only serving** — no FastAPI install; vanilla-JS UI — no npm build
 
-See [24-study-plan-and-projects.md](24-study-plan-and-projects.md) for full week-by-week plans.
+## 🧠 Theory curriculum — [`docs/curriculum/`](docs/curriculum/)
+
+| # | Module | # | Module |
+|---|---|---|---|
+| 00 | [Mathematical Foundations](docs/curriculum/00-mathematical-foundations.md) | 14 | [Large Language Models](docs/curriculum/14-large-language-models.md) |
+| 01 | [Python & Data Tooling](docs/curriculum/01-python-and-data-tooling.md) | 15 | [Fine-Tuning & PEFT](docs/curriculum/15-fine-tuning-and-peft.md) |
+| 02 | [ML Foundations](docs/curriculum/02-machine-learning-foundations.md) | 16 | [Prompt Engineering](docs/curriculum/16-prompt-engineering.md) |
+| 03 | [Supervised Algorithms](docs/curriculum/03-supervised-learning-algorithms.md) | 17 | [Retrieval-Augmented Generation](docs/curriculum/17-retrieval-augmented-generation.md) |
+| 04 | [Unsupervised Learning](docs/curriculum/04-unsupervised-learning.md) | 18 | [AI Agents & Tool Use](docs/curriculum/18-ai-agents-and-tool-use.md) |
+| 05 | [Evaluation & Tuning](docs/curriculum/05-model-evaluation-and-tuning.md) | 19 | [LLM Application Engineering](docs/curriculum/19-llm-application-engineering.md) |
+| 06 | [Feature Engineering](docs/curriculum/06-feature-engineering.md) | 20 | [Multimodal AI](docs/curriculum/20-multimodal-ai.md) |
+| 07 | [DL Fundamentals](docs/curriculum/07-deep-learning-fundamentals.md) | 21 | [MLOps & Production ML](docs/curriculum/21-mlops-and-production-ml.md) |
+| 08 | [Training & Regularization](docs/curriculum/08-training-and-regularizing-networks.md) | 22 | [AI Safety, Security & Ethics](docs/curriculum/22-ai-safety-security-ethics.md) |
+| 09 | [CNNs & Computer Vision](docs/curriculum/09-convolutional-networks-and-vision.md) | 23 | [Advanced & Specialized Topics](docs/curriculum/23-advanced-and-specialized-topics.md) |
+| 10 | [RNNs & Sequences](docs/curriculum/10-rnn-and-sequence-modeling.md) | 24 | [Study Plan & Projects](docs/curriculum/24-study-plan-and-projects.md) |
+| 11 | [Transformers & Foundation Models](docs/curriculum/11-transformers-and-foundation-models.md) | 25 | [ML System Design](docs/curriculum/25-ml-system-design.md) |
+| 12 | [Generative Models](docs/curriculum/12-generative-models.md) | 26 | [Interviews & From-Scratch Coding](docs/curriculum/26-ml-interview-prep-and-coding.md) |
+| 13 | [Reinforcement Learning](docs/curriculum/13-reinforcement-learning.md) | | |
+
+📖 Full topic index: **[docs/TOPICS-SUMMARY.md](docs/TOPICS-SUMMARY.md)** ·
+💻 Every example with concepts + real output: **[examples/README.md](examples/README.md)**
+
+## 🗺️ Suggested paths
+
+- **Beginner → practitioner (24 wks):** curriculum 00→13, then 14–19, 21, 24 (full schedule in [24-study-plan](docs/curriculum/24-study-plan-and-projects.md))
+- **Developer → AI engineer (10 wks):** 02, 05, 07, 11, 14, 16, 17, 18, 19, 21 + matching examples
+- **Interview sprint:** 25 (design docs) + 26 (from-scratch drills) with examples m25/m26
+
+## 🔗 Companion external resources
+
+3Blue1Brown (math intuition) · Andrew Ng *ML Specialization* · *fast.ai* · Hugging Face *LLM Course* · DeepLearning.AI short courses · d2l.ai — see [study plan](docs/curriculum/24-study-plan-and-projects.md) for the full pairing guide.

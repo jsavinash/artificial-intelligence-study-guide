@@ -1,6 +1,6 @@
 # 10 — RNNs & Sequence Modeling
 
-> Back to [index](README.md) · Prev: [09 CNNs & Vision](09-convolutional-networks-and-vision.md) · Next: [11 Transformers](11-transformers-and-foundation-models.md)
+> Back to [index](../../README.md) · Prev: [09 CNNs & Vision](09-convolutional-networks-and-vision.md) · Next: [11 Transformers](11-transformers-and-foundation-models.md)
 
 Sequences — text, speech, time series, genomes. RNNs were *the* answer before transformers, and their ideas (state, gating, attention) live on inside every LLM.
 

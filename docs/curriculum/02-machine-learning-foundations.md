@@ -1,6 +1,6 @@
 # 02 — Machine Learning Foundations
 
-> Back to [index](README.md) · Prev: [01 Python](01-python-and-data-tooling.md) · Next: [03 Supervised Learning](03-supervised-learning-algorithms.md)
+> Back to [index](../../README.md) · Prev: [01 Python](01-python-and-data-tooling.md) · Next: [03 Supervised Learning](03-supervised-learning-algorithms.md)
 
 ## 1. What machine learning is
 

@@ -1,6 +1,6 @@
 # 18 — AI Agents & Tool Use
 
-> Back to [index](README.md) · Prev: [17 RAG](17-retrieval-augmented-generation.md) · Next: [19 LLM App Engineering](19-llm-application-engineering.md)
+> Back to [index](../../README.md) · Prev: [17 RAG](17-retrieval-augmented-generation.md) · Next: [19 LLM App Engineering](19-llm-application-engineering.md)
 
 **An agent = LLM + tools + loop + memory, pursuing a goal with intermediate steps.** Where prompting (single call) ends and autonomous systems begin.
 

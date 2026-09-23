@@ -1,6 +1,6 @@
 # 00 — Mathematical Foundations for AI
 
-> Back to [index](README.md) · Next: [01 Python & Data Tooling](01-python-and-data-tooling.md)
+> Back to [index](../../README.md) · Next: [01 Python & Data Tooling](01-python-and-data-tooling.md)
 
 You do **not** need a math degree. You need working intuition for six areas. This file is the pragmatic syllabus: what to learn, why it matters in AI, and the minimum you must be able to *do*.
 

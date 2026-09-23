@@ -1,6 +1,6 @@
 # 04 — Unsupervised Learning
 
-> Back to [index](README.md) · Prev: [03 Supervised Learning](03-supervised-learning-algorithms.md) · Next: [05 Evaluation & Tuning](05-model-evaluation-and-tuning.md)
+> Back to [index](../../README.md) · Prev: [03 Supervised Learning](03-supervised-learning-algorithms.md) · Next: [05 Evaluation & Tuning](05-model-evaluation-and-tuning.md)
 
 No labels — the algorithm finds structure. Evaluation is harder: **no ground truth means intrinsic metrics + human judgment.**
 

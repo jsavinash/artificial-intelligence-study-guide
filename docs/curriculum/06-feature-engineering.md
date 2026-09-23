@@ -1,6 +1,6 @@
 # 06 — Feature Engineering
 
-> Back to [index](README.md) · Prev: [05 Evaluation](05-model-evaluation-and-tuning.md) · Next: [07 Deep Learning Fundamentals](07-deep-learning-fundamentals.md)
+> Back to [index](../../README.md) · Prev: [05 Evaluation](05-model-evaluation-and-tuning.md) · Next: [07 Deep Learning Fundamentals](07-deep-learning-fundamentals.md)
 
 **Feature engineering = domain knowledge turned into numbers.** For classical ML it's often worth more than the algorithm choice. (Deep nets learn their own features — that's the paradigm shift of [07](07-deep-learning-fundamentals.md).)
 

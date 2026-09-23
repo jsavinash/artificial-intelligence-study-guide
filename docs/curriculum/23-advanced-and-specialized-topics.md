@@ -1,6 +1,6 @@
 # 23 — Advanced & Specialized Topics
 
-> Back to [index](README.md) · Prev: [22 Safety & Ethics](22-ai-safety-security-ethics.md) · Next: [24 Study Plan & Projects](24-study-plan-and-projects.md)
+> Back to [index](../../README.md) · Prev: [22 Safety & Ethics](22-ai-safety-security-ethics.md) · Next: [24 Study Plan & Projects](24-study-plan-and-projects.md)
 
 The topics beyond the core track — each a full subfield; this is your map and where to go deeper.
 

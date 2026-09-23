@@ -1,6 +1,6 @@
 # 08 — Training & Regularizing Deep Networks
 
-> Back to [index](README.md) · Prev: [07 DL Fundamentals](07-deep-learning-fundamentals.md) · Next: [09 CNNs & Vision](09-convolutional-networks-and-vision.md)
+> Back to [index](../../README.md) · Prev: [07 DL Fundamentals](07-deep-learning-fundamentals.md) · Next: [09 CNNs & Vision](09-convolutional-networks-and-vision.md)
 
 Getting a net to *train well* is a craft. This is the toolbox.
 

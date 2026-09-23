@@ -1,6 +1,6 @@
 # 05 — Model Evaluation & Tuning
 
-> Back to [index](README.md) · Prev: [04 Unsupervised](04-unsupervised-learning.md) · Next: [06 Feature Engineering](06-feature-engineering.md)
+> Back to [index](../../README.md) · Prev: [04 Unsupervised](04-unsupervised-learning.md) · Next: [06 Feature Engineering](06-feature-engineering.md)
 
 The module that separates practitioners from hobbyists: **an unmeasured model is an untrained model.**
 

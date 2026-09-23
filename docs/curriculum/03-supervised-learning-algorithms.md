@@ -1,6 +1,6 @@
 # 03 — Supervised Learning Algorithms (Exhaustive)
 
-> Back to [index](README.md) · Prev: [02 ML Foundations](02-machine-learning-foundations.md) · Next: [04 Unsupervised Learning](04-unsupervised-learning.md)
+> Back to [index](../../README.md) · Prev: [02 ML Foundations](02-machine-learning-foundations.md) · Next: [04 Unsupervised Learning](04-unsupervised-learning.md)
 
 Each algorithm: **intuition → strengths → weaknesses → when to use.**
 

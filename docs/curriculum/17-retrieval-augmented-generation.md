@@ -1,6 +1,6 @@
 # 17 — Retrieval-Augmented Generation (RAG)
 
-> Back to [index](README.md) · Prev: [16 Prompt Engineering](16-prompt-engineering.md) · Next: [18 Agents](18-ai-agents-and-tool-use.md)
+> Back to [index](../../README.md) · Prev: [16 Prompt Engineering](16-prompt-engineering.md) · Next: [18 Agents](18-ai-agents-and-tool-use.md)
 
 **RAG = retrieve relevant documents at query time → put them in the prompt → generate grounded answers.** Fixes knowledge cutoffs, hallucination, and private-data access **without** retraining ([14](14-large-language-models.md)).
 

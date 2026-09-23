@@ -1,6 +1,6 @@
 # 21 — MLOps & Production ML
 
-> Back to [index](README.md) · Prev: [20 Multimodal](20-multimodal-ai.md) · Next: [22 Safety & Ethics](22-ai-safety-security-ethics.md)
+> Back to [index](../../README.md) · Prev: [20 Multimodal](20-multimodal-ai.md) · Next: [22 Safety & Ethics](22-ai-safety-security-ethics.md)
 
 Models die in notebooks. MLOps = **reliably shipping, monitoring, and improving** models in production.
 

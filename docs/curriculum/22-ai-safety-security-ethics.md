@@ -1,6 +1,6 @@
 # 22 — AI Safety, Security & Ethics
 
-> Back to [index](README.md) · Prev: [21 MLOps](21-mlops-and-production-ml.md) · Next: [23 Advanced Topics](23-advanced-and-specialized-topics.md)
+> Back to [index](../../README.md) · Prev: [21 MLOps](21-mlops-and-production-ml.md) · Next: [23 Advanced Topics](23-advanced-and-specialized-topics.md)
 
 Non-optional for practitioners: systems that are **secure, fair, lawful, and aligned with intent.**
 

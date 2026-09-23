@@ -1,6 +1,6 @@
 # 14 — Large Language Models
 
-> Back to [index](README.md) · Prev: [13 Reinforcement Learning](13-reinforcement-learning.md) · Next: [15 Fine-Tuning & PEFT](15-fine-tuning-and-peft.md)
+> Back to [index](../../README.md) · Prev: [13 Reinforcement Learning](13-reinforcement-learning.md) · Next: [15 Fine-Tuning & PEFT](15-fine-tuning-and-peft.md)
 
 Everything in [11](11-transformers-and-foundation-models.md), scaled up and post-trained into a usable assistant. This module is the center of gravity of modern AI.
 

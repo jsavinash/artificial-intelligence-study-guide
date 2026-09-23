@@ -1,6 +1,6 @@
 # 12 — Generative Models
 
-> Back to [index](README.md) · Prev: [11 Transformers](11-transformers-and-foundation-models.md) · Next: [13 Reinforcement Learning](13-reinforcement-learning.md)
+> Back to [index](../../README.md) · Prev: [11 Transformers](11-transformers-and-foundation-models.md) · Next: [13 Reinforcement Learning](13-reinforcement-learning.md)
 
 **Discriminative** models learn P(y|x) (decide). **Generative** models learn P(x) or P(x|y) (create). Language models are generative — they're in this family too.
 

@@ -1,6 +1,6 @@
 # 01 — Python & Data Tooling for AI
 
-> Back to [index](README.md) · Prev: [00 Math](00-mathematical-foundations.md) · Next: [02 ML Foundations](02-machine-learning-foundations.md)
+> Back to [index](../../README.md) · Prev: [00 Math](00-mathematical-foundations.md) · Next: [02 ML Foundations](02-machine-learning-foundations.md)
 
 Python is the default AI language. This module covers the working toolkit — not a Python course, but what you must be fluent in to do everything that follows.
 

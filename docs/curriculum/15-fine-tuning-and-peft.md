@@ -1,6 +1,6 @@
 # 15 — Fine-Tuning & Parameter-Efficient Methods
 
-> Back to [index](README.md) · Prev: [14 Large Language Models](14-large-language-models.md) · Next: [16 Prompt Engineering](16-prompt-engineering.md)
+> Back to [index](../../README.md) · Prev: [14 Large Language Models](14-large-language-models.md) · Next: [16 Prompt Engineering](16-prompt-engineering.md)
 
 **When prompting + RAG aren't enough** — to change *style, format, domain knowledge, or behavior* baked into the weights — you fine-tune.
 
