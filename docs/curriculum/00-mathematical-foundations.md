@@ -8,7 +8,7 @@ You do **not** need a math degree. You need working intuition for six areas. Thi
 
 | § | Topics | Figures |
 |---|---|---|
-| 1 · Linear algebra | vectors/dot/cosine · matmul shapes · eigen→PCA · SVD/low-rank · formula-sheet card | [01](../figures/00-math/01_vectors_dot.png) · [02](../figures/00-math/02_matmul_shapes.png) · [03](../figures/00-math/03_eigen_pca.png) · [04](../figures/00-math/04_svd_lowrank.png) · [32](../figures/00-math/32_linalg_cheatsheet.png) |
+| 1 · Linear algebra | **1 vectors:** dot product → norms → cosine · **2 matrix mechanics:** shape rule → matrix multiplication → linear layer · **3 spectral structure:** eigenvalues/eigenvectors → eigendecomposition → covariance → PCA · **4 advanced:** SVD/low-rank → positive-definite · **5 review:** foundational formula card | [01 dot/norm/cosine](../figures/00-math/01_vectors_dot.png) · [02 shapes/matmul/linear layer](../figures/00-math/02_matmul_shapes.png) · [03 eigen/covariance/PCA](../figures/00-math/03_eigen_pca.png) · [04 SVD/low-rank](../figures/00-math/04_svd_lowrank.png) · [32 formula sheet](../figures/00-math/32_linalg_cheatsheet.png) |
 | 2 · Calculus | derivative · gradient field · chain rule/backprop · partials · Hessian/saddle | [05](../figures/00-math/05_derivative_tangent.png) · [06](../figures/00-math/06_gradient_field.png) · [07](../figures/00-math/07_chain_graph.png) · [08](../figures/00-math/08_partials.png) · [09](../figures/00-math/09_hessian_curvature.png) · [31](../figures/00-math/31_learning_loop.png) |
 | 3 · Probability | Bayes medical test · 5 distributions · E/Var · joint/marginal · likelihood/MLE · Monte Carlo | [10](../figures/00-math/10_bayes_test.png) · [11](../figures/00-math/11_distributions.png) · [12](../figures/00-math/12_expectation_variance.png) · [13](../figures/00-math/13_joint_marginal.png) · [14](../figures/00-math/14_likelihood.png) · [15](../figures/00-math/15_monte_carlo.png) · [30](../figures/00-math/30_probability_tree.png) |
 | 4 · Statistics | estimator bias–variance · CI/p-value · correlation≠causation · MLE vs MAP · covariance | [16](../figures/00-math/16_estimator_biasvar.png) · [17](../figures/00-math/17_ci_pvalue.png) · [18](../figures/00-math/18_correlation_causation.png) · [19](../figures/00-math/19_mle_map.png) · [20](../figures/00-math/20_covariance_correlation.png) |
@@ -21,22 +21,36 @@ Regenerate all figures: `python3 tools/make_math_figures.py` · Verify every wor
 
 **Why AI runs on it:** every dataset is a matrix; every model is matrix operations; GPUs exist to do fast matrix multiplication.
 
-| # | Concept guide | Topics covered | AI relevance |
-|---:|---|---|---|
-| 1 | [Vector norms](../concepts/linear-algebra/vector-norm.md) | `Lₚ`, `L₁`, `L₂`, and `L∞` norms · norm axioms · unit balls · magnitude versus direction | Regularization, loss functions, gradient clipping, and embedding geometry |
-| 2 | [Cosine similarity](../concepts/linear-algebra/cosine-similarity.md) | Vector angle · normalized dot product · directional alignment · zero-vector behavior | Embedding search, RAG retrieval, semantic similarity, and recommendations |
-| 3 | [Dot product](../concepts/linear-algebra/dot-product.md) | Algebraic and geometric forms · projection · orthogonality · magnitude effects | Neuron activations, attention scores, feature weighting, and similarity |
-| 4 | [Matrix multiplication](../concepts/linear-algebra/matrix-multiply.md) | Row–column products · dimensional reduction · non-commutativity · batching | Forward passes, loss computation, backpropagation, and GPU/TPU workloads |
-| 5 | [Shape rule](../concepts/linear-algebra/shape-rule.md) | Compatible dimensions · inner-dimension matching · output shapes · broadcasting | Valid neural-network graphs, gradient alignment, and tensor-operation safety |
-| 6 | [Linear layer](../concepts/linear-algebra/linear-layer.md) | `y = xWᵀ + b` · learned weights · bias · batch dimensions · affine transformations | Dense layers, feature mixing, and trainable neural-network transformations |
-| 7 | [Eigenvalues and eigenvectors](../concepts/linear-algebra/eigen-values-vectors.md) | `Av = λv` · characteristic equations · invariant directions · spectral stability | PCA foundations, spectral methods, RNN stability, and training diagnostics |
-| 8 | [Eigendecomposition](../concepts/linear-algebra/eigen-decomposition.md) | `A = VΛV⁻¹` · symmetric form `A = QΛQᵀ` · eigenbasis · scaling directions | Spectral analysis, PCA, dynamical systems, and stability analysis |
-| 9 | [Covariance matrix](../concepts/linear-algebra/covariance-matrix.md) | Covariance · mean centering · variance · feature relationships · covariance structure | Feature-correlation analysis, PCA preprocessing, whitening, and multicollinearity |
-| 10 | [Principal Component Analysis (PCA)](../concepts/linear-algebra/PCA.md) | Covariance eigendecomposition · projections · principal components · explained variance | Dimensionality reduction, visualization, compression, and denoising |
-| 11 | [Positive-definite matrices](../concepts/linear-algebra/positive-definite-matrices.md) | Quadratic forms · positive eigenvalues · Hessians · covariance · kernel matrices | Convex optimization, Gaussian models, stable minima, and SVMs |
-| 12 | [Singular Value Decomposition (SVD)](../concepts/linear-algebra/SVD.md) | `A = UΣVᵀ` · singular values/vectors · low-rank approximation · pseudo-inverses · conditioning | Model compression, latent-factor recommendation, rectangular matrices, and stable inversion |
+### Learning path
 
-The table is a complete index of the **12 Markdown guides currently in** `/Users/avi/Documents/personal/ai-tutorial/docs/concepts/linear-algebra/`. Learn them in the numbered order: vector geometry and data shapes first, neural-network transformations next, then covariance and matrix decompositions.
+Follow the stages below; each stage reuses ideas from the previous one.
+
+| Stage | Goal | Guides in order |
+|---:|---|---|
+| 1 | Build vector intuition | [Dot product](../concepts/linear-algebra/dot-product.md) → [Vector norms](../concepts/linear-algebra/vector-norm.md) → [Cosine similarity](../concepts/linear-algebra/cosine-similarity.md) |
+| 2 | Master matrix and tensor shapes | [Shape rule](../concepts/linear-algebra/shape-rule.md) → [Matrix multiplication](../concepts/linear-algebra/matrix-multiply.md) |
+| 3 | Apply matrices in neural networks | [Linear layer](../concepts/linear-algebra/linear-layer.md) |
+| 4 | Understand variance and spectral structure | [Eigenvalues and eigenvectors](../concepts/linear-algebra/eigen-values-vectors.md) → [Eigendecomposition](../concepts/linear-algebra/eigen-decomposition.md) → [Covariance matrix](../concepts/linear-algebra/covariance-matrix.md) → [Principal Component Analysis (PCA)](../concepts/linear-algebra/PCA.md) |
+| 5 | Generalize to rectangular data and stable systems | [Singular Value Decomposition (SVD)](../concepts/linear-algebra/SVD.md) → [Positive-definite matrices](../concepts/linear-algebra/positive-definite-matrices.md) |
+
+### Complete concept-guide index
+
+This is a complete, dependency-ordered index of all **12 Markdown guides** in `/Users/avi/Documents/personal/ai-tutorial/docs/concepts/linear-algebra/`.
+
+| Order | Concept guide | Learn this because | Topics covered | AI relevance |
+|---:|---|---|---|---|
+| 1 | [Dot product](../concepts/linear-algebra/dot-product.md) | It is the operation behind vector comparison, projections, neurons, and every matrix-product entry. | Algebraic and geometric forms · projection · orthogonality · magnitude effects | Neuron activations, attention scores, feature weighting, and similarity |
+| 2 | [Vector norms](../concepts/linear-algebra/vector-norm.md) | Norms quantify vector size after you can compare vectors. | `Lₚ`, `L₁`, `L₂`, and `L∞` norms · norm axioms · unit balls · magnitude versus direction | Regularization, loss functions, gradient clipping, and embedding geometry |
+| 3 | [Cosine similarity](../concepts/linear-algebra/cosine-similarity.md) | It combines the dot product and norms to compare direction independently of magnitude. | Vector angle · normalized dot product · directional alignment · zero-vector behavior | Embedding search, RAG retrieval, semantic similarity, and recommendations |
+| 4 | [Shape rule](../concepts/linear-algebra/shape-rule.md) | Learn compatible dimensions before performing repeated matrix products. | Compatible dimensions · inner-dimension matching · output shapes · broadcasting | Valid neural-network graphs, gradient alignment, and tensor-operation safety |
+| 5 | [Matrix multiplication](../concepts/linear-algebra/matrix-multiply.md) | It applies the dot product systematically across rows, columns, and batches. | Row–column products · dimensional reduction · non-commutativity · batching | Forward passes, loss computation, backpropagation, and GPU/TPU workloads |
+| 6 | [Linear layer](../concepts/linear-algebra/linear-layer.md) | It combines matrix multiplication, shapes, weights, and bias into the basic neural-network operation. | `y = xWᵀ + b` · learned weights · bias · batch dimensions · affine transformations | Dense layers, feature mixing, and trainable neural-network transformations |
+| 7 | [Eigenvalues and eigenvectors](../concepts/linear-algebra/eigen-values-vectors.md) | They identify directions that a matrix scales without changing direction. | `Av = λv` · characteristic equations · invariant directions · spectral stability | PCA foundations, spectral methods, RNN stability, and training diagnostics |
+| 8 | [Eigendecomposition](../concepts/linear-algebra/eigen-decomposition.md) | It organizes all eigenpairs into a matrix factorization and eigenbasis. | `A = VΛV⁻¹` · symmetric form `A = QΛQᵀ` · eigenbasis · scaling directions | Spectral analysis, PCA, dynamical systems, and stability analysis |
+| 9 | [Covariance matrix](../concepts/linear-algebra/covariance-matrix.md) | It gives eigendecomposition a central AI dataset to analyze: feature variance and correlation. | Covariance · mean centering · variance · feature relationships · covariance structure | Feature-correlation analysis, PCA preprocessing, whitening, and multicollinearity |
+| 10 | [Principal Component Analysis (PCA)](../concepts/linear-algebra/PCA.md) | It combines covariance, eigenvectors, and projections to reduce dimensions. | Covariance eigendecomposition · projections · principal components · explained variance | Dimensionality reduction, visualization, compression, and denoising |
+| 11 | [Singular Value Decomposition (SVD)](../concepts/linear-algebra/SVD.md) | It generalizes eigendecomposition to rectangular matrices and exposes their best low-rank approximation. | `A = UΣVᵀ` · singular values/vectors · low-rank approximation · pseudo-inverses · conditioning | Model compression, latent-factor recommendation, rectangular matrices, and stable inversion |
+| 12 | [Positive-definite matrices](../concepts/linear-algebra/positive-definite-matrices.md) | It closes the progression by applying symmetric spectral structure to optimization and Gaussian geometry. | Quadratic forms · positive eigenvalues · Hessians · covariance · kernel matrices | Convex optimization, Gaussian models, stable minima, and SVMs |
 
 ### Topic coverage and missing standalone guides
 
@@ -44,16 +58,16 @@ The linked guides use or assume the topics below. **Missing** means there is no 
 
 | Area | Topics that need dedicated guides | Status and connection to existing material |
 |---|---|---|
-| Foundations | Scalar and vector operations · vector spaces · subspaces · span · basis · dimension · linear independence | **Missing.** Needed to give vectors, matrices, and linear layers a formal foundation |
-| Matrix operations | Transpose · identity and zero matrices · scalar multiplication · matrix addition · Hadamard product | **Missing.** Used throughout linear layers, covariance, eigendecomposition, and SVD |
-| Linear systems and geometry | Row reduction and Gaussian elimination · linear transformations · null space · column and row space · solution spaces | **Missing.** Required to understand rank, invertibility, and matrix factorization |
-| Orthogonality | Orthogonal vectors and matrices · orthonormal bases · projections · Gram–Schmidt process | **Missing.** Projection appears in dot product, PCA, and SVD; the supporting theory is not fully covered |
-| Inverses and factorization | Matrix inverse · Gaussian elimination · LU factorization · Cholesky factorization · matrix condition number | **Missing.** Positive-definite and SVD guides motivate stable inversion and numerical behavior |
-| Spectral structure | Trace · determinant · characteristic polynomial · rank and nullity · matrix norm · diagonalization · spectral theorem | **Missing.** Eigenvalue and eigendecomposition guides introduce these concepts but do not cover them comprehensively |
-| Statistical geometry | Mean vector · variance · covariance · correlation · standardization · data whitening | **Partially missing.** Covariance and PCA have guides; the other statistical topics do not have standalone files |
+| Foundations | Scalar and vector operations · vector spaces · subspaces · span · basis · dimension · linear independence | **Missing.** Learn first to give vectors, matrices, and linear transformations a formal foundation |
+| Matrix operations | Transpose · identity and zero matrices · scalar multiplication · matrix addition · Hadamard product | **Missing.** Learn next because these operations underpin linear layers, covariance, eigendecomposition, and SVD |
+| Tensors and batching | Elementwise operations · broadcasting · batched matrix multiplication · contractions · tensor shapes and axes | **Partially missing.** Shape and linear-layer guides cover the essentials; add these before advanced neural-network linear algebra |
+| Linear systems and geometry | Row reduction and Gaussian elimination · linear transformations · null space · column and row space · solution spaces | **Missing.** Required before inverses, rank, and matrix factorizations |
+| Orthogonality | Orthogonal vectors and matrices · orthonormal bases · projections · Gram–Schmidt process | **Missing.** Extends the dot-product guide and supports PCA and SVD |
+| Inverses and factorization | Matrix inverse · Gaussian elimination · LU factorization · Cholesky factorization · matrix condition number | **Missing.** Study after linear systems; positive-definite and SVD guides motivate stable inversion and numerical behavior |
+| Statistical geometry | Mean vector · variance · covariance · correlation · standardization · data whitening | **Partially missing.** Covariance and PCA have guides; add the remaining statistical topics around the covariance stage |
+| Spectral structure | Trace · determinant · characteristic polynomial · rank and nullity · matrix norm · diagonalization · spectral theorem | **Partially missing.** Eigenvalue and eigendecomposition guides cover the core; these supporting topics complete the spectral foundation |
 | Applied decomposition | Low-rank approximation · truncated SVD · matrix factorization · recommendation-system latent factors | **Partially missing.** SVD covers the ideas, but dedicated low-rank and recommendation-system guides are missing |
-| Numerical stability | Ill-conditioning · least-squares solutions · normal equations · Moore–Penrose pseudo-inverse · regularization of inverse problems | **Partially missing.** Referenced by positive-definite and SVD guides without a dedicated numerical-linear-algebra guide |
-| Tensors and batching | Elementwise operations · broadcasting · batched matrix multiplication · contractions · tensor shapes and axes | **Partially missing.** Shape and linear-layer guides cover the essentials; broader tensor operations need a guide |
+| Numerical stability | Ill-conditioning · least-squares solutions · normal equations · Moore–Penrose pseudo-inverse · regularization of inverse problems | **Partially missing.** Study last; referenced by positive-definite and SVD guides without a dedicated numerical-linear-algebra guide |
 
 **You should be able to:** multiply matrices by hand once, know shapes must align, understand broadcasting, explain what a linear layer computes.
 
@@ -64,13 +78,27 @@ The linked guides use or assume the topics below. **Missing** means there is no 
 | Dot product | `a·b = a₁b₁ + a₂b₂ + …` | Multiply matching entries of two vectors, then add them all up to get a single number. |
 | Length (norm) | `‖a‖ = √(a₁² + a₂² + …)` | The straight-line distance from the origin to the vector's tip. |
 | Cosine similarity | `cos θ = a·b / (‖a‖·‖b‖)` | Measures how aligned two vectors are. **1** = they point in the same direction; **0** = unrelated / perpendicular. |
-| Matrix multiply | `C[i,j] = Σₖ A[i,k]·B[k,j]` | To find the item at row *i*, column *j* in the new matrix, take row *i* of matrix A and dot product it with column *j* of matrix B. |
 | Shape rule | `(m×n) · (n×p) → (m×p)` | To multiply two matrices, the inner dimensions (**n**) must match. The result keeps the outer dimensions (**m × p**). |
+| Matrix multiply | `C[i,j] = Σₖ A[i,k]·B[k,j]` | To find the item at row *i*, column *j* in the new matrix, take row *i* of matrix A and dot product it with column *j* of matrix B. |
 | Linear layer | `Y = W·X + b` | The foundation of neural networks. **W** = learned weights, **b** = the bias, **X** = data with one column per sample. |
+| Eigenvalue equation | `Av = λv` | Find directions that a matrix only stretches, shrinks, or reverses. |
+| Covariance eigendecomposition | `C = QΛQᵀ` | Rotate covariance data into orthogonal principal directions. |
+| PCA projection | `Z = X_cQ_k` | Keep the top `k` variance directions to reduce feature dimensions. |
+| SVD | `A = UΣVᵀ` | Decompose any rectangular matrix into orthogonal directions and singular-value scales. |
+| Positive-definite test | `xᵀHx > 0` for `x ≠ 0` | Verify positive curvature in optimization and valid Gaussian/kernel geometry. |
 
-**🖼️ Figure — all six rows of this sheet in one picture:**
+**🖼️ Figure — core formulas from dot products through linear layers:**
 
-![Formula sheet at a glance: dot product, norm, cosine similarity, matrix multiply, shape rule, linear layer](../figures/00-math/32_linalg_cheatsheet.png)
+![Formula sheet at a glance: dot product, norm, cosine similarity, shape rule, matrix multiply, linear layer](../figures/00-math/32_linalg_cheatsheet.png)
+
+**🔢 Worked calculation — cosine of `a=(3,1)`, `b=(1,3)`**
+
+| step | formula | numbers | result |
+|---|---|---|---|
+| 1 · dot | `Σ aᵢ·bᵢ` | `3·1 + 1·3` | 6 |
+| 2 · norms | `√(a₁²+a₂²)` | `√10` each | 3.162 |
+| 3 · cosine | `a·b / (‖a‖·‖b‖)` | `6 / (3.162×3.162)` | **0.60** |
+| 4 · angle | `arccos(0.60)` | — | **53.13°** |
 
 **🔢 Worked calculation — `[[1,2,3],[4,5,6]] · [[7,8],[9,10],[11,12]]`**
 
@@ -82,15 +110,6 @@ The linked guides use or assume the topics below. **Missing** means there is no 
 | C[1,1] | `4·8 + 5·10 + 6·12` | 32 + 50 + 72 | **154** |
 
 → `[[58,64],[139,154]]` — each cell is a dot product: three multiplications and two additions.
-
-**🔢 Worked calculation — cosine of `a=(3,1)`, `b=(1,3)`**
-
-| step | formula | numbers | result |
-|---|---|---|---|
-| 1 · dot | `Σ aᵢ·bᵢ` | `3·1 + 1·3` | 6 |
-| 2 · norms | `√(a₁²+a₂²)` | `√10` each | 3.162 |
-| 3 · cosine | `a·b / (‖a‖·‖b‖)` | `6 / (3.162×3.162)` | **0.60** |
-| 4 · angle | `arccos(0.60)` | — | **53.13°** |
 
 > ✅ every number on this page is machine-checked by `python3 tools/calc_00_math.py`
 
@@ -105,11 +124,13 @@ The linked guides use or assume the topics below. **Missing** means there is no 
 ![SVD low-rank approximation at ranks 10, 5, 2, 1](../figures/00-math/04_svd_lowrank.png)
 
 **💡 Simple examples:**
-- **Shapes:** `(2×3) · (3×2) → (2×2)` — inner `3 = 3` must match, else error.
-- **Multiply by hand:** `[[1,2,3],[4,5,6]] · [[7,8],[9,10],[11,12]] = [[58,64],[139,154]]` — row·column dot products.
-- **Cosine similarity:** `a=(3,1), b=(1,3)` → `a·b = 6`, `‖a‖‖b‖ = 10` → `cos θ = 0.6` → θ = 53.1°. Embeddings use this instead of raw distance.
-- **Linear layer:** `Y = WX + b` with `W:(out×in)`, `X:(in×batch)` — each column of `Y` is one sample's scores.
-- **Eigen → PCA:** `C = [[2,1],[1,2]]` → `trace 4`, `det 3` → `λ = 3, 1`; `v₁ = (1,1)/√2` holds **75%** of the variance (figure 03).
+- **Dot product and cosine similarity:** `a=(3,1), b=(1,3)` → `a·b = 6`, `‖a‖‖b‖ = 10` → `cos θ = 0.6` → θ = 53.1°. Norm-normalized dot products compare embedding direction.
+- **Shapes before multiplication:** `(2×3) · (3×2) → (2×2)` — inner `3 = 3` must match, else error.
+- **Multiply by hand:** `[[1,2,3],[4,5,6]] · [[7,8],[9,10],[11,12]] = [[58,64],[139,154]]` — every output cell is a row·column dot product.
+- **Linear layer:** `Y = WX + b` with `W:(out×in)`, `X:(in×batch)` — matrix multiplication and shape rules become a trainable neural-network transform.
+- **Eigen → eigendecomposition → covariance → PCA:** `C = [[2,1],[1,2]]` → `trace 4`, `det 3` → `λ = 3, 1`; `v₁ = (1,1)/√2` holds **75%** of the variance (figure 03).
+- **SVD:** extend the eigen idea from square covariance matrices to rectangular data or weight matrices; retain the largest singular values for a low-rank approximation.
+- **Positive definiteness:** symmetric matrices with positive quadratic forms identify stable optimization bowls and valid Gaussian/kernel covariance geometry.
 
 **🔢 Worked calculation — eigen-decomposition → PCA of `C = [[2,1],[1,2]]`**
 
