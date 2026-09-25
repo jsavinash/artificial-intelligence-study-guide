@@ -14,7 +14,7 @@ In AI, vector length acts as a **size, penalty, or confidence score**. It tells 
 ### The Technical Definition
 In linear algebra, the **length of a vector is called its norm**. A norm is a function that maps a vector to a non-negative **scalar value**, representing the vector's total magnitude or size. For a norm to be valid, it must satisfy three structural rules:
 1. **Non-negativity:** $\Vert\mathbf{x}\Vert \ge 0$, and $\Vert\mathbf{x}\Vert = 0$ if and only if $\mathbf{x} = \mathbf{0}$.
-2. **Absolute Homogeneity:** $\Vertlpha\mathbf{x}\Vert = |lpha| \cdot \Vert\mathbf{x}\Vert$ for any scalar $lpha$.
+2. **Absolute Homogeneity:** $\Vert\alpha\mathbf{x}\Vert = |\alpha| \cdot \Vert\mathbf{x}\Vert$ for any scalar $\alpha$.
 3. **Triangle Inequality:** $\Vert\mathbf{x} + \mathbf{y}\Vert \le \Vert\mathbf{x}\Vert + \Vert\mathbf{y}\Vert$.
 
 ### Why It Is Necessary for AI
@@ -42,8 +42,7 @@ graph TD
 
 ### Foundations in Standard Notation
 
-$$	ext{General } L_p 	ext{ Norm: } \Vert\mathbf{x}\Vert_p = \left( \sum_{i=1}^{n} |x_i|^p 
-ight)^{rac{1}{p}}$$
+$$\text{General } L_p \text{ Norm: } \Vert\mathbf{x}\Vert_p = \left( \sum_{i=1}^{n} |x_i|^p \right)^{\frac{1}{p}}$$
 
 $$	ext{Manhattan } L_1 	ext{ Norm: } \Vert\mathbf{x}\Vert_1 = \sum_{i=1}^{n} |x_i|$$
 
@@ -70,10 +69,8 @@ The **$L_2$ norm** squares each component before summing them, which is a direct
 
 ### Cause-and-Effect Relationships
 * **Increasing Component Magnitudes:** If any single element $x_i$ increases in magnitude (further from zero in either a positive or negative direction), the output norm **must increase**.
-* **Approaching Zero:** As all elements approach zero ($\mathbf{x} 
-ightarrow \mathbf{0}$), the length collapses to **exactly zero**. The only vector with a length of zero is the zero vector itself.
-* **Varying the $p$ Parameter:** As $p$ increases, the norm places **heavier emphasis on the single largest element** in the vector. If $p 
-ightarrow \infty$ (the Infinity Norm $\Vert\mathbf{x}\Vert_{\infty}$), the formula completely ignores all elements except the one with the maximum absolute value.
+* **Approaching Zero:** As all elements approach zero ($\mathbf{x} \rightarrow \mathbf{0}$), the length collapses to **exactly zero**. The only vector with a length of zero is the zero vector itself.
+* **Varying the $p$ Parameter:** As $p$ increases, the norm places **heavier emphasis on the single largest element** in the vector. If $p \rightarrow \infty$ (the Infinity Norm $\Vert\mathbf{x}\Vert_{\infty}$), the formula completely ignores all elements except the one with the maximum absolute value.
 
 ### Edge Cases and Constraints
 * **The Sparsity Effect ($L_1$ vs $L_2$):** When used to penalize weights, the $L_1$ norm drives weights to **exactly zero**, creating sparse models (feature selection). The $L_2$ norm drives weights to **small fractions** but rarely exactly zero, spreading the influence across features.

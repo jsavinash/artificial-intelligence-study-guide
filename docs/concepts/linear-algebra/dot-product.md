@@ -101,33 +101,61 @@ The geometric formula reveals what this sum actually means: it multiplies the le
 
 ---
 
-## 4. TEXT-BASED INTERACTIVE PLOT DIAGRAM
+## 4. GEOMETRIC DIAGRAM (PROJECTION OF v ONTO u)
 
-Below is a 2D geometric visualization of a dot product where vector `v` is projected onto vector `u`.
+Below is a 2D geometric visualization of a dot product where vector **v** is projected onto vector **u**. Mermaid has no true coordinate-plane renderer, so the axes, the two vectors, and the perpendicular "shadow" are modeled as a construction flowchart.
 
-```text
-    y-axis
-      ^
-      |         . Vector v (4, 5)
-      |        /|
-      |       / | 
-      |      /  | 
-      |     /   | 
-      |    /    |  
-      |   /     |   
-      |  / θ    |    
-      +---------+--------------------> x-axis
-     (0,0)      |        Vector u (6, 0)
-                |
-         [Projected Length]
-         v's shadow on u = ||v||*cos(θ)
+```mermaid
+graph TD
+    subgraph Origin ["Coordinate Plane"]
+        direction LR
+        O["(0,0)<br>shared tail of u and v"]
+    end
+
+    subgraph Axis_U ["Vector u = (6, 0) along the x-axis"]
+        direction LR
+        U["u = (6,0)<br>length 6"]
+    end
+
+    subgraph Axis_V ["Vector v = (4, 5) tilted up"]
+        direction LR
+        V["v = (4,5)<br>length 6.4031"]
+    end
+
+    O -->|"hypotenuse"| V
+    O -->|"along x-axis"| U
+    V -->|"perpendicular drop"| F
+    F["Foot of projection<br>F = (4,0)<br>on vector u"]
+    U --> F
+
+    THETA["angle θ = 51.34 deg<br>between u and v"]
+    O --- THETA
+    THETA --- V
+
+    SHADOW["Projected length = |v| · cos θ<br>= 6.4031 × 0.6247 = 4.0<br>the 'shadow' of v on u"]
+    F --- SHADOW
+
+    RESULT["u · v = |u| · |v| · cos θ<br>= 6 × 6.4031 × 0.6247 = 24"]
+    SHADOW --> RESULT
 ```
 
+**Reading the diagram**
+
+| Element | Meaning |
+|---|---|
+| `O` → `U` | Vector **u** lies on the x-axis, so its direction is the reference for the angle |
+| `O` → `V` | Vector **v** is the second vector, tilted upward by $\theta$ |
+| `V` → `F` | The **perpendicular** drop from the tip of **v** onto **u** — this is the "shadow" |
+| `O` → `F` | The **projected length** of **v** onto **u**, equal to $\|\mathbf{v}\| \cos(\theta) = 4$ |
+| `RESULT` | Multiplying that projection by $\|\mathbf{u}\|$ recovers the dot product, $24$ |
+
+Note the decomposition: $\mathbf{u} \cdot \mathbf{v} = \|\mathbf{u}\| \times (\text{projection of } \mathbf{v} \text{ on } \mathbf{u})$. The projection alone is a *length*; scaling it by $\|\mathbf{u}\|$ gives the scalar dot product.
+
 ### What to Visualize in Python (Matplotlib)
-If you were to animate this dynamically in a script:
-1. **The Vectors:** You would see two arrows originating from the center $(0,0)$.
-2. **The Shadow (Projection):** Dropping a perpendicular dashed line from the tip of Vector `v` down to Vector `u` creates a "shadow" along `u`. The length of this shadow multiplied by the length of `u` is your dot product.
-3. **Dynamic Motion:** If you rotate `v` clockwise toward `u` (decreasing `θ`), you will see the shadow grow longer, causing the dot product value displayed on your screen to climb until they overlap perfectly.
+If you were to animate the construction above dynamically in a script:
+1. **The Vectors:** Two arrows originating from the shared origin $(0,0)$ — $\mathbf{u} = (6,0)$ along the x-axis and $\mathbf{v} = (4,5)$ tilted upward.
+2. **The Shadow (Projection):** Dropping a perpendicular dashed line from the tip of $\mathbf{v}$ down to $\mathbf{u}$ creates a "shadow" along $\mathbf{u}$, landing at $F = (4,0)$. The length of this shadow multiplied by $\|\mathbf{u}\|$ is your dot product.
+3. **Dynamic Motion:** If you rotate $\mathbf{v}$ clockwise toward $\mathbf{u}$ (decreasing $\theta$), you will see the shadow grow longer, causing the dot product value displayed on your screen to climb until they overlap perfectly at $\cos\theta = 1$.
 
 ---
 
