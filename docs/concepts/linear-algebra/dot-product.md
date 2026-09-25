@@ -27,35 +27,42 @@ Without the dot product, modern AI would collapse. It is the fundamental buildin
 The dot product can be calculated in two ways: **Algebraically** (using coordinates) and **Geometrically** (using angles).
 
 ### Algebraic Formula
-```mermaid
-graph LR
-    subgraph Algebraic Formulation
-    A["u · v"] --> B["∑ (u_i * v_i)"]
-    B --> C["u_1*v_1 + u_2*v_2 + ... + u_n*v_n"]
-    end
-```
+
+$$\mathbf{u} \cdot \mathbf{v} = \sum_{i=1}^{n} u_i v_i$$
+
+Expanding the summation for a small number of dimensions:
+
+$$\mathbf{u} \cdot \mathbf{v} = u_1 v_1 + u_2 v_2 + \cdots + u_n v_n$$
+
+For the concrete two-dimensional case $\mathbf{u} = (3, 1)$ and $\mathbf{v} = (1, 3)$:
+
+$$\mathbf{u} \cdot \mathbf{v} = (3)(1) + (1)(3) = 3 + 3 = 6$$
 
 ### Geometric Formula
-```mermaid
-graph LR
-    subgraph Geometric Formulation
-    D["u · v"] --> E["||u|| * ||v|| * cos(θ)"]
-    end
-```
+
+$$\mathbf{u} \cdot \mathbf{v} = \|\mathbf{u}\| \, \|\mathbf{v}\| \, \cos(\theta)$$
+
+The projection of $\mathbf{v}$ onto the unit direction of $\mathbf{u}$ is:
+
+$$\operatorname{proj}_{\mathbf{u}}(\mathbf{v}) = \frac{\mathbf{u} \cdot \mathbf{v}}{\|\mathbf{u}\|^2} \, \mathbf{u}$$
+
+The projected length of $\mathbf{v}$ along $\mathbf{u}$ is:
+
+$$\|\mathbf{u}\| \, \cos(\theta) = \frac{\mathbf{u} \cdot \mathbf{v}}{\|\mathbf{u}\|}$$
 
 ### Variable Definitions
-* **`u`, `v`**: The two vectors being multiplied.
-* **`·`**: The dot product operator symbol.
-* **`n`**: The dimensionality of the vectors (the number of elements they contain).
-* **`u_i`, `v_i`**: The specific $i$-th components of vectors `u` and `v`.
-* **`||u||`, `||v||`**: The magnitudes (lengths) of vectors `u` and `v`.
-* **`θ` (Theta)**: The angle between the two vectors in space.
-* **`cos`**: The trigonometric cosine function.
+* **$\mathbf{u}$, $\mathbf{v}$**: The two vectors being multiplied.
+* **$\cdot$**: The dot product operator symbol.
+* **$n$**: The dimensionality of the vectors (the number of elements they contain).
+* **$u_i$, $v_i$**: The $i$-th components of vectors $\mathbf{u}$ and $\mathbf{v}$.
+* **$\|\mathbf{u}\|$, $\|\mathbf{v}\|$**: The magnitudes (lengths) of vectors $\mathbf{u}$ and $\mathbf{v}$.
+* **$\theta$ (Theta)**: The angle between the two vectors in space.
+* **$\cos$**: The trigonometric cosine function.
 
 ### Logical Intuition
 The algebraic formula multiplies corresponding elements because it asks: *"How much intensity do these two vectors share along this specific axis?"* By summing these products across all axes ($1$ through $n$), it accumulates the total shared strength across all dimensions.
 
-The geometric formula reveals what this sum actually means: it multiplies the lengths of both vectors ($||u|| ||v||$) and scales the result by their directional alignment ($\cos(	heta)$).
+The geometric formula reveals what this sum actually means: it multiplies the lengths of both vectors ($\|\mathbf{u}\| \, \|\mathbf{v}\|$) and scales the result by their directional alignment ($\cos(\theta)$).
 
 ---
 
@@ -63,16 +70,17 @@ The geometric formula reveals what this sum actually means: it multiplies the le
 
 ### Cause-and-Effect Relationships
 * **Increasing Component Magnitudes:** If any positive element $u_i$ or $v_i$ increases, the final dot product increases linearly. In AI, stronger inputs or heavier weights result in a more powerful neuron activation.
-* **Approaching Zero:** If one vector approaches the zero vector ($u 
-ightarrow 0$), the dot product collapses to **exactly zero**, regardless of how large the other vector is. In machine learning, a weight of zero completely silences an incoming feature.
+* **Approaching Zero:** If one vector approaches the zero vector ($\mathbf{u} \rightarrow \mathbf{0}$), the dot product collapses to **exactly zero**, regardless of how large the other vector is. In machine learning, a weight of zero completely silences an incoming feature.
+* **Scaling Either Vector:** Scaling is linear, so doubling one vector doubles the result: $(\alpha \mathbf{u}) \cdot \mathbf{v} = \alpha (\mathbf{u} \cdot \mathbf{v})$.
 * **Changing the Angle (θ):**
-  * **θ = 0° (Perfect Alignment):** $\cos(0^\circ) = 1$. The dot product is maximally positive ($||u||||v||$).
-  * **θ = 90° (Orthogonality):** $\cos(90^\circ) = 0$. The dot product becomes **zero**. The vectors are completely independent; one contains no information about the other.
-  * **θ = 180° (Perfect Opposition):** $\cos(180^\circ) = -1$. The dot product is maximally negative ($-||u||||v||$).
+  * **θ = 0° (Perfect Alignment):** $\cos(0^\circ) = 1$, so $\mathbf{u} \cdot \mathbf{v} = \|\mathbf{u}\| \, \|\mathbf{v}\|$.
+  * **θ = 90° (Orthogonality):** $\cos(90^\circ) = 0$, so $\mathbf{u} \cdot \mathbf{v} = 0$. The vectors are orthogonal.
+  * **θ = 180° (Perfect Opposition):** $\cos(180^\circ) = -1$, so $\mathbf{u} \cdot \mathbf{v} = -\|\mathbf{u}\| \, \|\mathbf{v}\|$.
 
 ### Edge Cases and Constraints
-* **Dimensionality Constraint:** The dot product is strictly undefined if vectors `u` and `v` do not have the exact same number of dimensions ($n$). Attempting this causes shape mismatch errors in libraries like NumPy or PyTorch.
-* **The Magnitude Bias:** The dot product is highly sensitive to the scale of the numbers. A poorly aligned pair of long vectors can yield a higher dot product than a perfectly aligned pair of short vectors. AI models often use *normalized* dot products (Cosine Similarity) to fix this bias.
+* **Dimensionality Constraint:** The dot product is strictly undefined if vectors $\mathbf{u}$ and $\mathbf{v}$ do not have the same number of dimensions ($n$). Attempting this causes shape mismatch errors in libraries like NumPy or PyTorch.
+* **The Magnitude Bias:** The dot product is highly sensitive to the scale of the numbers, since $\|\mathbf{u}\| \, \|\mathbf{v}\|$ grows with both lengths. A poorly aligned pair of long vectors can yield a higher dot product than a perfectly aligned pair of short vectors. AI models often use *normalized* dot products (Cosine Similarity) to remove this scale dependence.
+* **Vector $\mathbf{0}$:** If either vector is the zero vector, the result is exactly $\mathbf{0} \cdot \mathbf{v} = 0$ for any $\mathbf{v}$.
 
 ---
 
@@ -112,11 +120,13 @@ If you were to animate this dynamically in a script:
 We want to calculate the raw, pre-activation output ($z$) of a single hidden neuron in a deep neural network. The neuron receives **3 input features** from a processed image and applies its **learned weights**.
 
 ### Toy Dataset
-* **Input Vector (x):** `[2.0, 0.5, 1.5]` (e.g., values representing pixel intensity, edge detection, and texture).
-* **Weight Vector (w):** `[1.2, -2.0, 0.4]` (the importance coefficients learned by the network).
-* **Bias (b):** `+0.15` (a constant baseline scalar added to the final result).
+* **Input Vector ($\mathbf{x}$):** $[2.0,\ 0.5,\ 1.5]$ (e.g., values representing pixel intensity, edge detection, and texture).
+* **Weight Vector ($\mathbf{w}$):** $[1.2,\ -2.0,\ 0.4]$ (the importance coefficients learned by the network).
+* **Bias ($b$):** $+0.15$ (a constant baseline scalar added to the final result).
 
-The mathematical operation is: $z = (w \cdot x) + b$
+The mathematical operation for the neuron pre-activation is:
+
+$$z = \mathbf{w} \cdot \mathbf{x} + b = \sum_{i=1}^{n} w_i x_i + b$$
 
 ### Step-by-Step Arithmetic
 
@@ -126,17 +136,17 @@ The mathematical operation is: $z = (w \cdot x) + b$
 * Pair 3: $w_3 = 0.4$, $x_3 = 1.5$
 
 **Step 2: Multiply each pair together.**
-* Element 1: $1.2 	imes 2.0 = 2.4$
-* Element 2: $-2.0 	imes 0.5 = -1.0$
-* Element 3: $0.4 	imes 1.5 = 0.6$
+* Element 1: $(1.2)(2.0) = 2.4$
+* Element 2: $(-2.0)(0.5) = -1.0$
+* Element 3: $(0.4)(1.5) = 0.6$
 
-**Step 3: Sum the products to find the Dot Product (w · x).**
-* $w \cdot x = 2.4 + (-1.0) + 0.6$
-* $w \cdot x = 1.4 + 0.6$
-* $w \cdot x = 2.0$
+**Step 3: Sum the products to find the dot product $\mathbf{w} \cdot \mathbf{x}$.**
 
-**Step 4: Add the bias scalar (b) to compute the final neuron score (z).**
-* $z = 2.0 + 0.15$
-* $z = 2.15$
+$$\mathbf{w} \cdot \mathbf{x} = (1.2)(2.0) + (-2.0)(0.5) + (0.4)(1.5)$$
+$$\mathbf{w} \cdot \mathbf{x} = 2.4 - 1.0 + 0.6 = 1.4 + 0.6 = 2.0$$
 
-**Conclusion:** The dot product is `2.0`. Because the result is positive, it tells the network that the inputs align well with what the weights are looking for, pushing the neuron closer to firing.
+**Step 4: Add the bias scalar to compute the final neuron score.**
+
+$$z = \mathbf{w} \cdot \mathbf{x} + b = 2.0 + 0.15 = 2.15$$
+
+**Conclusion:** The dot product is $2.0$ and the pre-activation is $z = 2.15$. Because the result is positive, it tells the network that the inputs align well with what the weights are looking for, pushing the neuron closer to firing.
