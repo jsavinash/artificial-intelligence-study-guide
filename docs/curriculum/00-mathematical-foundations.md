@@ -21,18 +21,20 @@ Regenerate all figures: `python3 tools/make_math_figures.py` · Verify every wor
 
 **Why AI runs on it:** every dataset is a matrix; every model is matrix operations; GPUs exist to do fast matrix multiplication.
 
-| Concept | AI relevance |
-|---|---|
-| [Vector norms](../concepts/linear-algebra/vector-norm.md) (`‖x‖`) | Measure vector length; support regularization, loss functions, and gradient clipping |
-| [Cosine similarity](../concepts/linear-algebra/cosine-similarity.md) | Compare embedding direction for retrieval, RAG, and recommendations independently of magnitude |
-| [Dot product](../concepts/linear-algebra/dot-product.md) | Combine aligned features in neurons, embeddings, and attention scores |
-| [Matrix multiplication](../concepts/linear-algebra/matrix-multiply.md) | Powers forward passes, loss calculations, and backpropagation on CPUs, GPUs, and TPUs |
-| [Shape rule](../concepts/linear-algebra/shape-rule.md) | Enforces compatible dimensions and predictable output shapes in matrix and tensor operations |
-| [Linear layer](../concepts/linear-algebra/linear-layer.md) (`Y = WX + b`) | Learn affine transformations that mix input features into output features |
-| [Eigenvalues and eigenvectors](../concepts/linear-algebra/eigen-values-vectors.md) | Reveal invariant directions for PCA, spectral methods, and training-stability analysis |
-| [Principal Component Analysis (PCA)](../concepts/linear-algebra/PCA.md) | Reduce dimensionality while preserving directions of maximum variance |
-| [Positive-definite matrices](../concepts/linear-algebra/positive-definite-matrices.md) | Characterize stable curvature, valid covariance, and convex optimization geometry |
-| [Singular Value Decomposition (SVD)](../concepts/linear-algebra/SVD.md) | Factor matrices for low-rank compression, pseudo-inverses, and latent-factor models |
+| Concept guide | Topics covered | AI relevance |
+|---|---|---|
+| [Vector norms](../concepts/linear-algebra/vector-norm.md) | `L₁`, `L₂`, and `L∞` norms · norm axioms · unit balls · magnitude versus direction | Regularization, loss functions, gradient clipping, and embedding geometry |
+| [Cosine similarity](../concepts/linear-algebra/cosine-similarity.md) | Vector angle · normalized dot product · directional alignment · zero-vector behavior | Embedding search, RAG retrieval, semantic similarity, and recommendations |
+| [Dot product](../concepts/linear-algebra/dot-product.md) | Algebraic and geometric forms · projection · orthogonality · magnitude effects | Neuron activations, attention scores, feature weighting, and similarity |
+| [Matrix multiplication](../concepts/linear-algebra/matrix-multiply.md) | Row–column products · dimensional reduction · non-commutativity · batching | Forward passes, loss computation, backpropagation, and GPU/TPU workloads |
+| [Shape rule](../concepts/linear-algebra/shape-rule.md) | Compatible dimensions · inner-dimension matching · output shapes · broadcasting | Valid neural-network graphs, gradient alignment, and tensor-operation safety |
+| [Linear layer](../concepts/linear-algebra/linear-layer.md) | `y = xWᵀ + b` · learned weights · bias · batch dimensions · affine transformations | Dense layers, feature mixing, and trainable neural-network transformations |
+| [Eigenvalues and eigenvectors](../concepts/linear-algebra/eigen-values-vectors.md) | `Av = λv` · characteristic equations · invariant directions · spectral stability | PCA foundations, spectral methods, RNN stability, and training diagnostics |
+| [Principal Component Analysis (PCA)](../concepts/linear-algebra/PCA.md) | Mean centering · covariance matrices · eigenvectors · projection · explained variance | Dimensionality reduction, visualization, compression, and denoising |
+| [Positive-definite matrices](../concepts/linear-algebra/positive-definite-matrices.md) | Quadratic forms · positive eigenvalues · Hessians · covariance · kernel matrices | Convex optimization, Gaussian models, stable minima, and SVMs |
+| [Singular Value Decomposition (SVD)](../concepts/linear-algebra/SVD.md) | `A = UΣVᵀ` · singular values/vectors · low-rank approximation · pseudo-inverses · conditioning | Model compression, latent-factor recommendation, rectangular matrices, and stable inversion |
+
+**Supporting topics referenced by these guides but without standalone files in the folder:** vector spaces and linear transformations, matrix transpose, identity matrix, covariance matrix, determinant, rank, orthogonality, broadcasting, low-rank approximation, Moore–Penrose pseudo-inverse, and condition number. These are introduced where they are needed in the linked guides and should be learned alongside the corresponding topic above.
 
 **You should be able to:** multiply matrices by hand once, know shapes must align, understand broadcasting, explain what a linear layer computes.
 
