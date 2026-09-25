@@ -38,28 +38,153 @@ print(f"numpy {np.__version__} · matplotlib ready · seed=0 set")
 # **Why AI runs on it:** every dataset is a matrix, every model is matrix operations,
 # GPUs exist to do fast matrix multiplication.
 #
-# **🧮 Formula sheet**
+# **🧮 Formula sheet — Linear Algebra Cheatsheet (Plain English)**
 #
 # | What | Formula | Plain English |
 # |---|---|---|
-# | Dot product | `a·b = a₁b₁ + a₂b₂ + …` | multiply matching entries, add them up |
-# | Length (norm) | `‖a‖ = √(a₁² + a₂² + …)` | distance from the origin |
-# | Cosine similarity | `cos θ = a·b / (‖a‖·‖b‖)` | 1 = same direction, 0 = unrelated |
-# | Matrix multiply | `C[i,j] = Σₖ A[i,k]·B[k,j]` | row *i* of A dotted with column *j* of B |
-# | Shape rule | `(m×n) · (n×p) → (m×p)` | the middle numbers must be equal |
-# | Linear layer | `Y = W·X + b` | `W` = learned weights, `X` = one column per sample |
-
-# %% [markdown]
-# **📋 Linear Algebra Cheatsheet (Plain English)** — quick-reference card:
+# | Dot product | `a·b = a₁b₁ + a₂b₂ + …` | Multiply matching entries of two vectors, then add them all up to get a single number. |
+# | Length (norm) | `‖a‖ = √(a₁² + a₂² + …)` | The straight-line distance from the origin to the vector's tip. |
+# | Cosine similarity | `cos θ = a·b / (‖a‖·‖b‖)` | Measures how aligned two vectors are. **1** = they point in the same direction; **0** = unrelated / perpendicular. |
+# | Matrix multiply | `C[i,j] = Σₖ A[i,k]·B[k,j]` | To find the item at row *i*, column *j* in the new matrix, take row *i* of matrix A and dot product it with column *j* of matrix B. |
+# | Shape rule | `(m×n) · (n×p) → (m×p)` | To multiply two matrices, the inner dimensions (**n**) must match. The result keeps the outer dimensions (**m × p**). |
+# | Linear layer | `Y = W·X + b` | The foundation of neural networks. **W** = learned weights, **b** = the bias, **X** = data with one column per sample. |
 #
-# | Concept | Mathematical Formula | Plain English Meaning |
-# |---|---|---|
-# | Dot Product | \(a \cdot b = a_1b_1 + a_2b_2 + \dots\) | Multiply matching entries of two vectors, then add them all up to get a single number. |
-# | Length (Norm) | \(\Vert a\Vert = \sqrt{a_1^2 + a_2^2 + \dots}\) | The straight-line distance from the origin to the vector's tip. |
-# | Cosine Similarity | \(\cos \theta = \frac{a \cdot b}{\Vert a\Vert \cdot \Vert b\Vert}\) | Measures how aligned two vectors are. **1** = they point in the same direction; **0** = unrelated / perpendicular. |
-# | Matrix Multiplication | \(C[i,j] = \sum_k A[i,k] \cdot B[k,j]\) | To find the item at row *i*, column *j* in the new matrix, take row *i* of matrix A and dot product it with column *j* of matrix B. |
-# | Shape Rule | \((m \times n) \cdot (n \times p) \to (m \times p)\) | To multiply two matrices, the inner dimensions (**n**) must match. The result keeps the outer dimensions (**m × p**). |
-# | Linear Layer | \(Y = W \cdot X + b\) | The foundation of neural networks. **W** = learned weights, **b** = the bias, **X** = data with one column per sample. |
+# %%
+# --- The formula sheet as one picture: six rows → six panels ------
+def matrix_grid(ax, M, x0, y0, w=0.5, h=0.5, fc="white", hi=(), hc="#fde68a",
+                fs=8):
+    """Draw matrix M as a grid of boxes; hi = coordinates to highlight."""
+    for i in range(M.shape[0]):
+        for j in range(M.shape[1]):
+            ax.add_patch(plt.Rectangle((x0 + j * w, y0 - (i + 1) * h), w, h,
+                                       fc=hc if (i, j) in hi else fc,
+                                       ec="gray", lw=0.8))
+            ax.text(x0 + (j + 0.5) * w, y0 - (i + 0.5) * h, f"{M[i, j]:g}",
+                    ha="center", va="center", fontsize=fs)
+# %%
+# --- Figure construction continues below ------
+A = np.array([[1, 2, 3], [4, 5, 6]])                 # 2x3
+B = np.array([[7, 8], [9, 10], [11, 12]])            # 3x2
+Cmat = A @ B                                         # 2x2
+a, b = np.array([3.0, 1.0]), np.array([1.0, 3.0])
+dot = float(a @ b)
+na, nb = float(np.linalg.norm(a)), float(np.linalg.norm(b))
+cos = dot / (na * nb)
+theta = float(np.degrees(np.arccos(cos)))
+X = np.array([[1.0, 0.0, -1.0, 2.0],
+              [0.0, 1.0, 0.5, -1.0],
+              [1.0, 1.0, 1.0, 1.0]])                 # 3 features x 4 samples
+W = np.array([[0.5, -0.5, 0.25],
+              [-1.0, 2.0, 0.0],
+              [0.0, 0.0, 1.0]])                      # 3 outputs x 3 features
+assert Cmat.tolist() == [[58, 64], [139, 154]], Cmat
+assert (dot, round(na, 3), round(cos, 2), round(theta, 2)) == (6.0, 3.162, 0.6, 53.13)
+assert W.shape == (3, 3) and (W @ X).shape == (3, 4)
+fig, axes = plt.subplots(2, 3, figsize=(12.0, 6.4))
+# 1 - dot product: multiply matching entries, then add
+ax = axes[0, 0]
+for v, c, lab in ((a, C["b"], "a = (3,1)"), (b, C["r"], "b = (1,3)")):
+    ax.annotate("", xy=v, xytext=(0, 0),
+                arrowprops=dict(arrowstyle="-|>", color=c, lw=2))
+    ax.text(*v * 1.07, lab, color=c, fontsize=9, weight="bold")
+ax.plot(*np.vstack([a * 0, a * dot / na ** 2]), ls="--", color=C["b"], lw=1)
+arc = np.linspace(np.arctan2(1, 3), np.arctan2(3, 1), 30)
+ax.plot(0.85 * np.cos(arc), 0.85 * np.sin(arc), color="k", lw=1)
+ax.text(0.95, 0.42, f"θ = {theta:.1f}°", fontsize=9)
+ax.set_title(f"1 · Dot product → a·b = {dot:.0f}", fontsize=9.5)
+ax.text(-0.35, 4.05, "multiply matching entries, add them up", fontsize=8)
+ax.set_xlim(-0.5, 4.4); ax.set_ylim(-0.5, 4.4); ax.set_aspect("equal")
+
+# 2 - norm: distance from the origin to the tip
+ax = axes[0, 1]
+ax.annotate("", xy=a, xytext=(0, 0),
+            arrowprops=dict(arrowstyle="-|>", color=C["b"], lw=2.4))
+ax.plot([0, a[0]], [0, 0], "k:", lw=1)
+ax.plot([a[0], a[0]], [0, a[1]], "k:", lw=1)
+ax.text(1.5, -0.3, "3", ha="center", fontsize=9)
+ax.text(3.15, 0.5, "1", fontsize=9)
+ax.text(0.1, 1.15, f"‖a‖ = √(3² + 1²) = {na:.3f}", fontsize=9,
+        weight="bold", color=C["b"])
+ax.set_title(f"2 · Length (norm) → ‖a‖ = {na:.3f}", fontsize=9.5)
+ax.set_xlim(-0.5, 4.6); ax.set_ylim(-0.7, 3.0); ax.set_aspect("equal")
+
+# 3 - cosine similarity: 1, 0 and -1 side by side
+ax = axes[0, 2]
+for i, (u, v, lab, c) in enumerate((
+        (np.array([2.4, 0.0]), np.array([2.4, 0.0]),
+         "1.00 — same direction", C["g"]),
+        (np.array([2.0, 0.0]), np.array([0.0, 2.0]),
+         "0.00 — perpendicular", C["o"]),
+        (np.array([2.4, 0.0]), np.array([-2.4, 0.0]),
+         "−1.00 — opposite", C["r"]))):
+    y = -i * 2.4
+    for w in (u, v):
+        ax.annotate("", xy=w + (0, y), xytext=(0, y),
+                    arrowprops=dict(arrowstyle="-|>", color=c, lw=2))
+    ax.text(2.8, y, f"cos θ = {lab}", fontsize=8, va="center",
+            weight="bold", color=c)
+ax.set_title("3 · Cosine similarity → cos θ = a·b / (‖a‖·‖b‖)",
+             fontsize=8)
+ax.set_xlim(-3.0, 10.6); ax.set_ylim(-5.6, 2.2); ax.set_aspect("equal")
+
+# 4 - matrix multiply: row i of A dotted with column j of B
+ax = axes[1, 0]
+matrix_grid(ax, A, 0.0, 0.0, hi={(0, 0), (0, 1), (0, 2)})
+matrix_grid(ax, B, 2.0, 0.0, hi={(0, 0), (1, 0), (2, 0)})
+matrix_grid(ax, Cmat, 4.0, 0.0, fc="#dcfce7", hi={(0, 0)}, hc="#fca5a5")
+ax.text(0.75, 0.3, "A 2×3", ha="center", fontsize=9, weight="bold")
+ax.text(2.75, 0.3, "B 3×2", ha="center", fontsize=9, weight="bold")
+ax.text(4.75, 0.3, "C = A·B 2×2", ha="center", fontsize=9, weight="bold")
+ax.text(0.0, 1.3, "C[0,0] = 1·7 + 2·9 + 3·11 = 58", fontsize=9,
+        weight="bold", color=C["r"])
+ax.set_title("4 · Matrix multiply → C[i,j] = row i · column j", fontsize=8)
+ax.set_xlim(-0.2, 6.3); ax.set_ylim(-1.8, 1.8); ax.axis("off")
+
+# 5 - shape rule: inner dims must match, outer dims carry through
+ax = axes[1, 1]
+ax.add_patch(plt.Rectangle((0.2, 1.0), 1.5, 0.9, fc="#dbeafe", ec=C["b"], lw=2))
+ax.text(0.95, 1.45, "A  (m×n)", ha="center", va="center", fontsize=9,
+        weight="bold", color=C["b"])
+ax.add_patch(plt.Rectangle((2.2, 0.4), 1.3, 1.4, fc="#fef3c7", ec=C["o"], lw=2))
+ax.text(2.85, 1.1, "B  (n×p)", ha="center", va="center", fontsize=9,
+        weight="bold", color=C["o"])
+ax.add_patch(plt.Rectangle((3.9, 1.0), 1.0, 0.9, fc="#dcfce7", ec=C["g"], lw=2))
+ax.text(4.4, 1.45, "C  (m×p)", ha="center", va="center", fontsize=9,
+        weight="bold", color=C["g"])
+ax.annotate("", xy=(2.17, 2.05), xytext=(1.77, 2.05),
+            arrowprops=dict(arrowstyle="-|>", lw=1.2))
+ax.annotate("", xy=(3.87, 2.05), xytext=(3.57, 2.05),
+            arrowprops=dict(arrowstyle="-|>", lw=1.2))
+ax.text(2.85, 2.24, "inner n = n  (3 = 3)", ha="center", fontsize=9,
+        weight="bold", color=C["g"])
+ax.text(0.2, 0.18, "outer dims carry through →  (2×3)·(3×2) = (2×2)", fontsize=8)
+ax.text(0.2, 2.68, "(m×n) · (n×p) → (m×p)", fontsize=11, weight="bold")
+ax.set_title("5 · Shape rule → middle numbers must match", fontsize=8)
+ax.set_xlim(0.0, 5.2); ax.set_ylim(0.0, 2.95); ax.axis("off")
+
+# 6 - linear layer: one column per sample, one row per output
+ax = axes[1, 2]
+matrix_grid(ax, X, 0.0, 0.0, w=0.8, fc="#dbeafe", fs=7.5)
+matrix_grid(ax, W, 3.9, 0.0, w=0.8, fc="#fef3c7", fs=7.5)
+matrix_grid(ax, W @ X, 7.0, 0.0, w=0.8, fc="#dcfce7", fs=7.5)
+ax.text(1.6, 0.3, "X 3×4", ha="center", fontsize=9, weight="bold")
+ax.text(5.1, 0.3, "W 3×3", ha="center", fontsize=9, weight="bold")
+ax.text(8.6, 0.3, "Y = W·X + b 3×4", ha="center", fontsize=9, weight="bold")
+ax.annotate("", xy=(3.85, -0.7), xytext=(3.45, -0.7),
+            arrowprops=dict(arrowstyle="-|>", lw=1.5))
+ax.annotate("", xy=(6.95, -0.7), xytext=(6.55, -0.7),
+            arrowprops=dict(arrowstyle="-|>", lw=1.5))
+ax.text(1.6, -1.75, "one column = one sample", ha="center", fontsize=8)
+ax.text(8.6, -1.75, "one row = one output", ha="center", fontsize=8)
+ax.set_title("6 · Linear layer → Y = W·X + b", fontsize=9.5)
+ax.set_xlim(-0.3, 10.8); ax.set_ylim(-2.3, 0.9); ax.axis("off")
+fig.suptitle("§1 formula sheet at a glance — six rows, six pictures",
+             fontsize=12, weight="bold")
+fig.tight_layout()
+plt.show()
+print(f"formula sheet → 6 panels ✓  a·b={dot:.0f}  ‖a‖={na:.3f}  "
+      f"cos={cos:.2f}  θ={theta:.1f}°  C[0,0]={Cmat[0,0]}  "
+      f"Y{W.shape}@X{X.shape}={(W @ X).shape}")
 
 # %%
 # --- Matrix multiply BY HAND: every cell, expanded -------------------------
@@ -135,6 +260,77 @@ plt.show()
 # **Eigen-decomposition → PCA:** the eigenvectors of the covariance matrix are the
 # principal directions of your data; eigenvalues are how much variance lives along each.
 
+# %% [markdown]
+# **🔢 Worked calculation — eigen-decomposition → PCA, by hand on the simplest case**
+#
+# Take the symmetric `C = [[2,1],[1,2]]` (a 2×2 covariance matrix). No library needed:
+#
+# | step | formula | numbers | result |
+# |---|---|---|---|
+# | 1 · characteristic equation | `det(C − λI) = 0` ⇒ `λ² − trace·λ + det = 0` | `λ² − 4λ + 3 = 0` | — |
+# | 2 · eigenvalues | `λ = (trace ± √(trace² − 4·det)) / 2` | `(4 ± √4)/2` | **λ₁ = 3, λ₂ = 1** |
+# | 3 · eigenvector for λ₁ | `(C − 3I)·v = 0` | `[[−1,1],[1,−1]]·v = 0` | **v₁ = (1,1)/√2** |
+# | 4 · eigenvector for λ₂ | `(C − 1I)·v = 0` | `[[1,1],[1,1]]·v = 0` | **v₂ = (1,−1)/√2** |
+# | 5 · PCA variance share | `λᵢ / Σλ` | `3/4` vs `1/4` | **PC1 = 75%** |
+# | 6 · project x = (2,3) | `x·v₁` | `(2+3)/√2` | **3.536** |
+
+# %%
+# --- The same six steps in code: hand formulas first, eigh() to confirm -----
+C2 = np.array([[2.0, 1.0], [1.0, 2.0]])          # symmetric 2×2 "covariance"
+trace2, det2 = float(np.trace(C2)), float(np.linalg.det(C2))
+disc = math.sqrt(trace2 ** 2 - 4 * det2)         # √(trace² − 4·det)
+lam1, lam2 = (trace2 + disc) / 2, (trace2 - disc) / 2
+print(f"C = {C2.tolist()}   trace = {trace2:.0f}   det = {det2:.0f}")
+print(f"λ² − {trace2:.0f}λ + {det2:.0f} = 0 → λ = ({trace2:.0f} ± √{disc ** 2:.0f})/2 "
+      f"= {lam1:.3f}, {lam2:.3f}")
+# det() is LU-based → 2.9999999999999996, so the eigenvalues need a tolerance
+assert abs(lam1 - 3.0) < 1e-12 and abs(lam2 - 1.0) < 1e-12, (lam1, lam2)
+
+v1 = np.array([1.0, 1.0]) / np.sqrt(2)            # (C − 3I)v = 0
+v2 = np.array([1.0, -1.0]) / np.sqrt(2)           # (C − 1I)v = 0
+for lam, v in ((lam1, v1), (lam2, v2)):
+    assert np.allclose(C2 @ v, lam * v, atol=1e-15), (lam, v)
+assert abs(float(v1 @ v2)) < 1e-15                            # orthogonal
+assert abs(abs(float(np.linalg.det(np.c_[v1, v2]))) - 1) < 1e-12   # orthonormal
+print(f"v1 = {np.round(v1, 3).tolist()} (λ=3) → C·v1 = "
+      f"{np.round(C2 @ v1, 3).tolist()} = 3·v1 ✓")
+print(f"v2 = {np.round(v2, 3).tolist()} (λ=1) → C·v2 = "
+      f"{np.round(C2 @ v2, 3).tolist()} = 1·v2 ✓")
+print(f"v1·v2 = {v1 @ v2:.0f} ✓ orthogonal   |   λ1+λ2 = {lam1 + lam2:.0f} = trace, "
+      f"λ1·λ2 = {lam1 * lam2:.0f} = det")
+
+evals2, evecs2 = np.linalg.eigh(C2)               # ascending λ, columns match
+evals2, evecs2 = evals2[::-1], evecs2[:, ::-1]    # → descending, like the hand calc
+assert np.allclose(evals2, [lam1, lam2])
+assert all(abs(abs(float(evecs2[:, i] @ v)) - 1) < 1e-12
+           for i, v in enumerate((v1, v2)))
+print(f"numpy eigh() agrees: λ = {np.round(evals2, 3).tolist()} ✓ "
+      f"(the sign of each eigenvector is arbitrary)")
+
+# --- PCA = keep the top eigenvalue's direction, drop the rest ---------------
+frac = np.array([lam1, lam2]) / (lam1 + lam2)
+x_pt = np.array([2.0, 3.0])                       # one data point
+proj = float(x_pt @ v1)                           # its PC1 score
+assert np.allclose(frac, [0.75, 0.25]) and abs(proj - 3.5355) < 1e-3
+print(f"PC1 keeps {frac[0]:.0%} of the variance, PC2 keeps the remaining {frac[1]:.0%}")
+print(f"project x = {x_pt.tolist()} onto PC1: x·v1 = (2+3)/√2 = {proj:.3f}")
+print("→ PCA on 10 000 dimensions is the same two steps: covariance → top eigenvectors")
+
+fig, ax = plt.subplots(figsize=(4.4, 3.8))
+ax.annotate("", xy=lam1 * v1, xytext=(0, 0),
+            arrowprops=dict(arrowstyle="-|>", color=C["r"], lw=2.5))
+ax.annotate("", xy=lam2 * v2, xytext=(0, 0),
+            arrowprops=dict(arrowstyle="-|>", color=C["g"], lw=2.5))
+ax.text(0.85, 1.2, "v1 (λ=3) — 75%", color=C["r"], weight="bold", fontsize=9)
+ax.text(0.8, -1.05, "v2 (λ=1) — 25%", color=C["g"], weight="bold", fontsize=9)
+ax.axhline(0, color="k", lw=0.6)
+ax.axvline(0, color="k", lw=0.6)
+ax.set_xlim(-2.3, 2.7); ax.set_ylim(-2.3, 2.3)
+ax.set_aspect("equal"); ax.grid(alpha=0.3)
+ax.set_title("eigenvectors of C = [[2,1],[1,2]] are the PCA axes")
+plt.show()
+
+
 # %%
 # Correlated 2-D data → covariance → eigen → PCA axes
 rng = np.random.default_rng(1)
@@ -166,7 +362,7 @@ assert evals.min() > 0 and explained[0] > 0.85
 
 # %% [markdown]
 # **SVD / low-rank:** store `k·(m+n)` numbers instead of `m·n` — compression,
-# embedding geometry, and LoRA (module 15) are all this picture.
+# embedding geometry, and parameter-efficient fine-tuning are all this picture.
 
 # %%
 A = rng.normal(size=(10, 10)) @ rng.normal(size=(10, 10))   # any 10×10 matrix
@@ -1000,7 +1196,7 @@ print(f"Exercise 5 ✓  GD reached x={xs_[0]:.2e} ≈ 0 from 4.0 in 100 steps")
 # | Entropy, cross-entropy, KL divergence each measure | §6 (1 bit / 9.966 bits / 0.208 vs 0.189) |
 #
 # **Related material in this repo**
-# - Theory: [`docs/curriculum/00-mathematical-foundations.md`](../docs/curriculum/00-mathematical-foundations.md) (31 figures, worked tables)
+# - Theory: [`docs/curriculum/00-mathematical-foundations.md`](../docs/curriculum/00-mathematical-foundations.md) (32 figures, worked tables)
 # - Executable script version: `python3 tools/calc_00_math.py` (18 checks)
 # - From-scratch implementations: `make run M=00`
 # - Rebuild this notebook from its source: `python3 tools/build_math_notebook.py`

@@ -128,6 +128,138 @@ def fig_svd_lowrank():
     return save(fig, "04_svd_lowrank.png")
 
 
+def fig_linalg_card():
+    """The whole §1 formula sheet in one picture: six rows, six panels."""
+    def matrix_grid(ax, M, x0, y0, w=0.5, h=0.5, fc="white", hi=(), hc="#fde68a",
+                    fs=8):
+        """Draw matrix M as a grid of boxes; hi = coordinates to highlight."""
+        for i in range(M.shape[0]):
+            for j in range(M.shape[1]):
+                ax.add_patch(plt.Rectangle((x0 + j * w, y0 - (i + 1) * h), w, h,
+                                           fc=hc if (i, j) in hi else fc,
+                                           ec="gray", lw=0.8))
+                ax.text(x0 + (j + 0.5) * w, y0 - (i + 0.5) * h, f"{M[i, j]:g}",
+                        ha="center", va="center", fontsize=fs)
+    A = np.array([[1, 2, 3], [4, 5, 6]])                 # 2x3
+    B = np.array([[7, 8], [9, 10], [11, 12]])            # 3x2
+    Cmat = A @ B                                         # 2x2
+    a, b = np.array([3.0, 1.0]), np.array([1.0, 3.0])
+    dot = float(a @ b)
+    na, nb = float(np.linalg.norm(a)), float(np.linalg.norm(b))
+    cos = dot / (na * nb)
+    theta = float(np.degrees(np.arccos(cos)))
+    X = np.array([[1.0, 0.0, -1.0, 2.0],
+                  [0.0, 1.0, 0.5, -1.0],
+                  [1.0, 1.0, 1.0, 1.0]])                 # 3 features x 4 samples
+    W = np.array([[0.5, -0.5, 0.25],
+                  [-1.0, 2.0, 0.0],
+                  [0.0, 0.0, 1.0]])                      # 3 outputs x 3 features
+    assert Cmat.tolist() == [[58, 64], [139, 154]], Cmat
+    assert (dot, round(na, 3), round(cos, 2), round(theta, 2)) == (6.0, 3.162, 0.6, 53.13)
+    assert W.shape == (3, 3) and (W @ X).shape == (3, 4)
+    fig, axes = plt.subplots(2, 3, figsize=(12.0, 6.4))
+    # 1 - dot product: multiply matching entries, then add
+    ax = axes[0, 0]
+    for v, c, lab in ((a, C["b"], "a = (3,1)"), (b, C["r"], "b = (1,3)")):
+        ax.annotate("", xy=v, xytext=(0, 0),
+                    arrowprops=dict(arrowstyle="-|>", color=c, lw=2))
+        ax.text(*v * 1.07, lab, color=c, fontsize=9, weight="bold")
+    ax.plot(*np.vstack([a * 0, a * dot / na ** 2]), ls="--", color=C["b"], lw=1)
+    arc = np.linspace(np.arctan2(1, 3), np.arctan2(3, 1), 30)
+    ax.plot(0.85 * np.cos(arc), 0.85 * np.sin(arc), color="k", lw=1)
+    ax.text(0.95, 0.42, f"θ = {theta:.1f}°", fontsize=9)
+    ax.set_title(f"1 · Dot product → a·b = {dot:.0f}", fontsize=9.5)
+    ax.text(-0.35, 4.05, "multiply matching entries, add them up", fontsize=8)
+    ax.set_xlim(-0.5, 4.4); ax.set_ylim(-0.5, 4.4); ax.set_aspect("equal")
+
+    # 2 - norm: distance from the origin to the tip
+    ax = axes[0, 1]
+    ax.annotate("", xy=a, xytext=(0, 0),
+                arrowprops=dict(arrowstyle="-|>", color=C["b"], lw=2.4))
+    ax.plot([0, a[0]], [0, 0], "k:", lw=1)
+    ax.plot([a[0], a[0]], [0, a[1]], "k:", lw=1)
+    ax.text(1.5, -0.3, "3", ha="center", fontsize=9)
+    ax.text(3.15, 0.5, "1", fontsize=9)
+    ax.text(0.1, 1.15, f"‖a‖ = √(3² + 1²) = {na:.3f}", fontsize=9,
+            weight="bold", color=C["b"])
+    ax.set_title(f"2 · Length (norm) → ‖a‖ = {na:.3f}", fontsize=9.5)
+    ax.set_xlim(-0.5, 4.6); ax.set_ylim(-0.7, 3.0); ax.set_aspect("equal")
+
+    # 3 - cosine similarity: 1, 0 and -1 side by side
+    ax = axes[0, 2]
+    for i, (u, v, lab, c) in enumerate((
+            (np.array([2.4, 0.0]), np.array([2.4, 0.0]),
+             "1.00 — same direction", C["g"]),
+            (np.array([2.0, 0.0]), np.array([0.0, 2.0]),
+             "0.00 — perpendicular", C["o"]),
+            (np.array([2.4, 0.0]), np.array([-2.4, 0.0]),
+             "−1.00 — opposite", C["r"]))):
+        y = -i * 2.4
+        for w in (u, v):
+            ax.annotate("", xy=w + (0, y), xytext=(0, y),
+                        arrowprops=dict(arrowstyle="-|>", color=c, lw=2))
+        ax.text(2.8, y, f"cos θ = {lab}", fontsize=8, va="center",
+                weight="bold", color=c)
+    ax.set_title("3 · Cosine similarity → cos θ = a·b / (‖a‖·‖b‖)",
+                 fontsize=8)
+    ax.set_xlim(-3.0, 10.6); ax.set_ylim(-5.6, 2.2); ax.set_aspect("equal")
+
+    # 4 - matrix multiply: row i of A dotted with column j of B
+    ax = axes[1, 0]
+    matrix_grid(ax, A, 0.0, 0.0, hi={(0, 0), (0, 1), (0, 2)})
+    matrix_grid(ax, B, 2.0, 0.0, hi={(0, 0), (1, 0), (2, 0)})
+    matrix_grid(ax, Cmat, 4.0, 0.0, fc="#dcfce7", hi={(0, 0)}, hc="#fca5a5")
+    ax.text(0.75, 0.3, "A 2×3", ha="center", fontsize=9, weight="bold")
+    ax.text(2.75, 0.3, "B 3×2", ha="center", fontsize=9, weight="bold")
+    ax.text(4.75, 0.3, "C = A·B 2×2", ha="center", fontsize=9, weight="bold")
+    ax.text(0.0, 1.3, "C[0,0] = 1·7 + 2·9 + 3·11 = 58", fontsize=9,
+            weight="bold", color=C["r"])
+    ax.set_title("4 · Matrix multiply → C[i,j] = row i · column j", fontsize=8)
+    ax.set_xlim(-0.2, 6.3); ax.set_ylim(-1.8, 1.8); ax.axis("off")
+
+    # 5 - shape rule: inner dims must match, outer dims carry through
+    ax = axes[1, 1]
+    ax.add_patch(plt.Rectangle((0.2, 1.0), 1.5, 0.9, fc="#dbeafe", ec=C["b"], lw=2))
+    ax.text(0.95, 1.45, "A  (m×n)", ha="center", va="center", fontsize=9,
+            weight="bold", color=C["b"])
+    ax.add_patch(plt.Rectangle((2.2, 0.4), 1.3, 1.4, fc="#fef3c7", ec=C["o"], lw=2))
+    ax.text(2.85, 1.1, "B  (n×p)", ha="center", va="center", fontsize=9,
+            weight="bold", color=C["o"])
+    ax.add_patch(plt.Rectangle((3.9, 1.0), 1.0, 0.9, fc="#dcfce7", ec=C["g"], lw=2))
+    ax.text(4.4, 1.45, "C  (m×p)", ha="center", va="center", fontsize=9,
+            weight="bold", color=C["g"])
+    ax.annotate("", xy=(2.17, 2.05), xytext=(1.77, 2.05),
+                arrowprops=dict(arrowstyle="-|>", lw=1.2))
+    ax.annotate("", xy=(3.87, 2.05), xytext=(3.57, 2.05),
+                arrowprops=dict(arrowstyle="-|>", lw=1.2))
+    ax.text(2.85, 2.24, "inner n = n  (3 = 3)", ha="center", fontsize=9,
+            weight="bold", color=C["g"])
+    ax.text(0.2, 0.18, "outer dims carry through →  (2×3)·(3×2) = (2×2)", fontsize=8)
+    ax.text(0.2, 2.68, "(m×n) · (n×p) → (m×p)", fontsize=11, weight="bold")
+    ax.set_title("5 · Shape rule → middle numbers must match", fontsize=8)
+    ax.set_xlim(0.0, 5.2); ax.set_ylim(0.0, 2.95); ax.axis("off")
+
+    # 6 - linear layer: one column per sample, one row per output
+    ax = axes[1, 2]
+    matrix_grid(ax, X, 0.0, 0.0, w=0.8, fc="#dbeafe", fs=7.5)
+    matrix_grid(ax, W, 3.9, 0.0, w=0.8, fc="#fef3c7", fs=7.5)
+    matrix_grid(ax, W @ X, 7.0, 0.0, w=0.8, fc="#dcfce7", fs=7.5)
+    ax.text(1.6, 0.3, "X 3×4", ha="center", fontsize=9, weight="bold")
+    ax.text(5.1, 0.3, "W 3×3", ha="center", fontsize=9, weight="bold")
+    ax.text(8.6, 0.3, "Y = W·X + b 3×4", ha="center", fontsize=9, weight="bold")
+    ax.annotate("", xy=(3.85, -0.7), xytext=(3.45, -0.7),
+                arrowprops=dict(arrowstyle="-|>", lw=1.5))
+    ax.annotate("", xy=(6.95, -0.7), xytext=(6.55, -0.7),
+                arrowprops=dict(arrowstyle="-|>", lw=1.5))
+    ax.text(1.6, -1.75, "one column = one sample", ha="center", fontsize=8)
+    ax.text(8.6, -1.75, "one row = one output", ha="center", fontsize=8)
+    ax.set_title("6 · Linear layer → Y = W·X + b", fontsize=9.5)
+    ax.set_xlim(-0.3, 10.8); ax.set_ylim(-2.3, 0.9); ax.axis("off")
+    fig.suptitle("§1 formula sheet at a glance — six rows, six pictures",
+                 fontsize=12, weight="bold")
+    fig.tight_layout()
+    return save(fig, "32_linalg_cheatsheet.png")
+
 # =========================================================================
 # §2 Calculus & gradients
 # =========================================================================
@@ -872,7 +1004,7 @@ FIGURES = [
     fig_lagrange, fig_search_strategies,
     fig_entropy, fig_cross_entropy, fig_kl_divergence,
     fig_mutual_information,
-    fig_probability_tree, fig_learning_loop,
+    fig_probability_tree, fig_learning_loop, fig_linalg_card,
 ]
 
 

@@ -52,6 +52,29 @@ def sec1():
     print("RESULT   one column per sample — batch of N = one matmul   ✓")
 
 
+    print("\nFORMULA  eigen: det(C − λI) = 0  ⇒  λ² − trace·λ + det = 0")
+    C2 = np.array([[2.0, 1.0], [1.0, 2.0]])
+    tr, dt = float(np.trace(C2)), float(np.linalg.det(C2))
+    disc = math.sqrt(tr ** 2 - 4 * dt)
+    lam1, lam2 = (tr + disc) / 2, (tr - disc) / 2
+    print(f"STEPS    C = [[2,1],[1,2]]: trace = {tr:.0f}, det = {dt:.0f} "
+          f"→ λ² − 4λ + 3 = 0 → λ = (4 ± √4)/2 = {lam1:.0f}, {lam2:.0f}")
+    v1 = np.array([1.0, 1.0]) / np.sqrt(2)        # (C − 3I)v = 0
+    v2 = np.array([1.0, -1.0]) / np.sqrt(2)       # (C − 1I)v = 0
+    # det() is LU-based → 2.9999999999999996, so compare eigenvalues with tolerance
+    assert abs(lam1 - 3.0) < 1e-12 and abs(lam2 - 1.0) < 1e-12, (lam1, lam2)
+    assert np.allclose(C2 @ v1, 3 * v1, atol=1e-12)
+    assert np.allclose(C2 @ v2, 1 * v2, atol=1e-12)
+    assert abs(float(v1 @ v2)) < 1e-15            # eigenvectors are orthogonal
+    share = lam1 / (lam1 + lam2)
+    proj = float(np.array([2.0, 3.0]) @ v1)
+    print(f"STEPS    v1 = (1,1)/√2 (λ=3) → C·v1 = {np.round(C2 @ v1, 3).tolist()}; "
+          f"v2 = (1,−1)/√2 (λ=1); v1·v2 = {v1 @ v2:.0f}")
+    print(f"RESULT   PCA: PC1 keeps {share:.0%} of the variance, x=(2,3) → PC1 score "
+          f"{proj:.3f}   ✓ (figure 03)")
+    assert abs(share - 0.75) < 1e-12 and abs(proj - 3.5355) < 1e-3
+
+
 # ---------------------------------------------------------------- §2 calculus
 def sec2():
     head("§2 CALCULUS & GRADIENTS")
@@ -77,6 +100,24 @@ def sec2():
     print(f"         L=w²: w=3, grad=2w=6, w←3 − 0.1·6 = {w_new} "
           f"(loss 9 → {w_new**2:.2f})   ✓ 2.4")
     assert w_new == 2.4
+
+    print("\nFORMULA  one training step: g=w·x → p=e^g → L=½(p−y)²")
+    nx, ny, nw0, neta = 1.0, 1.0, 2.0, 0.01
+    ng0 = nw0 * nx
+    np0 = math.exp(ng0)
+    nL0 = 0.5 * (np0 - ny) ** 2
+    ndLdp, ndpdg, ndgdw = np0 - ny, math.exp(ng0), nx
+    ndLdw = ndLdp * ndpdg * ndgdw
+    nw1 = nw0 - neta * ndLdw
+    nnp1 = math.exp(nw1 * nx)
+    nnL1 = 0.5 * (nnp1 - ny) ** 2
+    print(f"STEPS    fwd: g={ng0:.1f} p=e²={np0:.3f} L={nL0:.3f}")
+    print(f"         bwd: ∂L/∂p={ndLdp:.3f} ∂p/∂g={ndpdg:.3f} ∂g/∂w={ndgdw:.1f} "
+          f"→ ∂L/∂w={ndLdw:.3f}")
+    print(f"RESULT   w {nw0:.1f}→{nw1:.4f}, L {nL0:.3f}→{nnL1:.3f} (−68.1%)   ✓")
+    assert abs(np0 - 7.389) < 0.001 and abs(nL0 - 20.410) < 0.001
+    assert abs(ndLdw - 47.209) < 0.001 and abs(nw1 - 1.5279) < 0.001
+    assert abs(nnL1 - 6.511) < 0.001
 
 
 # ---------------------------------------------------------------- §3 probability

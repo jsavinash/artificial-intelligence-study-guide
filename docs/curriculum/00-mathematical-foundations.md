@@ -4,11 +4,11 @@
 
 You do **not** need a math degree. You need working intuition for six areas. This file is the pragmatic syllabus: what to learn, why it matters in AI, and the minimum you must be able to *do*.
 
-### 📊 Visual guide — 31 figures, one per topic
+### 📊 Visual guide — 32 figures, one per topic
 
 | § | Topics | Figures |
 |---|---|---|
-| 1 · Linear algebra | vectors/dot/cosine · matmul shapes · eigen→PCA · SVD/low-rank | [01](../figures/00-math/01_vectors_dot.png) · [02](../figures/00-math/02_matmul_shapes.png) · [03](../figures/00-math/03_eigen_pca.png) · [04](../figures/00-math/04_svd_lowrank.png) |
+| 1 · Linear algebra | vectors/dot/cosine · matmul shapes · eigen→PCA · SVD/low-rank · formula-sheet card | [01](../figures/00-math/01_vectors_dot.png) · [02](../figures/00-math/02_matmul_shapes.png) · [03](../figures/00-math/03_eigen_pca.png) · [04](../figures/00-math/04_svd_lowrank.png) · [32](../figures/00-math/32_linalg_cheatsheet.png) |
 | 2 · Calculus | derivative · gradient field · chain rule/backprop · partials · Hessian/saddle | [05](../figures/00-math/05_derivative_tangent.png) · [06](../figures/00-math/06_gradient_field.png) · [07](../figures/00-math/07_chain_graph.png) · [08](../figures/00-math/08_partials.png) · [09](../figures/00-math/09_hessian_curvature.png) · [31](../figures/00-math/31_learning_loop.png) |
 | 3 · Probability | Bayes medical test · 5 distributions · E/Var · joint/marginal · likelihood/MLE · Monte Carlo | [10](../figures/00-math/10_bayes_test.png) · [11](../figures/00-math/11_distributions.png) · [12](../figures/00-math/12_expectation_variance.png) · [13](../figures/00-math/13_joint_marginal.png) · [14](../figures/00-math/14_likelihood.png) · [15](../figures/00-math/15_monte_carlo.png) · [30](../figures/00-math/30_probability_tree.png) |
 | 4 · Statistics | estimator bias–variance · CI/p-value · correlation≠causation · MLE vs MAP · covariance | [16](../figures/00-math/16_estimator_biasvar.png) · [17](../figures/00-math/17_ci_pvalue.png) · [18](../figures/00-math/18_correlation_causation.png) · [19](../figures/00-math/19_mle_map.png) · [20](../figures/00-math/20_covariance_correlation.png) |
@@ -24,35 +24,28 @@ Regenerate all figures: `python3 tools/make_math_figures.py` · Verify every wor
 | Concept | AI relevance |
 |---|---|
 | Vectors, norm (‖x‖) | Data points; embedding similarity (cosine = dot ÷ norms) |
-| Matrix multiply | Layers: `Y = WX + b` — one line runs a whole mini-batch |
+| Matrix multiply | Layers: `Y = WX + b` — one line runs a whole mini-batch · deep dive: [matrix-multiply](../concepts/matrix-multiply.md) |
 | Dot product | Similarity, attention scores |
 | Eigenvalues/vectors | PCA, covariance structure, Google's original PageRank |
 | Positive-definite matrices | Loss surfaces, covariance, Gaussians |
-| SVD / low-rank | Compression, embeddings geometry, LoRA in 15 |
+| SVD / low-rank | Compression, embeddings geometry, LoRA in LLMs |
 
 **You should be able to:** multiply matrices by hand once, know shapes must align, understand broadcasting, explain what a linear layer computes.
 
-**🧮 Formula sheet**
+**🧮 Formula sheet — Linear Algebra Cheatsheet (Plain English)**
 
 | What | Formula | Plain English |
 |---|---|---|
-| Dot product | `a·b = a₁b₁ + a₂b₂ + …` | multiply matching entries, add them up |
-| Length (norm) | `‖a‖ = √(a₁² + a₂² + …)` | distance from the origin |
-| Cosine similarity | `cos θ = a·b / (‖a‖·‖b‖)` | 1 = same direction, 0 = unrelated |
-| Matrix multiply | `C[i,j] = Σₖ A[i,k]·B[k,j]` | row *i* of A dotted with column *j* of B |
-| Shape rule | `(m×n) · (n×p) → (m×p)` | the middle numbers must be equal |
-| Linear layer | `Y = W·X + b` | `W` = learned weights, `X` = one column per sample |
+| Dot product | `a·b = a₁b₁ + a₂b₂ + …` | Multiply matching entries of two vectors, then add them all up to get a single number. |
+| Length (norm) | `‖a‖ = √(a₁² + a₂² + …)` | The straight-line distance from the origin to the vector's tip. |
+| Cosine similarity | `cos θ = a·b / (‖a‖·‖b‖)` | Measures how aligned two vectors are. **1** = they point in the same direction; **0** = unrelated / perpendicular. |
+| Matrix multiply | `C[i,j] = Σₖ A[i,k]·B[k,j]` | To find the item at row *i*, column *j* in the new matrix, take row *i* of matrix A and dot product it with column *j* of matrix B. |
+| Shape rule | `(m×n) · (n×p) → (m×p)` | To multiply two matrices, the inner dimensions (**n**) must match. The result keeps the outer dimensions (**m × p**). |
+| Linear layer | `Y = W·X + b` | The foundation of neural networks. **W** = learned weights, **b** = the bias, **X** = data with one column per sample. |
 
-**📋 Linear Algebra Cheatsheet (Plain English)** — quick-reference card:
+**🖼️ Figure — all six rows of this sheet in one picture:**
 
-| Concept | Mathematical Formula | Plain English Meaning |
-|---|---|---|
-| Dot Product | \(a \cdot b = a_1b_1 + a_2b_2 + \dots\) | Multiply matching entries of two vectors, then add them all up to get a single number. |
-| Length (Norm) | \(\Vert a\Vert = \sqrt{a_1^2 + a_2^2 + \dots}\) | The straight-line distance from the origin to the vector's tip. |
-| Cosine Similarity | \(\cos \theta = \frac{a \cdot b}{\Vert a\Vert \cdot \Vert b\Vert}\) | Measures how aligned two vectors are. **1** = they point in the same direction; **0** = unrelated / perpendicular. |
-| Matrix Multiplication | \(C[i,j] = \sum_k A[i,k] \cdot B[k,j]\) | To find the item at row *i*, column *j* in the new matrix, take row *i* of matrix A and dot product it with column *j* of matrix B. |
-| Shape Rule | \((m \times n) \cdot (n \times p) \to (m \times p)\) | To multiply two matrices, the inner dimensions (**n**) must match. The result keeps the outer dimensions (**m × p**). |
-| Linear Layer | \(Y = W \cdot X + b\) | The foundation of neural networks. **W** = learned weights, **b** = the bias, **X** = data with one column per sample. |
+![Formula sheet at a glance: dot product, norm, cosine similarity, matrix multiply, shape rule, linear layer](../figures/00-math/32_linalg_cheatsheet.png)
 
 **🔢 Worked calculation — `[[1,2,3],[4,5,6]] · [[7,8],[9,10],[11,12]]`**
 
@@ -63,7 +56,7 @@ Regenerate all figures: `python3 tools/make_math_figures.py` · Verify every wor
 | C[1,0] | `4·7 + 5·9 + 6·11` | 28 + 45 + 66 | **139** |
 | C[1,1] | `4·8 + 5·10 + 6·12` | 32 + 50 + 72 | **154** |
 
-→ `[[58,64],[139,154]]` — each cell is just four multiplications and three additions.
+→ `[[58,64],[139,154]]` — each cell is a dot product: three multiplications and two additions.
 
 **🔢 Worked calculation — cosine of `a=(3,1)`, `b=(1,3)`**
 
@@ -91,6 +84,18 @@ Regenerate all figures: `python3 tools/make_math_figures.py` · Verify every wor
 - **Multiply by hand:** `[[1,2,3],[4,5,6]] · [[7,8],[9,10],[11,12]] = [[58,64],[139,154]]` — row·column dot products.
 - **Cosine similarity:** `a=(3,1), b=(1,3)` → `a·b = 6`, `‖a‖‖b‖ = 10` → `cos θ = 0.6` → θ = 53.1°. Embeddings use this instead of raw distance.
 - **Linear layer:** `Y = WX + b` with `W:(out×in)`, `X:(in×batch)` — each column of `Y` is one sample's scores.
+- **Eigen → PCA:** `C = [[2,1],[1,2]]` → `trace 4`, `det 3` → `λ = 3, 1`; `v₁ = (1,1)/√2` holds **75%** of the variance (figure 03).
+
+**🔢 Worked calculation — eigen-decomposition → PCA of `C = [[2,1],[1,2]]`**
+
+| step | formula | numbers | result |
+|---|---|---|---|
+| 1 · characteristic equation | `det(C − λI) = 0` ⇒ `λ² − trace·λ + det = 0` | `λ² − 4λ + 3 = 0` | — |
+| 2 · eigenvalues | `λ = (trace ± √(trace² − 4·det)) / 2` | `(4 ± √4)/2` | **λ₁ = 3, λ₂ = 1** |
+| 3 · eigenvector for λ₁ | `(C − 3I)·v = 0` | `[[−1,1],[1,−1]]·v = 0` | **v₁ = (1,1)/√2 = 0.707, 0.707** |
+| 4 · eigenvector for λ₂ | `(C − 1I)·v = 0` | `[[1,1],[1,1]]·v = 0` | **v₂ = (1,−1)/√2 = 0.707, −0.707** |
+| 5 · PCA variance share | `λᵢ / Σλ` | `3/4` vs `1/4` | **PC1 = 75%, PC2 = 25%** |
+| 6 · project `x = (2,3)` | `x·v₁` | `(2+3)/√2` | **3.536** |
 
 ## 2. Calculus & Gradients — how models learn
 
@@ -127,6 +132,44 @@ Figure 7 draws exactly this graph; `calc_00_math.py` double-checks it against fi
 **🔢 Worked — a derivative and one learning step**
 - `f(x)=x³−2x` → `f'(x)=3x²−2` → `f'(2) = 3·4 − 2 = **10**` (slope at x=2).
 - `L(w)=w²`, `w=3`, `η=0.1` → `∇L = 2w = 6` → `w ← 3 − 0.1·6 = **2.4**`, loss `9 → 5.76` (**−36% in one step**).
+
+**🔢 Worked — one full training step: single neuron with `exp` activation (end-to-end)**
+
+Ties the rules above together: forward pass → backward pass (power + exponential + partial + chain) → gradient-descent update → verified loss drop.
+
+Setup: `x = 1.0` (input), `y = 1.0` (target), `w = 2.0` (current weight), `η = 0.01`.
+
+Formulae: `g = w·x` (linear) → `p = e^g` (prediction) → `L = ½(p − y)²` (squared-error loss).
+
+Forward pass:
+
+| quantity | calculation | value |
+|---|---|---|
+| `g` | `2.0 · 1.0` | `2.0` |
+| `p` | `e^2.0` | `≈ 7.389` |
+| `L` | `½(7.389 − 1.0)²` | `≈ 20.410` |
+
+Backward pass (`∂L/∂w` via chain rule):
+
+| step | rule | application | value |
+|---|---|---|---|
+| A · loss slope | power rule `d/dx xⁿ = n·xⁿ⁻¹` | `∂L/∂p = (p − y)` | `7.389 − 1.0 = **6.389**` |
+| B · activation slope | exponential `d/dx eˣ = eˣ` | `∂p/∂g = e^g` | `e^2.0 = **7.389**` |
+| C · isolate `w` | partial (freeze other inputs) | `∂g/∂w = x` | `**1.0**` |
+| D · assemble | chain `∂L/∂w = (∂L/∂p)·(∂p/∂g)·(∂g/∂w)` | `6.389 · 7.389 · 1.0` | `**≈ 47.209**` |
+| E · gradient vector | `∇L = (∂L/∂w)` | — | `**[47.209]**` |
+
+Learning step (downhill, opposite the gradient):
+
+`w ← w − η·∇L = 2.0 − 0.01·47.209 = 2.0 − 0.4721 = **1.5279**`
+
+Verification — rerun forward with `w = 1.5279`:
+
+- new `g = 1.5279 · 1.0 = 1.5279`
+- new `p = e^1.5279 ≈ 4.609`
+- new `L = ½(4.609 − 1.0)² ≈ **6.511**`
+
+Loss `20.410 → 6.511` (**−68.1% in one step**) — one gradient step visibly descends the loss surface. Figure 31 below is exactly this loop: forward, loss, backward, update, repeat.
 
 ![The five-step training loop: forward, loss, backward, update, repeat](../figures/00-math/31_learning_loop.png)
 
@@ -209,7 +252,7 @@ Figure 7 draws exactly this graph; `calc_00_math.py` double-checks it against fi
 ![Monte Carlo estimation of pi by sampling points in a square](../figures/00-math/15_monte_carlo.png)
 
 **💡 Simple examples:**
-- **Medical test (exercise #3):** prevalence 1%, sensitivity 90%, false-positive 5% → of 1000 people: 9 sick+positive vs 50 healthy+positive → `P(sick|+) = 9/59 = 15.4%`, not 90%.
+- **Medical test (exercise #3):** prevalence 1%, sensitivity 90%, false-positive 5% → of 1000 people: 9 sick+positive vs 49.5 healthy+positive → `P(sick|+) = 9/58.5 = 15.4%`, not 90%.
 - **Bayes on a die:** roll once, posterior given “even” → `P(2|even)=1/3` each, `P(odd|even)=0`.
 - **Expectation:** fair die `E[X] = 3.5`, `Var(X) = 35/12 ≈ 2.92`; `E[2X+1] = 2E[X]+1 = 8` (linearity).
 - **MLE:** fit a Gaussian to data → the maximizing μ̂ is just the sample mean (figure 14's argmax).
@@ -227,7 +270,7 @@ Figure 7 draws exactly this graph; `calc_00_math.py` double-checks it against fi
 | Quantity | Formula | Meaning |
 |---|---|---|
 | Mean | `x̄ = Σx / n` | center of the sample |
-| Variance | `s² = Σ(x−x̄)² / n` | average squared distance from center |
+| Variance (population) | `s² = Σ(x−x̄)² / n` | average squared distance from center (population form; used in the worked example below) |
 | Std deviation | `s = √s²` | spread in the original units |
 | Standard error | `SE = s / √n` | how wobbly the *mean* is |
 | 95% confidence interval | `x̄ ± 1.96·SE` | range that should capture the truth |
@@ -235,7 +278,7 @@ Figure 7 draws exactly this graph; `calc_00_math.py` double-checks it against fi
 | Maximum likelihood | `θ̂ = argmax P(D\|θ)` | best fit using **data only** |
 | Maximum a posteriori | `θ̂ = argmax P(D\|θ)·P(θ)` | best fit = **data × prior** |
 
-**🔢 Worked — dataset {2, 4, 4, 4, 5, 5, 7, 9}**
+**🔢 Worked — dataset {2, 4, 4, 4, 5, 5, 7, 9}** (population variance, ÷ n)
 
 | step | calculation | result |
 |---|---|---|
@@ -375,11 +418,11 @@ Loss falls `5.76 → 0.97` in five tiny steps — training a neural net is exact
 
 **💡 Simple examples:**
 - **Entropy:** fair coin `H = 1 bit`; always-heads coin `H = 0` — zero surprise carries zero information (figure 26).
-- **Cross-entropy (exercise #4):** confident-right `q=.99 → −log₂ = 0.015 bits`; confident-wrong `q=.001 → 9.97 bits` — the loss explodes ~660× (figure 27). Why `CrossEntropyLoss = softmax → log → NLL`.
-- **KL asymmetry:** `P=(.45,.35,.15,.05)`, `Q=(.20,.30,.30,.20)` → `KL(P‖Q) ≠ KL(Q‖P)` though both ≥ 0 — direction matters, which is why distillation and RLHF pick one deliberately (figure 28).
+- **Cross-entropy (exercise #4):** confident-right `q=.99 → −log₂ = 0.015 bits`; confident-wrong `q=.001 → 9.97 bits` — the loss explodes ~687× (figure 27). Why `CrossEntropyLoss = softmax → log → NLL`.
+- **KL asymmetry:** `P=(.5,.5)`, `Q=(.25,.75)` → `KL(P‖Q) = 0.208 ≠ KL(Q‖P) = 0.189` though both ≥ 0 — direction matters, which is why distillation and RLHF pick one deliberately (worked calculation + figure 28).
 - **Mutual information:** `I(X;Y) = 0` iff independent — two perfectly separable class clusters have high `I`; white-noise heatmap ≈ 0 bits (figure 29).
 
-Visualize every topic of module 00 with 31 generated figures, and machine-check
+Visualize every topic of module 00 with 32 generated figures, and machine-check
 every worked number in the tables above:
 
 ```bash
