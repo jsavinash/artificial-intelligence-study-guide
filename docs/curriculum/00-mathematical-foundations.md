@@ -23,12 +23,16 @@ Regenerate all figures: `python3 tools/make_math_figures.py` · Verify every wor
 
 | Concept | AI relevance |
 |---|---|
-| Vectors, norm (‖x‖) | Data points; embedding similarity (cosine = dot ÷ norms) |
-| Matrix multiply | Layers: `Y = WX + b` — one line runs a whole mini-batch · deep dive: [matrix-multiply](../concepts/matrix-multiply.md) |
-| Dot product | Similarity, attention scores |
-| Eigenvalues/vectors | PCA, covariance structure, Google's original PageRank |
-| Positive-definite matrices | Loss surfaces, covariance, Gaussians |
-| SVD / low-rank | Compression, embeddings geometry, LoRA in LLMs |
+| [Vector norms](../concepts/linear-algebra/vector-norm.md) (`‖x‖`) | Measure vector length; support regularization, loss functions, and gradient clipping |
+| [Cosine similarity](../concepts/linear-algebra/cosine-similarity.md) | Compare embedding direction for retrieval, RAG, and recommendations independently of magnitude |
+| [Dot product](../concepts/linear-algebra/dot-product.md) | Combine aligned features in neurons, embeddings, and attention scores |
+| [Matrix multiplication](../concepts/linear-algebra/matrix-multiply.md) | Powers forward passes, loss calculations, and backpropagation on CPUs, GPUs, and TPUs |
+| [Shape rule](../concepts/linear-algebra/shape-rule.md) | Enforces compatible dimensions and predictable output shapes in matrix and tensor operations |
+| [Linear layer](../concepts/linear-algebra/linear-layer.md) (`Y = WX + b`) | Learn affine transformations that mix input features into output features |
+| [Eigenvalues and eigenvectors](../concepts/linear-algebra/eigen-values-vectors.md) | Reveal invariant directions for PCA, spectral methods, and training-stability analysis |
+| [Principal Component Analysis (PCA)](../concepts/linear-algebra/PCA.md) | Reduce dimensionality while preserving directions of maximum variance |
+| [Positive-definite matrices](../concepts/linear-algebra/positive-definite-matrices.md) | Characterize stable curvature, valid covariance, and convex optimization geometry |
+| [Singular Value Decomposition (SVD)](../concepts/linear-algebra/SVD.md) | Factor matrices for low-rank compression, pseudo-inverses, and latent-factor models |
 
 **You should be able to:** multiply matrices by hand once, know shapes must align, understand broadcasting, explain what a linear layer computes.
 
