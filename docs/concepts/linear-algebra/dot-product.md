@@ -42,6 +42,8 @@ $$\mathbf{u} \cdot \mathbf{v} = (3)(1) + (1)(3) = 3 + 3 = 6$$
 
 $$\mathbf{u} \cdot \mathbf{v} = \|\mathbf{u}\| \, \|\mathbf{v}\| \, \cos(\theta)$$
 
+Read this as: *multiply the two lengths, then scale by how well the vectors point in the same direction.* The angle $\theta$ is the only term that can make the result negative.
+
 The projection of $\mathbf{v}$ onto the unit direction of $\mathbf{u}$ is:
 
 $$\operatorname{proj}_{\mathbf{u}}(\mathbf{v}) = \frac{\mathbf{u} \cdot \mathbf{v}}{\|\mathbf{u}\|^2} \, \mathbf{u}$$
@@ -49,6 +51,21 @@ $$\operatorname{proj}_{\mathbf{u}}(\mathbf{v}) = \frac{\mathbf{u} \cdot \mathbf{
 The projected length of $\mathbf{v}$ along $\mathbf{u}$ is:
 
 $$\|\mathbf{u}\| \, \cos(\theta) = \frac{\mathbf{u} \cdot \mathbf{v}}{\|\mathbf{u}\|}$$
+
+#### Worked example — the same vectors as above
+
+Using $\mathbf{u} = (3, 1)$ and $\mathbf{v} = (1, 3)$ again, this time via lengths and angle:
+
+| step | formula | numbers | result |
+|---|---|---|---|
+| 1 · lengths | `√(a₁² + a₂²)` | `√10` each | **3.1623** |
+| 2 · product of lengths | `‖u‖·‖v‖` | `3.1623 × 3.1623` | **10** |
+| 3 · cosine | `u·v / (‖u‖‖v‖)` | `6 / 10` | **0.6** |
+| 4 · angle | `arccos(0.6)` | — | **53.13°** |
+| 5 · projected length | `‖u‖·cos θ` | `3.1623 × 0.6` | **1.8974** |
+| 6 · projection vector | `(6/10)·(3,1)` | `0.6 × (3,1)` | **(1.8, 0.6)** |
+
+Both routes agree: the algebraic sum gives `6`, and the geometric form gives `10 × 0.6 = 6`. The projection `(1.8, 0.6)` is the part of $\mathbf{v}$ that actually points along $\mathbf{u}$; the remaining part is orthogonal and contributes nothing to the dot product.
 
 ### Variable Definitions
 * **$\mathbf{u}$, $\mathbf{v}$**: The two vectors being multiplied.
