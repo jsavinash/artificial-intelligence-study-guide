@@ -46,7 +46,7 @@ Read this as: *multiply the two lengths, then scale by how well the vectors poin
 
 The projection of $\mathbf{v}$ onto the unit direction of $\mathbf{u}$ is:
 
-$$\operatorname{proj}_{\mathbf{u}}(\mathbf{v}) = \frac{\mathbf{u} \cdot \mathbf{v}}{\|\mathbf{u}\|^2} \, \mathbf{u}$$
+$$\mathrm{proj}_{\mathbf{u}}(\mathbf{v}) = \frac{\mathbf{u} \cdot \mathbf{v}}{\|\mathbf{u}\|^2} \, \mathbf{u}$$
 
 The projected length of $\mathbf{v}$ along $\mathbf{u}$ is:
 
