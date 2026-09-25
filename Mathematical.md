@@ -1,4 +1,4 @@
-You are an expert AI scientist and mathematics professor. Help me deeply understand the mathematical concept of Shape rule specifically for its application in Artificial Intelligence, Machine Learning, and Deep Learning. 
+You are an expert AI scientist and mathematics professor. Help me deeply understand the mathematical concept of Positive-definite matrices specifically for its application in Artificial Intelligence, Machine Learning, and Deep Learning. 
 
 Structure your response into the following 5 distinct sections:
 
