@@ -72,26 +72,50 @@ The numerator ($\mathbf{u} \cdot \mathbf{v}$) acts as the engine, capturing how 
 
 ---
 
-### 4. TEXT-BASED INTERACTIVE PLOT DIAGRAM
+### 4. MERMAID PLOT DIAGRAM
 
-Below is a visual representation of how cosine similarity behaves across different vector arrangements inside a normalized space.
+Below is a visual representation of how cosine similarity behaves across different vector arrangements inside a normalized space. Mermaid has no true coordinate-plane renderer, so the unit circle, the reference vector, and the resulting score at each key angle are modeled as a construction flowchart.
 
-```text
-       y-axis
-         ^
-         |      . Vector B (Normalized to 1)
-         |     /
-         |    /  θ = 30° -> Cosine ~ 0.866 (Highly Similar)
-         |   /
-         |  /
-         | /
-         +--------------------> Vector A (Normalized to 1)
-       (0,0)
-         |
-         |
-         |      . Vector C (180° opposite) -> Cosine = -1.0
-         v
+```mermaid
+flowchart TB
+    ORIGIN["Origin (0,0)<br/>shared tail of every vector"]
+
+    subgraph CIRCLE["Unit circle: every vector normalized to length 1"]
+        direction LR
+        A["Vector A<br/>(1, 0)<br/>angle = 0°"]
+        B["Vector B<br/>(0.866, 0.5)<br/>angle = 30°"]
+        D["Vector D<br/>(0, 1)<br/>angle = 90°"]
+        C["Vector C<br/>(-1, 0)<br/>angle = 180°"]
+    end
+
+    ORIGIN --> A
+    ORIGIN --> B
+    ORIGIN --> D
+    ORIGIN --> C
+
+    A --> SA["S_C = 1.0<br/>identical direction"]
+    B --> SB["S_C ≈ 0.866<br/>highly similar"]
+    D --> SD["S_C = 0.0<br/>orthogonal, unrelated"]
+    C --> SC["S_C = -1.0<br/>perfect opposition"]
+
+    A -.->|"angle grows from A"| B
+    B -.-> D
+    D -.-> C
 ```
+
+**Reading the diagram**
+
+| Element | Meaning |
+|---|---|
+| `ORIGIN` → `A`, `B`, `D`, `C` | All four vectors share the same tail at the origin; only their direction differs |
+| `CIRCLE` | Because every vector is normalized to length 1, the tips of these vectors all sit on the unit circle |
+| `A` | The reference vector along the x-axis at 0°. Compared with itself, the angle is 0° |
+| `B` | Rotated 30° from `A`; the score has already fallen from 1.0 to about 0.866 |
+| `D` | Rotated 90° from `A` (perpendicular); the score is exactly 0.0 |
+| `C` | Rotated 180° from `A` (directly opposite); the score bottoms out at -1.0 |
+| Dashed edges | The angle growing from `A` toward `C`, sweeping through every intermediate value |
+
+Note the monotonic descent: as the angle widens from 0° to 180°, the score falls smoothly from **1.0** through **0.0** to **-1.0**. Normalizing to the unit circle removes magnitude, so *only* the angle decides the score — this is what makes cosine similarity scale-invariant.
 
 #### What to Visualize in Python (Matplotlib)
 If you were to create a dynamic visual tool in a Jupyter notebook:
@@ -115,7 +139,7 @@ Let's assume our embedding model outputs vectors in a 3-dimensional space repres
 * **Query Vector ($\mathbf{q}$):** `[1.0, 2.0, 0.0]` (The user's search intent)
 * **Document Vector ($\mathbf{d}$):** `[3.0, 6.0, 0.0]` (A stored documentation paragraph)
 
-*Note: Notice that Document $\mathbf{d}$ is exactly 3 times longer than Query $\mathbf{q}$ because it repeats similar terms. We will watch the math normalize this scaling discrepancy.*
+**Note:** Notice that Document $\mathbf{d}$ is exactly 3 times longer than Query $\mathbf{q}$ because it repeats similar terms. We will watch the math normalize this scaling discrepancy.
 
 #### Step-by-Step Arithmetic
 
