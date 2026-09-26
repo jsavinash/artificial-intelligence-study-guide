@@ -35,7 +35,7 @@ $$S_C(\mathbf{u}, \mathbf{v}) = \cos(\theta) = \frac{\mathbf{u} \cdot \mathbf{v}
 * n: The total number of dimensions (features) in the vector space.
 
 #### Logical Intuition
-The formula is a direct rearrangement of the geometric dot product formula ($\mathbf{w} \cdot \mathbf{x} = \Vert\mathbf{w}\Vert \Vert\mathbf{x}\Vert \cos(\theta)$).
+The formula is a direct rearrangement of the geometric dot product formula ($\mathbf{u} \cdot \mathbf{v} = \Vert\mathbf{u}\Vert \Vert\mathbf{v}\Vert \cos(\theta)$): dividing both sides by $\Vert\mathbf{u}\Vert \Vert\mathbf{v}\Vert$ leaves $\cos(\theta)$, which is exactly $S_C(\mathbf{u}, \mathbf{v})$.
 
 ```mermaid
 graph TD
