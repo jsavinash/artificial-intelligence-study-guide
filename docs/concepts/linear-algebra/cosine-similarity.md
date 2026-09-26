@@ -47,9 +47,9 @@ graph TD
     B[Vector v] --> C
     C -->|Shared Axis Intensity| G(Cosine Similarity Score)
 
-    A --> D(L2 Norm ||u||)
-    B --> E(L2 Norm ||v||)
-    D --> F(Denominator: ||u|| * ||v||)
+    A --> D("L2 Norm ‖u‖")
+    B --> E("L2 Norm ‖v‖")
+    D --> F("Denominator: ‖u‖ * ‖v‖")
     E --> F
     F -->|Normalization Firewall| G
 ```
