@@ -80,18 +80,19 @@ eq 0$. If $x = 0$, $x^T A x = 0$ instantly.
 
 When a matrix is positive-definite, visualizing $z = x^T A x$ creates a **3D paraboloid** (a perfect bowl). Below is a conceptual contour map slice looking directly down into the valley:
 
-```text
-       Y-Axis (Feature 2)
-             ^
-             |       . - ~ ~ ~ - .
-             |     /   . - ~ ~ - .   \  <-- Outer Contour (High Energy/Loss)
-             |    /  /   . - ~ .   \               |   |  |   /   x   \   |  |
-             |   |  |  |   (0,0) |  |  | <-- Global Minimum (Bottom of Bowl)
-             |   |  |   \       /   |  |
-             |    \  \   ` - _ - '  /  /
-             |     \   ` - _ _ _ - '  / <-- Inner Contour (Low Energy/Loss)
-             |       ` - _ _ _ _ _ - '
-             +----------------------------> X-Axis (Feature 1)
+```mermaid
+flowchart TB
+    Z["z = x^T A x<br/>quadratic form surface"]
+
+    Z --> ELL["Concentric ellipses<br/>centered exactly at the origin (0,0)"]
+    Z --> POS["Surface sits entirely above z = 0<br/>touching it only at (0,0,0)"]
+    Z --> EIG["Principal axes align with eigenvectors<br/>axis length proportional to 1/sqrt(lambda)"]
+
+    ELL --> OUT["Outer contour<br/>high energy / high loss"]
+    ELL --> IN["Inner contour<br/>low energy / low loss"]
+    ELL --> MIN["Global minimum<br/>bottom of the bowl at (0,0)"]
+
+    EIG --> ILL["Ill-conditioned: lambda_max / lambda_min large<br/>steep canyon - gradients bounce"]
 ```
 
 ### What to Visualize in a Python Environment

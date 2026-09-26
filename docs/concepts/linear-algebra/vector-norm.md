@@ -82,20 +82,36 @@ The **$L_2$ norm** squares each component before summing them, which is a direct
 
 Below is a visualization of **Unit Balls**—the geometric shapes formed by mapping out every possible vector that has a length of exactly $1.0$ under different norms.
 
-```text
-       y-axis
-         ^
-         |  (0,1)
-         +      .  [L2 Unit Ball: A perfect circle]
-       / | \       [L1 Unit Ball: A diamond grid]
-     /   |      /     |       /      |      (1,0)----+-------+-----> x-axis
- -1      |       1
-  \      |      /
-   \     |     /
-     \   |   /
-       \ | /
-         +
-       (0,-1)
+```mermaid
+flowchart TB
+    subgraph SB["Same length, different shapes: the unit ball of each norm"]
+        direction LR
+        L2["L2 Unit Ball<br/>x² + y² = 1<br/>smooth, uniform<br/>circle"]
+        L1["L1 Unit Ball<br/>abs(x) + abs(y) = 1<br/>rigid diamond<br/>sharp corners"]
+    end
+
+    BASE["Every point on a unit ball<br/>satisfies ‖x‖ = 1"]
+    AXES["Unit-circle anchors<br/>(1,0) (0,1) (-1,0) (0,-1)<br/>shared by both balls"]
+
+    BASE --> L2
+    BASE --> L1
+    AXES --> L2
+    AXES --> L1
+
+    L2 --> R2["Rotation-invariant:<br/>all directions penalized equally"]
+    L1 --> R1["Axis-aligned sparsity:<br/>corners at (±1,0), (0,±1)<br/>drive weights to exactly zero"]
+```
+
+```mermaid
+flowchart LR
+    subgraph REG["L2 penalty — smooth circle"]
+        R2a["soft, distributed<br/>shrinkage"]
+    end
+    subgraph L1R["L1 penalty — sharp diamond"]
+        R1a["hard, exact<br/>sparsity"]
+    end
+    R2a -.->|"weights rarely hit 0"| SP1["small fractions"]
+    R1a -.->|"corners force w = 0"| SP2["exact zeros"]
 ```
 
 ### What to Visualize in Python (Matplotlib)
