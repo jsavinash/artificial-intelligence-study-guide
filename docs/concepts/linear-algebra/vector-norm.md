@@ -21,6 +21,8 @@ In linear algebra, the **length of a vector is called its norm**. A norm is a fu
 Without vector norms, machine learning models would overfit, explode, or fail to optimize. Vector length is crucial for:
 * **Regularization ($L_1$ and $L_2$):** Prevents neural networks from memorizing noise by penalizing overly large weights, forcing the model to keep its weight vectors short and simple.
 * **Error Measurement (Loss Functions):** Mean Absolute Error (MAE) uses the $L_1$ norm, while Mean Squared Error (MSE) relies on the squared $L_2$ norm to measure how far predictions are from ground truth.
+The choice between $L_1$ and $L_2$ is one of the most consequential decisions in model design. This guide covers the shared theory first, then compares the two directly across **regularization**, **loss functions**, and **gradient clipping** (see [Section 5](#5-l1-vs-l2--choosing-the-right-norm)).
+
 * **Gradient Clipping:** Prevents deep neural networks from crashing due to "exploding gradients" by capping the maximum length of the gradient vector during training.
 
 ---
@@ -44,9 +46,11 @@ graph TD
 
 $$\text{General } L_p \text{ Norm: } \Vert\mathbf{x}\Vert_p = \left( \sum_{i=1}^{n} |x_i|^p \right)^{\frac{1}{p}}$$
 
-$$	ext{Manhattan } L_1 	ext{ Norm: } \Vert\mathbf{x}\Vert_1 = \sum_{i=1}^{n} |x_i|$$
+$$\text{Manhattan } L_1 \text{ Norm: } \Vert\mathbf{x}\Vert_1 = \sum_{i=1}^{n} |x_i|$$
 
-$$	ext{Euclidean } L_2 	ext{ Norm: } \Vert\mathbf{x}\Vert_2 = \sqrt{\sum_{i=1}^{n} x_i^2}$$
+$$\text{Euclidean } L_2 \text{ Norm: } \Vert\mathbf{x}\Vert_2 = \sqrt{\sum_{i=1}^{n} x_i^2}$$
+
+$$\text{Chebyshev } L_\infty \text{ Norm: } \Vert\mathbf{x}\Vert_\infty = \max_{1 \le i \le n} |x_i| = \lim_{p \to \infty} \left( \sum_{i=1}^{n} |x_i|^p \right)^{\frac{1}{p}}$$
 
 ### Variable Definitions
 * $\mathbf{x}$: The vector whose length is being calculated.
@@ -121,7 +125,83 @@ If you were to plot this dynamically using a grid of points:
 
 ---
 
-## 5. AI Example with Step-by-Step Calculation
+## 5. L1 vs L2 — Choosing the Right Norm
+
+The two most-used norms differ in exactly one way: whether components are summed **linearly** ($L_1$) or **squared before summing** ($L_2$). That single difference cascades into every downstream AI behavior — loss design, gradient magnitude, sparsity, and outlier sensitivity.
+
+### Comparison Matrix
+
+| Application | L1 Approach | L2 Approach | Core Mathematical Distinction | Practical Outcome |
+|---|---|---|---|---|
+| **Regularization** | **Lasso (L1)**<br>Adds the absolute sum of weights to the loss. | **Ridge (L2)**<br>Adds the squared sum of weights to the loss. | **L1 gradient is constant ($\pm 1$).** It drives weights entirely to $0$.<br><br>**L2 gradient scales with weight size ($2\lambda w$).** Force decays as the weight shrinks, keeping it alive. | **L1 creates feature selection:** automatically eliminates useless parameters, giving a sparse, interpretable model.<br><br>**L2 retains all features:** smoothly handles multicollinearity, yielding a dense model. |
+| **Error Measurement** | **MAE (L1)**<br>Measures average absolute distance to target. | **MSE (L2)**<br>Measures average squared distance to target. | **L2 squares errors.** A single massive error yields a disproportionately huge penalty compared to L1's linear treatment. | **L1 is robust to outliers:** ideal when anomalies are an accepted reality.<br><br>**L2 is sensitive to outliers:** forces the model to aggressively minimize large errors, sometimes skewing normal predictions. |
+| **Gradient Clipping** | **Clipping by value**<br>Caps each element of the gradient independently. | **Clipping by norm**<br>Caps the overall geometric length ($\Vert\mathbf{g}\Vert_2$) of the vector. | **Value clipping drops individual peaks** without considering other dimensions.<br><br>**Norm clipping scales the entire vector** by a uniform scalar ratio. | **L1 alters vector direction:** can misguide training, causing deep networks (LLMs/RNNs) to output gibberish.<br><br>**L2 preserves direction:** keeps the training direction identical while safely reducing step size. |
+
+### Scenario A — Regularization on House Price Prediction
+
+A high-impact feature weight $w_1 = 10.0$ (square footage) and a useless noise weight $w_2 = 0.1$ (mailbox style), with regularization strength $\lambda = 0.2$.
+
+**L1 (Lasso):** the shrinkage force is constant regardless of weight size.
+$$\text{Shrinkage Force} = \lambda \times \text{sign}(w) = 0.2 \times 1 = 0.2$$
+* New $w_1 = 10.0 - 0.2 = \mathbf{9.8}$
+* New $w_2 = 0.1 - 0.2 = -0.1$, then **soft-thresholded at zero** $\Rightarrow \mathbf{0.0}$
+
+> Note: the raw step overshoots to $-0.1$. Lasso clips at zero, which is precisely why the L1 penalty produces *exact* zeros rather than small values.
+
+*Outcome:* feature selection eliminates "mailbox style" entirely.
+
+**L2 (Ridge):** the force is proportional to the weight itself.
+$$\text{Shrinkage Force} = \lambda \times 2w = 0.2 \times 2w = 0.4w$$
+* New $w_1 = 10.0 - (0.4 \times 10.0) = \mathbf{6.0}$ (shrinks drastically because it is large)
+* New $w_2 = 0.1 - (0.4 \times 0.1) = \mathbf{0.06}$ (still alive; force fades as the value drops)
+
+*Outcome:* both features are retained in a dense model.
+
+### Scenario B — Loss Functions on Delivery-Time ETAs
+
+Three deliveries with errors $[-1, 0, 20]$, where $20$ is a truck-breakdown outlier.
+
+**L1 Loss (MAE):**
+$$\text{MAE} = \frac{|-1| + |0| + |20|}{3} = \frac{21}{3} = \mathbf{7.0}$$
+The outlier accounts for $\approx 95.24\%$ of the total loss.
+
+**L2 Loss (MSE):**
+$$\text{MSE} = \frac{(-1)^2 + (0)^2 + (20)^2}{3} = \frac{401}{3} = \mathbf{133.67}$$
+The outlier accounts for $\approx 99.75\%$ of the total loss.
+
+*Outcome:* MSE forces the model to shift normal predictions significantly just to mitigate the 400-point penalty from a rare exception.
+
+### Scenario C — Gradient Clipping in Chatbot Training
+
+An exploding gradient $\mathbf{g} = [10.0, 1.0]$ points at an angle of $\tan^{-1}(1/10) = \mathbf{5.71^\circ}$. We enforce a clipping threshold of **$5.0$**.
+
+**L1-Style Clipping (by value):** cap any individual element exceeding $5.0$.
+* $\mathbf{g_{\text{clipped}}} = [5.0, 1.0]$
+* New direction angle: $\tan^{-1}(1/5) = \mathbf{11.31^\circ}$
+
+*Outcome:* the direction shifted by $\approx \mathbf{98\%}$, roughly doubling. The network now updates along a direction that over-weights the second component relative to the first.
+
+**L2-Style Clipping (by norm):** scale the whole vector by one uniform factor.
+$$\Vert\mathbf{g}\Vert_2 = \sqrt{10.0^2 + 1.0^2} = \sqrt{101} \approx 10.05$$
+$$\text{Factor} = \frac{\text{Threshold}}{\Vert\mathbf{g}\Vert_2} = \frac{5.0}{10.05} \approx 0.4975$$
+* $\mathbf{g_{\text{clipped}}} = [10.0 \times 0.4975,\ 1.0 \times 0.4975] = \mathbf{[4.98, 0.50]}$
+* New direction angle: $\tan^{-1}(0.4975 / 4.975) = \mathbf{5.71^\circ}$ — identical to the original $5.71^\circ$
+
+*Outcome:* the direction is preserved to within rounding. Training remains completely stable.
+
+### Choosing a Norm — Decision Guide
+
+| If you need… | Use | Because |
+|---|---|---|
+| Interpretable, sparse features | **L1** | Exact zeros perform automatic feature selection |
+| Stable behavior with correlated inputs | **L2** | Smooth shrinkage, no hard cutoff |
+| Resistance to outliers in the labels | **L1 / MAE** | Linear error growth ignores extreme values |
+| Gradient clipping in deep networks | **L2 (by norm)** | Uniform scaling preserves the update direction |
+| Worst-case error bounds | **L∞** | Caps the single largest component |
+
+---
+
+## 6. AI Example with Step-by-Step Calculation
 
 ### Use Case: Weight Regularization Penalty ($L_2$ Norm)
 During the backward training pass of a deep neural network, we calculate the $L_2$ weight regularization penalty (often called **Ridge Regularization** or **Weight Decay**). This penalty is added to the loss function to discourage the network's weights from growing too large.
@@ -136,21 +216,18 @@ We need to calculate the standard Euclidean length ($\Vert\mathbf{w}\Vert_2$) of
 ### Step-by-Step Calculation Workflow
 
 ```mermaid
-gantt
-    title L2 Norm Execution Steps
-    dateFormat X
-    axisFormat %s
-    section Core Math
-    Square Components :active, 0, 2
-    Sum Squared Values :active, 2, 4
-    Compute Square Root :active, 4, 6
+flowchart LR
+    S1["Step 1<br/>Square each component<br/>0.16 · 1.44 · 0.00 · 0.36"] --> S2["Step 2<br/>Sum the squares<br/>0.16 + 1.44 + 0.00 + 0.36"]
+    S2 --> SUM["Total = 1.96"]
+    SUM --> S3["Step 3<br/>Take the square root<br/>sqrt(1.96)"]
+    S3 --> OUT["L2 norm = 1.4"]
 ```
 
 #### Step 1: Isolate the square of each individual component.
-* Component 1: $(0.4)^2 = 0.4 	imes 0.4 = 0.16$
-* Component 2: $(-1.2)^2 = (-1.2) 	imes (-1.2) = 1.44$
-* Component 3: $(0.0)^2 = 0.0 	imes 0.0 = 0.00$
-* Component 4: $(0.6)^2 = 0.6 	imes 0.6 = 0.36$
+* Component 1: $(0.4)^2 = 0.4 \times 0.4 = 0.16$
+* Component 2: $(-1.2)^2 = (-1.2) \times (-1.2) = 1.44$
+* Component 3: $(0.0)^2 = 0.0 \times 0.0 = 0.00$
+* Component 4: $(0.6)^2 = 0.6 \times 0.6 = 0.36$
 
 #### Step 2: Sum all of the squared component outputs together.
 $$\sum_{i=1}^{4} w_i^2 = 0.16 + 1.44 + 0.00 + 0.36$$
