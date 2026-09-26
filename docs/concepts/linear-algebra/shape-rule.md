@@ -39,12 +39,15 @@ graph LR
 ### Foundational Equations
 
 Standard 2D Matrix Multiplication:
+
 $$\mathbf{A}_{(m \times n)} \cdot \mathbf{B}_{(n \times p)} = \mathbf{C}_{(m \times p)}$$
 
 Multi-dimensional backpropagation gradient alignment:
+
 $$\frac{\partial L}{\partial \mathbf{W}} = \mathbf{X}^T \cdot \frac{\partial L}{\partial \mathbf{Y}}$$
 
 Where the dimensional alignment maps explicitly as:
+
 $$(d \times B) \cdot (B \times h) \rightarrow (d \times h)$$
 
 ### Variable & Symbol Definitions
@@ -123,22 +126,31 @@ The output cell at index $(i, j)$ is the dot product of Row $i$ from matrix $\ma
 $$\mathbf{Y} = \begin{pmatrix} \text{Row}_1 \cdot \text{Col}_1 & \text{Row}_1 \cdot \text{Col}_2 \\ \text{Row}_2 \cdot \text{Col}_1 & \text{Row}_2 \cdot \text{Col}_2 \end{pmatrix}$$
 
 **Calculation for Cell $\mathbf{Y}_{11}$ (Row 1 $\cdot$ Column 1):**
+
 $$\mathbf{Y}_{11} = (1 \times 2) + (2 \times -1) + (0 \times 3)$$
+
 $$\mathbf{Y}_{11} = 2 - 2 + 0 = 0$$
 
 **Calculation for Cell $\mathbf{Y}_{12}$ (Row 1 $\cdot$ Column 2):**
+
 $$\mathbf{Y}_{12} = (1 \times 1) + (2 \times 0) + (0 \times 2)$$
+
 $$\mathbf{Y}_{12} = 1 + 0 + 0 = 1$$
 
 **Calculation for Cell $\mathbf{Y}_{21}$ (Row 2 $\cdot$ Column 1):**
+
 $$\mathbf{Y}_{21} = (0 \times 2) + (3 \times -1) + (4 \times 3)$$
+
 $$\mathbf{Y}_{21} = 0 - 3 + 12 = 9$$
 
 **Calculation for Cell $\mathbf{Y}_{22}$ (Row 2 $\cdot$ Column 2):**
+
 $$\mathbf{Y}_{22} = (0 \times 1) + (3 \times 0) + (4 \times 2)$$
+
 $$\mathbf{Y}_{22} = 0 + 0 + 8 = 8$$
 
 ### Final Structural Output
+
 $$\mathbf{Y}_{({2 \times 2})} = \begin{pmatrix} 0 & 1 \\ 9 & 8 \end{pmatrix}$$
 
 The operations matched up perfectly, the inner dimension of 3 collapsed, and we achieved a structurally sound, valid network hidden state matrix.
