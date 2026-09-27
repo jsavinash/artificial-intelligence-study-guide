@@ -59,6 +59,29 @@ Memory Ribbon │  2   │  3   │  1   │  4   │  5   │  7   │  6   │
                  └── W row 0 ──┘└── W row 1 ──┘└─ feat 1: A,B ─┘└─ feat 2: A,B ─┘
 ```
 
+The same layout as a compact block diagram:
+
+```mermaid
+graph LR
+    subgraph Wtile["Weight tile W (cells 0-3)"]
+        direction LR
+        WR0["W row 0: 2, 3"]
+        WR1["W row 1: 1, 4"]
+    end
+
+    subgraph Xbatch["Batch X, column-major (cells 4-7)"]
+        direction LR
+        F1["feat 1: A=5, B=7"]
+        F2["feat 2: A=6, B=8"]
+        F1 -.->|"stride-2 hop<br>to assemble sample A"| F2
+    end
+
+    Wtile -->|"re-walked once<br>per output neuron"| Xbatch
+
+    style Wtile fill:#d4e1f5,stroke:#3b71ca,stroke-width:2px
+    style Xbatch fill:#fff7e6,stroke:#e0a800,stroke-width:2px
+```
+
 **Read trace for sample A** (features live on cells 4 and 6 — a stride-2 hop):
 
 *   $y_0 = 2 \cdot 5 + 3 \cdot 6 = 28$ — read W cells (0, 1), then hop across cell 5 to reach x cells (4, 6)
@@ -76,6 +99,29 @@ Memory Address:   0     1     2     3     4     5     6     7
 Memory Ribbon │  2   │  3   │  1   │  4   │  5   │  6   │  7   │  8   │
               └──────┴──────┴──────┴──────┴──────┴──────┴──────┴──────┘
                  └── W row 0 ──┘└── W row 1 ──┘└── sample A ───┘└── sample B ───┘
+```
+
+The same layout as a compact block diagram:
+
+```mermaid
+graph LR
+    subgraph Wtile2["Weight tile W (cells 0-3)"]
+        direction LR
+        WR20["W row 0: 2, 3"]
+        WR21["W row 1: 1, 4"]
+    end
+
+    subgraph Xbatch2["Batch X, row-major (cells 4-7)"]
+        direction LR
+        SA["Sample A: 5, 6"]
+        SB["Sample B: 7, 8"]
+        SA -->|"forward stream<br>cells 4 5 6 7"| SB
+    end
+
+    Wtile2 -->|"stays hot<br>in cache"| Xbatch2
+
+    style Wtile2 fill:#d4e1f5,stroke:#3b71ca,stroke-width:2px
+    style Xbatch2 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
 ```
 
 **Read trace for the batch** — the read head simply walks forward, cell by cell:
