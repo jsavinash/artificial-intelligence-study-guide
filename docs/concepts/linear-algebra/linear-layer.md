@@ -51,35 +51,42 @@ Physical RAM is not a 2D grid — it is a flat, addressable **ribbon** of contig
 
 Each sample is a vertical column vector. Stacked as a batch in column-major (Fortran-style) order, all of feature 1 comes first, then all of feature 2 — so one sample's features land on **non-adjacent** cells:
 
-```
-Memory Address:   0     1     2     3     4     5     6     7
-              ┌──────┬──────┬──────┬──────┬──────┬──────┬──────┬──────┐
-Memory Ribbon │  2   │  3   │  1   │  4   │  5   │  7   │  6   │  8   │
-              └──────┴──────┴──────┴──────┴──────┴──────┴──────┴──────┘
-                 └── W row 0 ──┘└── W row 1 ──┘└─ feat 1: A,B ─┘└─ feat 2: A,B ─┘
-```
-
-The same layout as a compact block diagram:
+The full ribbon in Mermaid — every cell addressable, with the strided read-trace for sample A overlaid:
 
 ```mermaid
 graph LR
-    subgraph Wtile["Weight tile W (cells 0-3)"]
+    subgraph C1W["WEIGHT TILE — cells 0-3"]
         direction LR
-        WR0["W row 0: 2, 3"]
-        WR1["W row 1: 1, 4"]
+        c1a0["@0 · W00 = 2"]
+        c1a1["@1 · W01 = 3"]
+        c1a2["@2 · W10 = 1"]
+        c1a3["@3 · W11 = 4"]
     end
 
-    subgraph Xbatch["Batch X, column-major (cells 4-7)"]
+    subgraph C1X["BATCH X column-major — cells 4-7"]
         direction LR
-        F1["feat 1: A=5, B=7"]
-        F2["feat 2: A=6, B=8"]
-        F1 -.->|"stride-2 hop<br>to assemble sample A"| F2
+        c1a4["@4 · A feat1 = 5"]
+        c1a5["@5 · B feat1 = 7"]
+        c1a6["@6 · A feat2 = 6"]
+        c1a7["@7 · B feat2 = 8"]
     end
 
-    Wtile -->|"re-walked once<br>per output neuron"| Xbatch
+    yA0["y0(A) = 2x5 + 3x6 = 28"]
+    yA1["y1(A) = 1x5 + 4x6 = 29"]
 
-    style Wtile fill:#d4e1f5,stroke:#3b71ca,stroke-width:2px
-    style Xbatch fill:#fff7e6,stroke:#e0a800,stroke-width:2px
+    c1a0 --> c1a1 --> c1a2 --> c1a3 --> c1a4 --> c1a5 --> c1a6 --> c1a7
+    c1a1 -.->|"hop over @5<br>to assemble A"| c1a4
+    c1a4 -.->|"stride 2<br>feat1 to feat2"| c1a6
+    c1a3 -.->|"y1 re-walks<br>the same hop"| c1a4
+    c1a6 --> yA0
+    c1a6 --> yA1
+
+    classDef wcell fill:#d4e1f5,stroke:#3b71ca,stroke-width:2px
+    classDef xcell fill:#fff7e6,stroke:#e0a800,stroke-width:2px
+    classDef out fill:#e1f5fe,stroke:#03a9f4,stroke-width:2px
+    class c1a0,c1a1,c1a2,c1a3 wcell
+    class c1a4,c1a5,c1a6,c1a7 xcell
+    class yA0,yA1 out
 ```
 
 **Read trace for sample A** (features live on cells 4 and 6 — a stride-2 hop):
@@ -93,35 +100,39 @@ Every output neuron re-walks the same strided hop, and sample B (cells 5, 7) is 
 
 Each sample is a horizontal row vector. Stacked as a batch in row-major (C-style) order, every sample occupies one **contiguous** block:
 
-```
-Memory Address:   0     1     2     3     4     5     6     7
-              ┌──────┬──────┬──────┬──────┬──────┬──────┬──────┬──────┐
-Memory Ribbon │  2   │  3   │  1   │  4   │  5   │  6   │  7   │  8   │
-              └──────┴──────┴──────┴──────┴──────┴──────┴──────┴──────┘
-                 └── W row 0 ──┘└── W row 1 ──┘└── sample A ───┘└── sample B ───┘
-```
-
-The same layout as a compact block diagram:
+The full ribbon in Mermaid — every cell addressable, with the forward streaming read-trace overlaid:
 
 ```mermaid
 graph LR
-    subgraph Wtile2["Weight tile W (cells 0-3)"]
+    subgraph C2W["WEIGHT TILE — cells 0-3"]
         direction LR
-        WR20["W row 0: 2, 3"]
-        WR21["W row 1: 1, 4"]
+        c2a0["@0 · W00 = 2"]
+        c2a1["@1 · W01 = 3"]
+        c2a2["@2 · W10 = 1"]
+        c2a3["@3 · W11 = 4"]
     end
 
-    subgraph Xbatch2["Batch X, row-major (cells 4-7)"]
+    subgraph C2X["BATCH X row-major — cells 4-7"]
         direction LR
-        SA["Sample A: 5, 6"]
-        SB["Sample B: 7, 8"]
-        SA -->|"forward stream<br>cells 4 5 6 7"| SB
+        c2a4["@4 · A feat1 = 5"]
+        c2a5["@5 · A feat2 = 6"]
+        c2a6["@6 · B feat1 = 7"]
+        c2a7["@7 · B feat2 = 8"]
     end
 
-    Wtile2 -->|"stays hot<br>in cache"| Xbatch2
+    yAB["A→[28, 29] · B→[38, 39]"]
 
-    style Wtile2 fill:#d4e1f5,stroke:#3b71ca,stroke-width:2px
-    style Xbatch2 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    c2a0 --> c2a1 --> c2a2 --> c2a3 --> c2a4 --> c2a5 --> c2a6 --> c2a7
+    c2a3 -.->|"weights stay<br>hot in cache"| c2a4
+    c2a4 ==>|"stream 4→5→6→7<br>no hops, no re-reads"| c2a7
+    c2a7 --> yAB
+
+    classDef wcell fill:#d4e1f5,stroke:#3b71ca,stroke-width:2px
+    classDef xcell fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    classDef out fill:#e1f5fe,stroke:#03a9f4,stroke-width:2px
+    class c2a0,c2a1,c2a2,c2a3 wcell
+    class c2a4,c2a5,c2a6,c2a7 xcell
+    class yAB out
 ```
 
 **Read trace for the batch** — the read head simply walks forward, cell by cell:
