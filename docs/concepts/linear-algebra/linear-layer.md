@@ -45,26 +45,55 @@ $$y = xW^T + b$$
 
 ### Memory Ribbon Example
 
-Physical RAM is not a 2D grid — it is a flat, addressable **ribbon** of contiguous cells. The "column vs. row" distinction is therefore an *interpretation layer* placed on top of the same serial ribbon of bytes. Below, the concrete values from Section 5 — the input row $x = [5, 6]$ and the weight matrix $W$ with rows $(2, 3)$ and $(1, 4)$ — are shown as they actually sit in memory:
+Physical RAM is not a 2D grid — it is a flat, addressable **ribbon** of contiguous cells. The "column vs. row" distinction is therefore an *interpretation layer* placed on top of the same serial ribbon of bytes. The two cases below walk the **same workload** — the Section-5 layer with weights $(2, 3)$ / $(1, 4)$ applied to two samples, $A = [5, 6]$ and $B = [7, 8]$ — and show how differently each notation traverses memory.
+
+#### Case 1 — Standard Notation ($y = Wx + b$): column vectors, column-major storage
+
+Each sample is a vertical column vector. Stacked as a batch in column-major (Fortran-style) order, all of feature 1 comes first, then all of feature 2 — so one sample's features land on **non-adjacent** cells:
+
+```
+Memory Address:   0     1     2     3     4     5     6     7
+              ┌──────┬──────┬──────┬──────┬──────┬──────┬──────┬──────┐
+Memory Ribbon │  2   │  3   │  1   │  4   │  5   │  7   │  6   │  8   │
+              └──────┴──────┴──────┴──────┴──────┴──────┴──────┴──────┘
+                 └── W row 0 ──┘└── W row 1 ──┘└─ feat 1: A,B ─┘└─ feat 2: A,B ─┘
+```
+
+**Read trace for sample A** (features live on cells 4 and 6 — a stride-2 hop):
+
+*   $y_0 = 2 \cdot 5 + 3 \cdot 6 = 28$ — read W cells (0, 1), then hop across cell 5 to reach x cells (4, 6)
+*   $y_1 = 1 \cdot 5 + 4 \cdot 6 = 29$ — read W cells (2, 3), then re-read x cells (4, 6) a second time
+
+Every output neuron re-walks the same strided hop, and sample B (cells 5, 7) is interleaved between A's features rather than sitting in its own block.
+
+#### Case 2 — Framework Notation ($y = xW^T + b$): row vectors, row-major storage
+
+Each sample is a horizontal row vector. Stacked as a batch in row-major (C-style) order, every sample occupies one **contiguous** block:
 
 ```
 Memory Address:   0     1     2     3     4     5     6     7
               ┌──────┬──────┬──────┬──────┬──────┬──────┬──────┬──────┐
 Memory Ribbon │  2   │  3   │  1   │  4   │  5   │  6   │  7   │  8   │
               └──────┴──────┴──────┴──────┴──────┴──────┴──────┴──────┘
-                 └── W row 0 ──┘└── W row 1 ──┘└─ x s.A ─┘└─ x s.B ─┘
+                 └── W row 0 ──┘└── W row 1 ──┘└── sample A ───┘└── sample B ───┘
 ```
 
-**How each notation reads the same ribbon**
+**Read trace for the batch** — the read head simply walks forward, cell by cell:
 
-| Feature | Standard Notation ($y = Wx + b$) | Framework Notation ($y = xW^T + b$) |
+*   Sample A (cells 4, 5): $y = [5 \cdot 2 + 6 \cdot 3,\; 5 \cdot 1 + 6 \cdot 4] = [28, 29]$
+*   Sample B (cells 6, 7): $y = [7 \cdot 2 + 8 \cdot 3,\; 7 \cdot 1 + 8 \cdot 4] = [38, 39]$
+*   Addresses visited in order: 4 → 5 → 6 → 7 — no hops, no re-reads; the small $W$ tile (cells 0–3) stays hot in cache across the whole batch.
+
+#### Case 1 vs. Case 2 at a glance
+
+| Feature | Case 1 — Standard ($y = Wx + b$) | Case 2 — Framework ($y = xW^T + b$) |
 |---|---|---|
-| **Sample $x$ on the ribbon** | $[5, 6]$ is a *column vector* — conceptually drawn vertically; each element is a strided "stop" visited once per output row | $[5, 6]$ is a *row vector* — one contiguous segment the CPU/GPU slurps up in a single sequential read |
-| **Batch of samples on the ribbon** | Each column vector stored separately (or scattered at a stride) → $B$ samples = $B$ disjoint ribbon segments | Samples stacked end-to-end: `[5,6, 7,8, ...]` → one long contiguous block = perfect cache locality |
-| **Weights $W$ on the ribbon** | Row-major stores `(2, 3, 1, 4)`; columns of $W$ (the dot-product partners of $x$) live at *non-adjacent* addresses (stride = 2) | The same `(2, 3, 1, 4)` ribbon is consumed via $W^T$; each output neuron's weights stay a contiguous row-chunk, matching how $x$ rows are read |
-| **Hardware consequence** | Vertical reads from the ribbon require strided memory access — slow on caches, awkward for SIMD | Horizontal reads from the ribbon = linear memory streaming — ideal for CPUs, GPUs, and tensor cores |
+| **Ribbon order** | `[2, 3, 1, 4, 5, 7, 6, 8]` — features interleaved across samples | `[2, 3, 1, 4, 5, 6, 7, 8]` — samples stacked end-to-end |
+| **Assembling one sample** | Hop with stride 2 (cells 4 → 6); $B$ samples = $B$ disjoint hop patterns | One contiguous block; $B$ samples = one long streaming read |
+| **Re-reads** | $x$ re-read once per output neuron, hopping each time | Each cell read exactly once per forward pass |
+| **Hardware effect** | Strided access — poor cache locality, awkward for SIMD | Linear streaming — ideal for CPUs, GPUs, and tensor cores |
 
-> **Memory takeaway:** The ribbon itself is identical in both cases — `(2, 3, 1, 4, 5, 6, 7, 8)`. Standard notation *imagines* $x$ as a vertical column and pays a stride penalty walking the ribbon, while framework notation keeps every dot-product partner on adjacent cells, which is exactly why PyTorch stores $W$ as `(out_features, in_features)` and computes with $xW^T$.
+> **Memory takeaway:** Compare the two ribbons cell by cell — Case 1 interleaves the samples as `(5, 7, 6, 8)` while Case 2 keeps them as `(5, 6, 7, 8)`. That single layout choice is why PyTorch stores $W$ as `(out_features, in_features)` and computes $xW^T$: the batch becomes one forward-marching read head instead of $B$ strided hops.
 
 ---
 
