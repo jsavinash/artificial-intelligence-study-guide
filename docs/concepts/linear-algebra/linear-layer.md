@@ -1,53 +1,67 @@
-# Deep Dive: The Linear Layer — Formula & Matrix Orientations
+# Deep Dive: The Linear Layer in Artificial Intelligence
 
-This document isolates and breaks down the core mathematical equation governing a **Linear Layer** (also known as a Fully Connected or Dense Layer) within modern Deep Learning architectures, bridging the gap between academic linear algebra notation and the hardware-optimized implementations found in production frameworks like [PyTorch](https://pytorch.org/) and TensorFlow.
+This document provides a comprehensive exploration of the **linear layer** (also called a fully-connected or dense layer) and its foundational role in Artificial Intelligence (AI), Machine Learning (ML), and Deep Learning (DL).
+
+$$
+y = Wx + b \quad\text{(textbook, column vectors)} \qquad\Longleftrightarrow\qquad y = xW^T + b \quad\text{(frameworks, row vectors)}
+$$
+
+**Notation used here:** $x \in \mathbb{R}^{N_{in}}$ is one sample, $W \in \mathbb{R}^{N_{out} \times N_{in}}$ is the weight matrix, $b \in \mathbb{R}^{N_{out}}$ is the bias. For batches, $X \in \mathbb{R}^{B \times N_{in}}$ stacks $B$ samples as rows, and $Y \in \mathbb{R}^{B \times N_{out}}$ holds the outputs.
 
 ---
 
 ## 1. THE CORE THEORY
 
-When working with linear layers you will encounter two primary mathematical notations depending on the context. Both perform the exact same underlying transformation, but their geometric perspectives differ:
+### 1.1 What a linear layer computes
+
+Two steps, in order: **(1)** each output is a weighted sum of the inputs (a dot product against one row of $W$), **(2)** a learned bias shifts the result. Without the matrix there is no mixing of features; without the bias every output is forced through the origin, which cripples fitting (it makes the map purely linear instead of affine).
+
+```mermaid
+graph LR
+    X["input x<br/>(N_in features)"] --> DOT["dot against<br/>each row of W"]
+    DOT --> SHIFT["add bias b<br/>(one shift per output)"]
+    SHIFT --> Y["output y<br/>(N_out features)"]
+```
+
+### 1.2 The two notations at a glance
+
+Textbooks write a sample as a vertical column multiplied on the **left** by $W$. Frameworks store a sample as a horizontal row multiplied on the **right** by $W^T$, so that whole batches stack into one matrix multiply:
 
 ```mermaid
 graph TD
-    A[Linear Layer Input Transformation] --> B(Classic Textbook Perspective)
-    A --> C(Framework Hardware Perspective)
-
-    B --> B1["Equation: y = Wx + b"]
-    B --> B2["Focus: Single Vector Math"]
-    B --> B3["Structure: Column-Vector x"]
-
-    C --> C1["Equation: y = xW^T + b"]
-    C --> C2["Focus: Batch Processing Efficiency"]
-    C --> C3["Structure: Row-Vector x"]
+    A[Linear layer: same map, two spellings] --> B["Textbook: y = Wx + b<br/>one column vector at a time"]
+    A --> C["Framework: y = xW^T + b<br/>rows stack into batches"]
 ```
 
-### Textbook Notation (Column-Vector Perspective)
+### 1.3 Textbook notation: one column at a time
 
-In standard mathematical literature, a data point is traditionally represented as a vertical **column vector** ($x$). The weight matrix ($W$) acts on the vector from the left:
+Classical texts write a sample as a vertical **column vector** and apply the weights from the left:
 
 $$y = Wx + b$$
 
-### Framework Notation (Row-Vector Perspective)
+Geometrically, each row of $W$ is a detector: output $i$ is the dot product of row $i$ with $x$, shifted by $b_i$. This is the natural notation for proving things about a single vector.
 
-In deep learning frameworks, data points are organized as horizontal **row vectors** ($x$) to allow batch stacking. The input multiplies the transposed weight matrix ($W^T$) from the left:
+### 1.4 Framework notation: rows that stack into batches
+
+Frameworks (PyTorch, TensorFlow, JAX) store a sample as a horizontal **row vector** and multiply from the right:
 
 $$y = xW^T + b$$
 
-### Structural Comparison
+The $W^T$ is only skin-deep: the weight *tensor* is still stored as $W$ with shape `(out_features, in_features)` — the transpose just re-orients the multiply so rows can stack (see §3 and §5).
+
+### 1.5 Structural comparison
 
 | Feature | Standard Notation ($y = Wx + b$) | Framework Notation ($y = xW^T + b$) |
 |---|---|---|
-| **Data Perspective** | Column vector ($x$ is a vertical column) | Row vector ($x$ is a horizontal row) |
-| **Operation Sequence** | Matrix multiplies the vector from the left ($W \cdot x$) | Vector multiplies the matrix from the left ($x \cdot W^T$) |
-| **Weight Tensor Dimensions** | `(out_features, in_features)` | `(out_features, in_features)` *prior to transpose* |
-| **Primary Use Case** | Academic theory, math proofs, hand derivations | Production frameworks (PyTorch, TensorFlow, JAX) |
+| **Data perspective** | Column vector ($x$ is $N_{in} \times 1$) | Row vector ($x$ is $1 \times N_{in}$) |
+| **Operation order** | $W$ acts from the left ($Wx$) | $x$ acts from the left ($xW^T$) |
+| **Stored weight shape** | $(N_{out}, N_{in})$ | $(N_{out}, N_{in})$ — the transpose is a view, not a copy |
+| **Natural use** | Proofs, single-sample derivations | Batched code: $XW^T + b$ with $X$ shaped $(B, N_{in})$ |
+| **Output shape** | $(N_{out}, 1)$ column | $(1, N_{out})$ row; batches give $(B, N_{out})$ |
 
-### Memory Ribbon Example
+### 1.6 Memory Ribbon: why rows win in real RAM
 
-Physical RAM is not a 2D grid — it is a flat, addressable **ribbon** of contiguous cells. So every picture below starts from the same **2D mental model** — a batch whose rows are samples and whose columns are features — and then shows how each notation *linearizes* that grid onto the ribbon. Both cases walk the **same workload**: the Section-5 layer with weights $(2, 3)$ / $(1, 4)$ applied to two samples, $A = [5, 6]$ and $B = [7, 8]$.
-
-**The shared 2D batch** — keep this picture in your head while reading both ribbons. Blue = sample A, orange = sample B; every ribbon below reuses these colors:
+Physical RAM is a flat ribbon of cells, not a 2D grid. A $2 \times 2$ batch (rows = samples $A = [5,6]$, $B = [7,8]$; columns = features) must be *linearized* — and the order decides whether reads stream or hop.
 
 ```mermaid
 graph TB
@@ -73,7 +87,7 @@ graph TB
 
 **How to read what follows** (the pattern borrowed from Eli Bendersky's [memory-layout diagrams](https://eli.thegreenplace.net/2015/memory-layout-of-multi-dimensional-arrays/)): the *layout* diagram shows where each 2D cell lands on the 1D ribbon; the separate *walk* diagram numbers the read head. Layout and walk are never mixed in one picture — that mixing was what made the old diagrams hard to read.
 
-#### Case 1 — Standard Notation ($y = Wx + b$): column vectors, column-major storage
+#### Case 1 — column-major: the strided walk
 
 Column-major (Fortran-style) stores the **feat1 column first, then the feat2 column** — the row index changes fastest. Watch the colors: blue-orange-blue-orange, the samples interleave:
 
@@ -116,7 +130,7 @@ graph LR
 
 Every output neuron re-walks the same strided hop — exactly the strided-access cost Igor Ostrovsky demonstrates in his [Gallery of Processor Cache Effects](https://igoro.com/archive/gallery-of-processor-cache-effects/): you pay for the whole cache line but use only half of it.
 
-#### Case 2 — Framework Notation ($y = xW^T + b$): row vectors, row-major storage
+#### Case 2 — row-major: the streaming walk
 
 Row-major (C-style) stores **row A first, then row B** — the column index changes fastest. The colors now sit in solid blocks, and because each block is already contiguous, layout and walk collapse into one forward stream:
 
@@ -153,7 +167,7 @@ graph LR
 | Feature | Case 1 — Standard ($y = Wx + b$) | Case 2 — Framework ($y = xW^T + b$) |
 |---|---|---|
 | **Ribbon order** | `[5, 7, 6, 8]` — feat1 column, then feat2 column; colors interleave blue-orange-blue-orange | `[5, 6, 7, 8]` — row A, then row B; colors block blue-blue-orange-orange |
-| **Assembling one sample** | Hop with stride 2 (cells 4 → 6); $B$ samples = $B$ disjoint hop patterns | One contiguous block; $B$ samples = one long streaming read |
+| **Assembling one sample** | Hop with stride 2 (cells 0 → 2); each sample contributes its own disjoint hop pattern | One contiguous block; $B$ samples = one long streaming read |
 | **Re-reads** | $x$ re-read once per output neuron, hopping each time | Each cell read exactly once per forward pass |
 | **Hardware effect** | Strided access — poor cache locality, awkward for SIMD | Linear streaming — ideal for CPUs, GPUs, and tensor cores |
 
@@ -169,7 +183,7 @@ In modern deep learning frameworks like [PyTorch](https://pytorch.org/), the for
 
 $$y = xW^T + b$$
 
-The transposed form ($xW^T$) is optimized for batch processing in computing hardware; the classic column-vector form ($y = Wx + b$) is treated as the alternative notation throughout Section 1.
+The transposed form keeps the stored weight matrix $W$ untouched and only re-orients the multiply so a whole batch fits one GEMM call; the classic column-vector form ($y = Wx + b$) from Section 1 is the same map written one sample at a time.
 
 ### Proof of Equivalence
 
@@ -187,13 +201,13 @@ $$(y_{\text{classic}})^T = (Wx)^T$$
 
 $$y^T = x^T W^T$$
 
-**Step 4 — Interpret the result in framework conventions:** deep learning frameworks inherently treat the input tensor $x$ as a row vector by default (so the explicit transpose notation on $x$ is dropped), and the bias term is restored:
+**Step 4 — Read $y^T = x^T W^T$ in framework conventions:** a framework row vector *is* the transposed column vector ($x^T$), so writing $y$ for $y^T$ and restoring the bias gives:
 
 $$y = xW^T + b$$
 
 ### Structural & Computational Mapping
 
-Below is the computational routing and shape conversion map for a standard forward pass through a linear layer:
+The same forward pass as a shape pipeline — watch the inner dimensions meet and the bias broadcast across the batch:
 
 ```mermaid
 graph TD
@@ -246,14 +260,14 @@ The formula splits geometric space manipulation into two clean, distinct parts:
 
 ### Why the Row-Vector Perspective? (The Batch Processing Factor)
 
-In deep learning, data is rarely processed one sample at a time. Instead, multiple samples are packed into a **batch** to leverage the massive parallel compute capabilities of graphics cards (GPUs).
+In deep learning, data is rarely processed one sample at a time. Instead, multiple samples are packed into a **batch** to leverage the massive parallel compute capabilities of graphics cards (GPUs). One batched multiply replaces $B$ separate matrix-vector products — exactly the workload BLAS GEMM kernels and their batched variants are tuned for.
 
 ### Memory Layout (Row-Major Storage)
 
-Modern computer architectures store multi-dimensional arrays in continuous blocks of physical memory sequentially along rows.
+C, C++, and Python (NumPy, PyTorch) store multidimensional arrays row-major by default: a row's elements sit next to each other, so element $(i, j)$ of a $B$-by-$N$ matrix lives at offset $i·N + j$. (Fortran and MATLAB do the opposite — column-major.)
 
 *   In a dataset batch $X$, each row represents an independent sample (e.g., an individual image or token embedding).
-*   Each column represents a distinct feature dimension.
+*   Each column represents a distinct feature dimension — and because rows are contiguous, sample $A$ occupies offsets $0·2+0 = 0$ through $0·2+1 = 1$: one unbroken run.
 
 By structuring the forward pass equation as $Y = XW^T + B$, the framework can pass the batched input matrix $X$ directly into compute kernels without wasting valuable clock cycles transposing the incoming data stream.
 
@@ -265,7 +279,7 @@ $$(B \times N_{in}) \times (N_{in} \times N_{out}) = (B \times N_{out})$$
 
 ## 4. MERMAID PLOT DIAGRAM
 
-The row-major memory layout of a batched input tensor $X$ — each row is one independent sample, each column one distinct feature dimension:
+The same row-major batch as a sample/feature grid — each row is one independent sample, each column one feature dimension, stored row after row:
 
 ```mermaid
 graph LR
@@ -314,9 +328,9 @@ Both execution paths evaluate to identical output maps (**28** and **29**).
 
 ### Concrete PyTorch Implementation
 
-Under the hood, PyTorch's `nn.Linear` instantiates weights matching the shape layout `(out_features, in_features)` but applies the transposed matrix operation during the computational graph execution.
+Per the [torch.nn.Linear docs](https://pytorch.org/docs/2.14/generated/torch.nn.Linear.html), the layer applies $y = xA^T + b$: `weight` has shape `(out_features, in_features)`, `bias` has shape `(out_features,)`, and both are initialized from the uniform distribution $U(-\sqrt{k}, \sqrt{k})$ with $k$ = 1 / in_features.
 
-Below is a complete script demonstrating this behavior inside a custom, modular network layer:
+The script below pins the Section-5 weights into a custom layer and checks all three spellings (textbook math, module forward, `F.linear`) headlessly:
 
 ```python
 import torch
@@ -331,21 +345,28 @@ class CustomLinear(nn.Module):
 
     def forward(self, x):
         # Implementation of the hardware-optimized framework formula: y = xW^T + b
-        return torch.matmul(x, self.weight.t()) + self.bias
+        return torch.nn.functional.linear(x, self.weight, self.bias)
 
 # Execution verification block
 if __name__ == "__main__":
-    # Create a batch of 3 independent samples, each containing 2 features
-    batch_input = torch.randn(3, 2)
+    torch.manual_seed(0)
 
-    # Initialize our custom structural layer
+    # Same two samples as Sections 1 and 5: A = [5, 6], B = [7, 8]
+    batch_input = torch.tensor([[5.0, 6.0], [7.0, 8.0]])
+
     layer = CustomLinear(in_features=2, out_features=2)
+    with torch.no_grad():
+        layer.weight.copy_(torch.tensor([[2.0, 3.0], [1.0, 4.0]]))
+        layer.bias.copy_(torch.tensor([1.0, -1.0]))
 
-    # Calculate forward execution pass
     output = layer(batch_input)
+    expected = torch.tensor([[29.0, 28.0], [39.0, 38.0]])
+    assert torch.allclose(output, expected), output
 
     print("----- PyTorch Verification -----")
-    print("Input Tensor Shape: ", batch_input.shape)   # Dimensions: (3, 2)
-    print("Weight Tensor Shape:", layer.weight.shape)  # Dimensions: (2, 2)
-    print("Output Tensor Shape:", output.shape)        # Dimensions: (3, 2)
+    print("Input Tensor Shape: ", tuple(batch_input.shape))   # (2, 2): (batch, in_features)
+    print("Weight Tensor Shape:", tuple(layer.weight.shape))  # (2, 2): (out_features, in_features)
+    print("Output Tensor Shape:", tuple(output.shape))        # (2, 2): (batch, out_features)
+    print("Output Values:", output.tolist())                  # [[29, 28], [39, 38]]
+    print("F.linear match:", torch.allclose(torch.nn.functional.linear(batch_input, layer.weight, layer.bias), expected))
 ```
