@@ -45,7 +45,7 @@ $$y = xW^T + b$$
 
 ### Memory Ribbon Example
 
-Physical RAM is not a 2D grid — it is a flat, addressable **ribbon** of contiguous cells. The "column vs. row" distinction is therefore an *interpretation layer* placed on top of the same serial ribbon of bytes. Below, the concrete values from Section 5 ($x = [5, 6]$, $W = \begin{bmatrix} 2 & 3 \\ 1 & 4 \end{bmatrix}$) are shown as they actually sit in memory:
+Physical RAM is not a 2D grid — it is a flat, addressable **ribbon** of contiguous cells. The "column vs. row" distinction is therefore an *interpretation layer* placed on top of the same serial ribbon of bytes. Below, the concrete values from Section 5 — the input row $x = [5, 6]$ and the weight matrix $W$ with rows $(2, 3)$ and $(1, 4)$ — are shown as they actually sit in memory:
 
 ```
 Memory Address:   0     1     2     3     4     5     6     7
