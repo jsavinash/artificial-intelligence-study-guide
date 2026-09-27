@@ -43,6 +43,29 @@ $$y = xW^T + b$$
 | **Weight Tensor Dimensions** | `(out_features, in_features)` | `(out_features, in_features)` *prior to transpose* |
 | **Primary Use Case** | Academic theory, math proofs, hand derivations | Production frameworks (PyTorch, TensorFlow, JAX) |
 
+### Memory Ribbon Example
+
+Physical RAM is not a 2D grid — it is a flat, addressable **ribbon** of contiguous cells. The "column vs. row" distinction is therefore an *interpretation layer* placed on top of the same serial ribbon of bytes. Below, the concrete values from Section 5 ($x = [5, 6]$, $W = \begin{bmatrix} 2 & 3 \\ 1 & 4 \end{bmatrix}$) are shown as they actually sit in memory:
+
+```
+Memory Address:   0     1     2     3     4     5     6     7
+              ┌──────┬──────┬──────┬──────┬──────┬──────┬──────┬──────┐
+Memory Ribbon │  2   │  3   │  1   │  4   │  5   │  6   │  7   │  8   │
+              └──────┴──────┴──────┴──────┴──────┴──────┴──────┴──────┘
+                 └── W row 0 ──┘└── W row 1 ──┘└─ x s.A ─┘└─ x s.B ─┘
+```
+
+**How each notation reads the same ribbon**
+
+| Feature | Standard Notation ($y = Wx + b$) | Framework Notation ($y = xW^T + b$) |
+|---|---|---|
+| **Sample $x$ on the ribbon** | $[5, 6]$ is a *column vector* — conceptually drawn vertically; each element is a strided "stop" visited once per output row | $[5, 6]$ is a *row vector* — one contiguous segment the CPU/GPU slurps up in a single sequential read |
+| **Batch of samples on the ribbon** | Each column vector stored separately (or scattered at a stride) → $B$ samples = $B$ disjoint ribbon segments | Samples stacked end-to-end: `[5,6, 7,8, ...]` → one long contiguous block = perfect cache locality |
+| **Weights $W$ on the ribbon** | Row-major stores `(2, 3, 1, 4)`; columns of $W$ (the dot-product partners of $x$) live at *non-adjacent* addresses (stride = 2) | The same `(2, 3, 1, 4)` ribbon is consumed via $W^T$; each output neuron's weights stay a contiguous row-chunk, matching how $x$ rows are read |
+| **Hardware consequence** | Vertical reads from the ribbon require strided memory access — slow on caches, awkward for SIMD | Horizontal reads from the ribbon = linear memory streaming — ideal for CPUs, GPUs, and tensor cores |
+
+> **Memory takeaway:** The ribbon itself is identical in both cases — `(2, 3, 1, 4, 5, 6, 7, 8)`. Standard notation *imagines* $x$ as a vertical column and pays a stride penalty walking the ribbon, while framework notation keeps every dot-product partner on adjacent cells, which is exactly why PyTorch stores $W$ as `(out_features, in_features)` and computes with $xW^T$.
+
 ---
 
 ## 2. THE MATHEMATICAL FORMULA
