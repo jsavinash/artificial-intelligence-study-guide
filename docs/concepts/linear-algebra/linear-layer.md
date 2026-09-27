@@ -177,8 +177,10 @@ graph LR
 
 Let us calculate a practical example using a layer configured with **2 input features** and **2 output features**. For clarity, the bias term is omitted ($b = 0$).
 
-*   **Weight Tensor Structure ($W$):** $\begin{bmatrix} 2 & 3 \\ 1 & 4 \end{bmatrix}$
+*   **Weight Tensor Structure ($W$):** 2 output features $\times$ 2 input features
 *   **Input Elements ($x$):** Feature dimensions containing values $5$ and $6$.
+
+$$W = \begin{bmatrix} 2 & 3 \\ 1 & 4 \end{bmatrix}$$
 
 #### Textbook Execution ($y = Wx$)
 
