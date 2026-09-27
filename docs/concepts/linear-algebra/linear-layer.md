@@ -45,112 +45,119 @@ $$y = xW^T + b$$
 
 ### Memory Ribbon Example
 
-Physical RAM is not a 2D grid — it is a flat, addressable **ribbon** of contiguous cells. The "column vs. row" distinction is therefore an *interpretation layer* placed on top of the same serial ribbon of bytes. The two cases below walk the **same workload** — the Section-5 layer with weights $(2, 3)$ / $(1, 4)$ applied to two samples, $A = [5, 6]$ and $B = [7, 8]$ — and show how differently each notation traverses memory.
+Physical RAM is not a 2D grid — it is a flat, addressable **ribbon** of contiguous cells. So every picture below starts from the same **2D mental model** — a batch whose rows are samples and whose columns are features — and then shows how each notation *linearizes* that grid onto the ribbon. Both cases walk the **same workload**: the Section-5 layer with weights $(2, 3)$ / $(1, 4)$ applied to two samples, $A = [5, 6]$ and $B = [7, 8]$.
+
+**The shared 2D batch** — keep this picture in your head while reading both ribbons. Blue = sample A, orange = sample B; every ribbon below reuses these colors:
+
+```mermaid
+graph TB
+    subgraph BATCH2D["2D batch — rows = samples, cols = features"]
+        direction TB
+        subgraph ROWA["Sample A"]
+            direction LR
+            b2dA1["feat1 = 5"]
+            b2dA2["feat2 = 6"]
+        end
+        subgraph ROWB["Sample B"]
+            direction LR
+            b2dB1["feat1 = 7"]
+            b2dB2["feat2 = 8"]
+        end
+    end
+
+    classDef acell fill:#d4e1f5,stroke:#3b71ca,stroke-width:2px
+    classDef bcell fill:#ffe0b2,stroke:#ef6c00,stroke-width:2px
+    class b2dA1,b2dA2 acell
+    class b2dB1,b2dB2 bcell
+```
+
+**How to read what follows** (the pattern borrowed from Eli Bendersky's [memory-layout diagrams](https://eli.thegreenplace.net/2015/memory-layout-of-multi-dimensional-arrays/)): the *layout* diagram shows where each 2D cell lands on the 1D ribbon; the separate *walk* diagram numbers the read head. Layout and walk are never mixed in one picture — that mixing was what made the old diagrams hard to read.
 
 #### Case 1 — Standard Notation ($y = Wx + b$): column vectors, column-major storage
 
-Each sample is a vertical column vector. Stacked as a batch in column-major (Fortran-style) order, all of feature 1 comes first, then all of feature 2 — so one sample's features land on **non-adjacent** cells:
-
-The full ribbon in Mermaid — every cell addressable, with the strided read-trace for sample A overlaid:
+Column-major (Fortran-style) stores the **feat1 column first, then the feat2 column** — the row index changes fastest. Watch the colors: blue-orange-blue-orange, the samples interleave:
 
 ```mermaid
 graph LR
-    subgraph C1W["WEIGHT TILE — cells 0-3"]
+    subgraph MR1LAY["Case-1 ribbon — column-major: feat1 column (5, 7), then feat2 column (6, 8)"]
         direction LR
-        c1a0["@0 · W00 = 2"]
-        c1a1["@1 · W01 = 3"]
-        c1a2["@2 · W10 = 1"]
-        c1a3["@3 · W11 = 4"]
+        mr1c0["@0 = 5<br>A feat1"]
+        mr1c1["@1 = 7<br>B feat1"]
+        mr1c2["@2 = 6<br>A feat2"]
+        mr1c3["@3 = 8<br>B feat2"]
     end
 
-    subgraph C1X["BATCH X column-major — cells 4-7"]
-        direction LR
-        c1a4["@4 · A feat1 = 5"]
-        c1a5["@5 · B feat1 = 7"]
-        c1a6["@6 · A feat2 = 6"]
-        c1a7["@7 · B feat2 = 8"]
-    end
+    mr1c0 --> mr1c1 --> mr1c2 --> mr1c3
 
-    yA0["y0(A) = 2x5 + 3x6 = 28"]
-    yA1["y1(A) = 1x5 + 4x6 = 29"]
-
-    c1a0 --> c1a1 --> c1a2 --> c1a3 --> c1a4 --> c1a5 --> c1a6 --> c1a7
-    c1a1 -.->|"hop over @5<br>to assemble A"| c1a4
-    c1a4 -.->|"stride 2<br>feat1 to feat2"| c1a6
-    c1a3 -.->|"y1 re-walks<br>the same hop"| c1a4
-    c1a6 --> yA0
-    c1a6 --> yA1
-
-    classDef wcell fill:#d4e1f5,stroke:#3b71ca,stroke-width:2px
-    classDef xcell fill:#fff7e6,stroke:#e0a800,stroke-width:2px
-    classDef out fill:#e1f5fe,stroke:#03a9f4,stroke-width:2px
-    class c1a0,c1a1,c1a2,c1a3 wcell
-    class c1a4,c1a5,c1a6,c1a7 xcell
-    class yA0,yA1 out
+    classDef acell fill:#d4e1f5,stroke:#3b71ca,stroke-width:2px
+    classDef bcell fill:#ffe0b2,stroke:#ef6c00,stroke-width:2px
+    class mr1c0,mr1c2 acell
+    class mr1c1,mr1c3 bcell
 ```
 
-**Read trace for sample A** (features live on cells 4 and 6 — a stride-2 hop):
+Assembling sample A means a **stride-2 hop**: read @0, jump over @1, read @2. The walk, numbered:
 
-*   $y_0 = 2 \cdot 5 + 3 \cdot 6 = 28$ — read W cells (0, 1), then hop across cell 5 to reach x cells (4, 6)
-*   $y_1 = 1 \cdot 5 + 4 \cdot 6 = 29$ — read W cells (2, 3), then re-read x cells (4, 6) a second time
+```mermaid
+graph LR
+    mr1s1["step 1 — read @0 = 5<br>A feat1"] -.->|"hop over @1<br>(B's cell)"| mr1s2["step 2 — read @2 = 6<br>A feat2"]
+    mr1s2 --> mr1y0["y0(A) = 2x5 + 3x6 = 28"]
+    mr1s2 -.->|"second output neuron<br>re-walks the same hop"| mr1y1["y1(A) = 1x5 + 4x6 = 29"]
 
-Every output neuron re-walks the same strided hop, and sample B (cells 5, 7) is interleaved between A's features rather than sitting in its own block.
+    classDef hopcell fill:#fff7e6,stroke:#e0a800,stroke-width:2px
+    classDef outcell fill:#e1f5fe,stroke:#03a9f4,stroke-width:2px
+    class mr1s1,mr1s2 hopcell
+    class mr1y0,mr1y1 outcell
+```
+
+**Read trace for sample A:**
+
+*   $y_0 = 2 \cdot 5 + 3 \cdot 6 = 28$ — read W row 0 $(2, 3)$, then hop across cell @1 to gather A's features from cells @0 and @2
+*   $y_1 = 1 \cdot 5 + 4 \cdot 6 = 29$ — read W row 1 $(1, 4)$, then re-walk the same hop a second time
+
+Every output neuron re-walks the same strided hop — exactly the strided-access cost Igor Ostrovsky demonstrates in his [Gallery of Processor Cache Effects](https://igoro.com/archive/gallery-of-processor-cache-effects/): you pay for the whole cache line but use only half of it.
 
 #### Case 2 — Framework Notation ($y = xW^T + b$): row vectors, row-major storage
 
-Each sample is a horizontal row vector. Stacked as a batch in row-major (C-style) order, every sample occupies one **contiguous** block:
-
-The full ribbon in Mermaid — every cell addressable, with the forward streaming read-trace overlaid:
+Row-major (C-style) stores **row A first, then row B** — the column index changes fastest. The colors now sit in solid blocks, and because each block is already contiguous, layout and walk collapse into one forward stream:
 
 ```mermaid
 graph LR
-    subgraph C2W["WEIGHT TILE — cells 0-3"]
+    subgraph MR2LAY["Case-2 ribbon — row-major: row A (5, 6), then row B (7, 8)"]
         direction LR
-        c2a0["@0 · W00 = 2"]
-        c2a1["@1 · W01 = 3"]
-        c2a2["@2 · W10 = 1"]
-        c2a3["@3 · W11 = 4"]
+        mr2c0["@0 = 5<br>A feat1"]
+        mr2c1["@1 = 6<br>A feat2"]
+        mr2c2["@2 = 7<br>B feat1"]
+        mr2c3["@3 = 8<br>B feat2"]
     end
 
-    subgraph C2X["BATCH X row-major — cells 4-7"]
-        direction LR
-        c2a4["@4 · A feat1 = 5"]
-        c2a5["@5 · A feat2 = 6"]
-        c2a6["@6 · B feat1 = 7"]
-        c2a7["@7 · B feat2 = 8"]
-    end
+    mr2c0 --> mr2c1 --> mr2c2 --> mr2c3
+    mr2c0 ==>|"steps 1-2-3-4<br>one forward stream, no hops"| mr2c3
+    mr2c3 --> mr2y["A→[28, 29] · B→[38, 39]"]
 
-    yAB["A→[28, 29] · B→[38, 39]"]
-
-    c2a0 --> c2a1 --> c2a2 --> c2a3 --> c2a4 --> c2a5 --> c2a6 --> c2a7
-    c2a3 -.->|"weights stay<br>hot in cache"| c2a4
-    c2a4 ==>|"stream 4→5→6→7<br>no hops, no re-reads"| c2a7
-    c2a7 --> yAB
-
-    classDef wcell fill:#d4e1f5,stroke:#3b71ca,stroke-width:2px
-    classDef xcell fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-    classDef out fill:#e1f5fe,stroke:#03a9f4,stroke-width:2px
-    class c2a0,c2a1,c2a2,c2a3 wcell
-    class c2a4,c2a5,c2a6,c2a7 xcell
-    class yAB out
+    classDef acell fill:#d4e1f5,stroke:#3b71ca,stroke-width:2px
+    classDef bcell fill:#ffe0b2,stroke:#ef6c00,stroke-width:2px
+    classDef outcell fill:#e1f5fe,stroke:#03a9f4,stroke-width:2px
+    class mr2c0,mr2c1 acell
+    class mr2c2,mr2c3 bcell
+    class mr2y outcell
 ```
 
 **Read trace for the batch** — the read head simply walks forward, cell by cell:
 
-*   Sample A (cells 4, 5): $y = [5 \cdot 2 + 6 \cdot 3,\; 5 \cdot 1 + 6 \cdot 4] = [28, 29]$
-*   Sample B (cells 6, 7): $y = [7 \cdot 2 + 8 \cdot 3,\; 7 \cdot 1 + 8 \cdot 4] = [38, 39]$
-*   Addresses visited in order: 4 → 5 → 6 → 7 — no hops, no re-reads; the small $W$ tile (cells 0–3) stays hot in cache across the whole batch.
+*   Sample A (cells 0, 1): $y = [5 \cdot 2 + 6 \cdot 3,\; 5 \cdot 1 + 6 \cdot 4] = [28, 29]$
+*   Sample B (cells 2, 3): $y = [7 \cdot 2 + 8 \cdot 3,\; 7 \cdot 1 + 8 \cdot 4] = [38, 39]$
+*   Addresses visited in order: 0 → 1 → 2 → 3 — no hops, no re-reads; the small $W$ tile stays hot in cache across the whole batch.
 
 #### Case 1 vs. Case 2 at a glance
 
 | Feature | Case 1 — Standard ($y = Wx + b$) | Case 2 — Framework ($y = xW^T + b$) |
 |---|---|---|
-| **Ribbon order** | `[2, 3, 1, 4, 5, 7, 6, 8]` — features interleaved across samples | `[2, 3, 1, 4, 5, 6, 7, 8]` — samples stacked end-to-end |
+| **Ribbon order** | `[5, 7, 6, 8]` — feat1 column, then feat2 column; colors interleave blue-orange-blue-orange | `[5, 6, 7, 8]` — row A, then row B; colors block blue-blue-orange-orange |
 | **Assembling one sample** | Hop with stride 2 (cells 4 → 6); $B$ samples = $B$ disjoint hop patterns | One contiguous block; $B$ samples = one long streaming read |
 | **Re-reads** | $x$ re-read once per output neuron, hopping each time | Each cell read exactly once per forward pass |
 | **Hardware effect** | Strided access — poor cache locality, awkward for SIMD | Linear streaming — ideal for CPUs, GPUs, and tensor cores |
 
-> **Memory takeaway:** Compare the two ribbons cell by cell — Case 1 interleaves the samples as `(5, 7, 6, 8)` while Case 2 keeps them as `(5, 6, 7, 8)`. That single layout choice is why PyTorch stores $W$ as `(out_features, in_features)` and computes $xW^T$: the batch becomes one forward-marching read head instead of $B$ strided hops.
+> **Memory takeaway:** Compare the two ribbons cell by cell — Case 1 interleaves the samples as `(5, 7, 6, 8)` while Case 2 keeps them as `(5, 6, 7, 8)`. That single layout choice is why PyTorch stores $W$ as `(out_features, in_features)` and computes $xW^T$: the batch becomes one forward-marching read head instead of $B$ strided hops. Side-by-side linearization pictures like these are the standard teaching tool — see the [row- vs. column-major illustration](https://en.wikipedia.org/wiki/Row-_and_column-major_order) on Wikipedia.
 
 ---
 
