@@ -77,26 +77,46 @@ Within the mathematical framework of the shape rule, changes to the dimensional 
 
 ---
 
-## 4. TEXT-BASED INTERACTIVE PLOT DIAGRAM
+## 4. MERMAID PLOT DIAGRAM
 
-```text
-       INPUT MATRIX (X)                 WEIGHT MATRIX (W)                OUTPUT MATRIX (Y)
-    [Batch Size x Features]          [Features x Hidden Units]        [Batch Size x Hidden Units]
-        
-        n Columns (Features)            p Columns (Hidden)               p Columns (Hidden)
-         ◄───────────────►               ◄───────────────►                ◄───────────────►
-     ┌───────────────────┐               ┌───────────────┐                ┌───────────────┐  ▲
-  ▲  │  ·   ·   ·   ·   ·│            ▲  │  ·   ·   ·   ·│             ▲  │  ·   ·   ·   ·│  │
-  │  │  ·   ·   ·   ·   ·│            │  │  ·   ·   ·   ·│             │  │  ·   ·   ·   ·│  │
-m │  │  ·   ·   ·   ·   ·│   ███►   n │  │  ·   ·   ·   ·│    ====►  m │  │  ·   ·   ·   ·│  │ Rows
-  │  │  ·   ·   ·   ·   ·│  MatMul    │  │  ·   ·   ·   ·│   Collapse  │  │  ·   ·   ·   ·│  │ (Batch)
-  ▼  │  ·   ·   ·   ·   ·│            ▼  │  ·   ·   ·   ·│             ▼  │  ·   ·   ·   ·│  ▼
-     └───────────────────┘               └───────────────┘                └────────────────┘
-       Shape: (m x n)                      Shape: (n x p)                   Shape: (m x p)
-                 │                                   ▲
-                 └───────── INNER DIMS MUST ─────────┘
-                            MATCH EXACTLY!
+```mermaid
+flowchart LR
+    subgraph X ["Input Matrix X<br/>Shape: (m × n)"]
+        direction TB
+        X_INFO["Batch Size: m rows<br/>Features: n columns"]
+    end
+
+    subgraph W ["Weight Matrix W<br/>Shape: (n × p)"]
+        direction TB
+        W_INFO["Features: n rows<br/>Hidden Units: p columns"]
+    end
+
+    subgraph INNER ["Inner Dimension Check"]
+        direction TB
+        MATCH["Inner Dims Match:<br/>Cols of X (n) == Rows of W (n)"]
+        COLLAPSE["Inner dimension n collapses<br/>via row · col dot products"]
+        MATCH --> COLLAPSE
+    end
+
+    subgraph Y ["Output Matrix Y<br/>Shape: (m × p)"]
+        direction TB
+        Y_INFO["Batch Size: m rows (from X)<br/>Hidden Units: p columns (from W)"]
+    end
+
+    X -->|"Inner: n columns"| MATCH
+    W -->|"Inner: n rows"| MATCH
+    COLLAPSE -->|"Resulting footprint"| Y
 ```
+
+**Reading the diagram**
+
+| Element | Meaning |
+|---|---|
+| `X` | Input matrix with $m$ rows (samples in batch) and $n$ columns (input features) |
+| `W` | Weight matrix with $n$ rows (input features) and $p$ columns (hidden units / output features) |
+| `INNER` | The core shape rule: the column count of $\mathbf{X}$ must match the row count of $\mathbf{W}$ ($n = n$) |
+| `COLLAPSE` | Each cell of $\mathbf{Y}$ is a dot product across the $n$ shared elements; the inner dimension compresses away |
+| `Y` | Output matrix inheriting outer dimensions: $m$ rows from $\mathbf{X}$ and $p$ columns from $\mathbf{W}$ |
 
 ### What to Visualize in Python (e.g., Matplotlib)
 If you were to plot this dynamically in a Python environment using `imshow()` or a heat map layout:
