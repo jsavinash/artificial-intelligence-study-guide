@@ -9,6 +9,36 @@ Imagine a wind tunnel testing the aerodynamics of a car. When you blast wind thr
 
 In linear algebra, a **matrix is like that blast of wind**—it warps, rotates, and transforms geometric space. Most vectors get violently knocked off their original path when multiplied by a matrix. But a few special, stubborn vectors do not change their directional path at all. They are merely scaled (stretched, shrunk, or flipped). These stubborn vectors are **eigenvectors**, and the factor by which they stretch or shrink is their corresponding **eigenvalue**.
 
+The diagram below maps each part of the wind-tunnel story onto its linear-algebra counterpart:
+
+```mermaid
+graph TD
+    WIND["Wind-tunnel blast<br/>= the matrix A"] --> WARP["A warps, rotates<br/>and stretches space"]
+
+    WARP --> LOOSE["Loose objects<br/>= ordinary vectors x"]
+    WARP --> ARROW["A streamlined arrow aligned<br/>with the airflow<br/>= the eigenvector v"]
+
+    LOOSE --> LOOSE_OUT["Pushed, turned and spun<br/>- its direction changes"]
+    ARROW --> ARROW_OUT["Never rotates<br/>- it stays on the same line"]
+
+    ARROW_OUT --> SCALE["The wind only stretches<br/>or compresses it"]
+    SCALE --> RESULT["v is scaled to λv<br/>(same direction, new length)<br/>= the eigenvalue λ"]
+
+    classDef wind fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a8a
+    classDef bad  fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
+    classDef good fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d
+    class WIND wind
+    class LOOSE,LOOSE_OUT bad
+    class ARROW,ARROW_OUT,SCALE,RESULT good
+```
+
+| Wind-tunnel story | Linear algebra | Symbol |
+|---|---|---|
+| The blast of wind | the matrix that warps space | $\mathbf{A}$ |
+| Loose objects (pushed, turned, spun) | ordinary vectors whose direction changes | $\mathbf{x}$ |
+| The streamlined, stubborn arrow | the **eigenvector** that keeps its direction | $\mathbf{v}$ |
+| Wind stretching / compressing the arrow | the scalar that rescales the eigenvector | $\lambda$ (**eigenvalue**) |
+
 #### The Technical Definition
 Given a square matrix $\mathbf{A}$, an **eigenvector** is a non-zero vector $\mathbf{v}$ that, when multiplied by $\mathbf{A}$, yields a scalar multiple of itself. This means the matrix transformation behaves exactly like simple scalar multiplication for that specific vector. An **eigenvalue** $\lambda$ is the scalar factor by which the eigenvector's length is scaled during this transformation.
 
