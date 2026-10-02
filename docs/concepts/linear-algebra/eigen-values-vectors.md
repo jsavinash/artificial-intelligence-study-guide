@@ -39,6 +39,10 @@ graph TD
 | The streamlined, stubborn arrow | the **eigenvector** that keeps its direction | $\mathbf{v}$ |
 | Wind stretching / compressing the arrow | the scalar that rescales the eigenvector | $\lambda$ (**eigenvalue**) |
 
+![The wind-tunnel analogy in 2-D: a unit circle is warped into an ellipse by the matrix; an ordinary vector (red) is rotated off its line, while the two eigenvectors (green, amber) stay on their own dashed lines — one stretched, one squeezed](../../figures/00-math/35_eigen_wind_tunnel.png)
+
+**Reading the picture:** The two dashed diagonals are the invariant **eigen-lines**. In the left panel ("still air") the red ordinary vector $\mathbf{x}$ and the two eigenvectors $\mathbf{v}_1, \mathbf{v}_2$ all start at the origin. Once the matrix $\mathbf{A}$ is applied (right panel), the unit circle is warped into an ellipse, and the red vector $\mathbf{Ax}$ swings **off** its original line — proof it is *not* an eigenvector. The green vector $\mathbf{v}_1$ stays exactly on its dashed line and only grows (stretched by $\lambda_1 = 2$), while the amber $\mathbf{v}_2$ stays on its line and shrinks (squeezed by $\lambda_2 = 0.4$). The "stubborn arrows" are the eigenvectors; the stretch/squeeze factor is the eigenvalue.
+
 #### The Technical Definition
 Given a square matrix $\mathbf{A}$, an **eigenvector** is a non-zero vector $\mathbf{v}$ that, when multiplied by $\mathbf{A}$, yields a scalar multiple of itself. This means the matrix transformation behaves exactly like simple scalar multiplication for that specific vector. An **eigenvalue** $\lambda$ is the scalar factor by which the eigenvector's length is scaled during this transformation.
 

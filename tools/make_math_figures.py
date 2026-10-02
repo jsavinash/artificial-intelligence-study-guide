@@ -360,6 +360,78 @@ def fig_affine_two_steps():
     fig.tight_layout()
     return save(fig, "34_affine_scale_rotate_translate.png")
 
+
+def fig_eigen_wind_tunnel():
+    """The wind-tunnel analogy: a matrix warps space, but eigenvectors stay put.
+
+    A unit circle (all directions) is mapped through a symmetric matrix. Most
+    vectors — drawn red — get rotated off their original line, exactly like
+    loose debris in a wind tunnel. The two eigenvectors (green and amber) never
+    leave their own lines: one is stretched by λ₁ = 2, the other compressed by
+    λ₂ = 0.4, so A·v = λv.
+    """
+    A = np.array([[1.2, 0.8], [0.8, 1.2]])         # symmetric → eigen-lines y = ±x
+    lam, vec = np.linalg.eigh(A)                    # λ = [0.4, 2.0]
+    order = np.argsort(lam)[::-1]
+    lam, vec = lam[order], vec[:, order]
+    th = np.linspace(0, 2 * np.pi, 400)
+    circle = np.c_[np.cos(th), np.sin(th)]
+    ell = circle @ A.T
+    x0 = np.array([1.0, 0.0])                       # the "loose" ordinary vector
+
+    fig, axes = plt.subplots(1, 2, figsize=(9.8, 4.7))
+    # symmetric matrix: the invariant lines are the two diagonals
+    for ax in axes:
+        for s in (1, -1):
+            ax.plot([-2.3, 2.3], [-2.3 * s, 2.3 * s], ls="--", lw=1.0,
+                    color="gray", alpha=0.7, zorder=1)
+        ax.axhline(0, color="gray", lw=0.8, zorder=1)
+        ax.axvline(0, color="gray", lw=0.8, zorder=1)
+        ax.set_aspect("equal")
+        ax.set_xlim(-2.5, 2.5); ax.set_ylim(-2.5, 2.5)
+        ax.set_xlabel("feature 1"); ax.set_ylabel("feature 2")
+
+    def arrow(ax, tip, color, lw=2.4, ls="-"):
+        ax.annotate("", xy=tip, xytext=(0, 0),
+                    arrowprops=dict(arrowstyle="-|>", color=color, lw=lw, ls=ls),
+                    zorder=5)
+
+    # ---- Panel 1: before — the still air ----
+    ax = axes[0]
+    ax.plot(circle[:, 0], circle[:, 1], color=C["b"], lw=1.6, ls=":",
+            label="unit circle (all directions)", zorder=2)
+    arrow(ax, x0, C["r"])
+    arrow(ax, vec[:, 0] * 1.0, C["g"])
+    arrow(ax, vec[:, 1] * 1.0, C["o"])
+    ax.set_title("Before:  the still air")
+    ax.text(x0[0] + 0.05, x0[1] - 0.32, "ordinary vector  x", color=C["r"],
+            fontsize=8.5, weight="bold")
+    ax.text(*vec[:, 0] * 1.08, "v₁", color=C["g"], fontsize=9, weight="bold")
+    ax.text(*vec[:, 1] * 1.08, "v₂", color=C["o"], fontsize=9, weight="bold")
+    ax.legend(loc="lower right", fontsize=8, framealpha=0.9)
+
+    # ---- Panel 2: after — the blast of wind (matrix A) ----
+    ax = axes[1]
+    ax.plot(ell[:, 0], ell[:, 1], color=C["b"], lw=1.8, ls=":",
+            label="warped circle → ellipse", zorder=2)
+    arrow(ax, A @ x0, C["r"])
+    arrow(ax, A @ vec[:, 0], C["g"])
+    arrow(ax, A @ vec[:, 1], C["o"])
+    ax.set_title("After:  the blast of wind (matrix A)")
+    ax.text(1.35, 0.35, "Ax — rotated off its line!", color=C["r"],
+            fontsize=8.5, weight="bold")
+    ax.text(0.55, 1.95, f"v₁ stays: A·v₁ = {lam[0]:.0f}·v₁ (stretched)",
+            color=C["g"], fontsize=8.5, weight="bold")
+    ax.text(0.45, -0.95, f"A·v₂ = {lam[1]:.1f}·v₂ (squeezed)",
+            color=C["o"], fontsize=8.5, weight="bold")
+    ax.legend(loc="lower right", fontsize=8, framealpha=0.9)
+
+    fig.suptitle("Wind-tunnel analogy: the matrix turns most vectors, "
+                 "but eigenvectors only stretch or squeeze", fontsize=11.5,
+                 weight="bold")
+    fig.tight_layout()
+    return save(fig, "35_eigen_wind_tunnel.png")
+
 # =========================================================================
 # §2 Calculus & gradients
 # =========================================================================
@@ -1105,7 +1177,7 @@ FIGURES = [
     fig_entropy, fig_cross_entropy, fig_kl_divergence,
     fig_mutual_information,
     fig_probability_tree, fig_learning_loop, fig_linalg_card,
-    fig_linear_layer_affine, fig_affine_two_steps,
+    fig_linear_layer_affine, fig_affine_two_steps, fig_eigen_wind_tunnel,
 ]
 
 
