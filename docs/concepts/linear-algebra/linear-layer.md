@@ -294,6 +294,28 @@ The formula splits geometric space manipulation into two clean, distinct parts:
 1. **Linear Scaling & Rotation ($xW^T$):** The matrix multiplication combines, rotates, scales, or squashes the input coordinates. This step acts like an audio mixing console, where every input is weighted and blended together. Crucially, without a bias, this operation is locked to the origin: if the input $x$ is entirely zeros, the product $xW^T$ is unconditionally zero.
 2. **Translation ($+b$):** Adding the bias vector shifts the entire geometric plane away from the origin point. This gives the neural network the flexibility to shift its baseline predictions up or down, allowing it to output meaningful values even when the incoming feature indicators are dead silent.
 
+The same two steps as a pipeline diagram:
+
+```mermaid
+graph LR
+    X["input  x<br/>(shape at the origin)"] --> S1["① Scale<br/>stretch / squash per axis"]
+    S1 --> S2["① Rotate<br/>tilt the whole shape"]
+    S2 --> LOCK["still locked to the origin<br/>x = 0 ⇒ xWᵀ = 0"]
+    LOCK --> T1["② Translate<br/>add the bias vector b"]
+    T1 --> Y["output  y = xWᵀ + b<br/>slid off the origin"]
+
+    classDef lin  fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
+    classDef lock fill:#fef3c7,stroke:#f59e0b,stroke-width:1px,color:#78350f
+    classDef tra  fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d
+    classDef io   fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a8a
+    class S1,S2 lin
+    class LOCK lock
+    class T1 tra
+    class X,Y io
+```
+
+And the same two steps drawn in 2-D coordinates:
+
 ![The two steps of a linear layer in 2-D: a square is first scaled and rotated about the fixed origin by xWᵀ, then translated off the origin by adding the bias b](../../figures/00-math/34_affine_scale_rotate_translate.png)
 
 Reading the three panels:
