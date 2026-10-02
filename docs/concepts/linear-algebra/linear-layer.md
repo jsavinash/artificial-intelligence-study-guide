@@ -173,6 +173,25 @@ graph LR
 
 > **Memory takeaway:** Compare the two ribbons cell by cell — Case 1 interleaves the samples as `(5, 7, 6, 8)` while Case 2 keeps them as `(5, 6, 7, 8)`. That single layout choice is why PyTorch stores $W$ as `(out_features, in_features)` and computes $xW^T$: the batch becomes one forward-marching read head instead of $B$ strided hops. Side-by-side linearization pictures like these are the standard teaching tool — see the [row- vs. column-major illustration](https://en.wikipedia.org/wiki/Row-_and_column-major_order) on Wikipedia.
 
+### 1.7 A 2D picture: slope ($w$) and intercept ($b$)
+
+Strip a linear layer down to its smallest form — **one input feature, one output feature** — and it stops being a matrix at all: it becomes a single straight line. The weight collapses to a scalar $w$ (the **slope**) and the bias to a scalar $b$ (the **intercept**):
+
+$$y = w\,x + b$$
+
+![A linear layer drawn as a straight line: the slope w is the rise over run and the bias b is the y-intercept where the line crosses x = 0](../../figures/00-math/33_linear_layer_affine.png)
+
+Reading the plot:
+
+| Element | Meaning | Ties back to |
+|---|---|---|
+| Solid blue line `y = w·x + b` | The affine map a linear layer computes | §1.1 — a weighted sum, then a shift |
+| Slope triangle, `w = Δy / Δx` | How much the output moves per unit of input | The one weight row of $W$ (the tilt) |
+| Green point at `(0, b)` | The output when the input feature is exactly zero | The bias $b$ |
+| Dashed red line `y = w·x` | The *same* weight with **no bias**, locked to the origin | Why $b \neq 0$ is essential (§2) |
+
+Going from the dashed red line to the solid blue line is a pure **vertical translation** by $b$: the **slope** sets the tilt and the **intercept** slides the whole line up or down. This is the 1-D shadow of the general rule from §2 — the geometric work splits into a rotation/stretch ($xW^T$) plus a translation ($+b$), and a line without a bias is permanently pinned to the origin.
+
 ---
 
 ## 2. THE MATHEMATICAL FORMULA

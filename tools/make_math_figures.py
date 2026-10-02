@@ -260,6 +260,48 @@ def fig_linalg_card():
     fig.tight_layout()
     return save(fig, "32_linalg_cheatsheet.png")
 
+
+def fig_linear_layer_affine():
+    """A 1-D linear layer is just a line: y = w·x + b.
+
+    Isolates the two terms of the affine map in 2-D — the slope w (weight)
+    read off a rise/run triangle and the intercept b (bias) where the line
+    crosses the y-axis — and contrasts the biased line with the bias-free
+    y = w·x that is pinned to the origin.
+    """
+    w, b = 2.0, 3.0                                   # slope (weight), intercept (bias)
+    x = np.linspace(-1.6, 4.6, 200)
+    fig, ax = plt.subplots(figsize=(5.6, 4.2))
+    # bias-free map: the same weight, but locked to the origin
+    ax.plot(x, w * x, ls="--", color=C["r"], lw=1.6,
+            label="no bias:  y = w·x  (pinned to the origin)")
+    # the affine map a linear layer actually computes
+    ax.plot(x, w * x + b, color=C["b"], lw=2.4,
+            label="linear layer:  y = w·x + b")
+    # intercept: the output when the input feature is zero
+    ax.plot([0], [b], "o", color=C["g"], ms=8, zorder=5)
+    ax.annotate(f"intercept b = {b:g}\n(line crosses x = 0 here)",
+                xy=(0, b), xytext=(-1.5, 8.4), color=C["g"], weight="bold",
+                fontsize=8.5,
+                arrowprops=dict(arrowstyle="-|>", color=C["g"], lw=1.4))
+    # slope: rise over run measured on the solid line
+    x1, x2 = 1.0, 3.0
+    y1, y2 = w * x1 + b, w * x2 + b
+    ax.plot([x1, x2], [y1, y1], color=C["k"], lw=1.1)          # run (Δx)
+    ax.plot([x2, x2], [y1, y2], color=C["k"], lw=1.1)          # rise (Δy)
+    ax.text((x1 + x2) / 2, y1 - 0.6, "run Δx = 2", ha="center", fontsize=8)
+    ax.text(x2 + 0.12, (y1 + y2) / 2,
+            f"rise Δy = {y2 - y1:g}\nslope w = Δy/Δx = {w:g}",
+            fontsize=8, va="center")
+    ax.axhline(0, color="gray", lw=0.8)
+    ax.axvline(0, color="gray", lw=0.8)
+    ax.set_title(f"§1 · A linear layer as a 2-D line: "
+                 f"slope w = {w:g}, intercept b = {b:g}")
+    ax.set_xlabel("input feature  x"); ax.set_ylabel("output  y")
+    ax.set_xlim(-1.7, 4.9); ax.set_ylim(-1.2, 12.0)
+    ax.legend(loc="upper left", fontsize=8, framealpha=0.9)
+    return save(fig, "33_linear_layer_affine.png")
+
 # =========================================================================
 # §2 Calculus & gradients
 # =========================================================================
@@ -1005,6 +1047,7 @@ FIGURES = [
     fig_entropy, fig_cross_entropy, fig_kl_divergence,
     fig_mutual_information,
     fig_probability_tree, fig_learning_loop, fig_linalg_card,
+    fig_linear_layer_affine,
 ]
 
 
