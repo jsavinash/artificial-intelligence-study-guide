@@ -179,18 +179,30 @@ Strip a linear layer down to its smallest form — **one input feature, one outp
 
 $$y = w\,x + b$$
 
-![A linear layer drawn as a straight line: the slope w is the rise over run and the bias b is the y-intercept where the line crosses x = 0](../../figures/00-math/33_linear_layer_affine.png)
+```mermaid
+graph LR
+    X["input x"] -->|"multiply by weight w<br/>(SLOPE — sets the tilt)"| MUL["w · x"]
+    MUL -->|"add bias b<br/>(INTERCEPT — shifts the line up/down)"| Y["output y = w·x + b"]
+
+    classDef slope fill:#d4e1f5,stroke:#3b71ca,stroke-width:2px
+    classDef inter fill:#d1f2dd,stroke:#16a34a,stroke-width:2px
+    classDef io fill:#e1f5fe,stroke:#03a9f4,stroke-width:2px
+    class MUL slope
+    class Y inter
+    class X io
+```
+
+![A linear layer drawn as a single straight line: the slope w is the rise over run and the bias b is the y-intercept where the line crosses x = 0](../../figures/00-math/33_linear_layer_affine.png)
 
 Reading the plot:
 
 | Element | Meaning | Ties back to |
 |---|---|---|
-| Solid blue line `y = w·x + b` | The affine map a linear layer computes | §1.1 — a weighted sum, then a shift |
+| Single blue line `y = w·x + b` | The affine map a linear layer computes | §1.1 — a weighted sum, then a shift |
 | Slope triangle, `w = Δy / Δx` | How much the output moves per unit of input | The one weight row of $W$ (the tilt) |
 | Green point at `(0, b)` | The output when the input feature is exactly zero | The bias $b$ |
-| Dashed red line `y = w·x` | The *same* weight with **no bias**, locked to the origin | Why $b \neq 0$ is essential (§2) |
 
-Going from the dashed red line to the solid blue line is a pure **vertical translation** by $b$: the **slope** sets the tilt and the **intercept** slides the whole line up or down. This is the 1-D shadow of the general rule from §2 — the geometric work splits into a rotation/stretch ($xW^T$) plus a translation ($+b$), and a line without a bias is permanently pinned to the origin.
+The **slope** $w$ sets the tilt of the line (the weight's job) and the **intercept** $b$ slides the whole line up or down (the bias's job). Drop the bias and the line is forced through the origin — which is exactly why $b \neq 0$ matters. This is the 1-D shadow of the general rule from §2: the geometric work splits into a rotation/stretch ($xW^T$) plus a translation ($+b$).
 
 ---
 
