@@ -179,6 +179,15 @@ Strip a linear layer down to its smallest form — **one input feature, one outp
 
 $$y = w\,x + b$$
 
+> **Definition — slope ($w$):** the *constant rate of change* of the output with respect to the input, i.e. how much $y$ moves for each **one-unit increase** in $x$. Formally, for any two distinct points $(x_1, y_1)$ and $(x_2, y_2)$ on the line: $w = \dfrac{\Delta y}{\Delta x} = \dfrac{y_2 - y_1}{x_2 - x_1}$ (rise over run). A larger $|w|$ tilts the line more steeply; the sign of $w$ says whether the line rises ($w > 0$) or falls ($w < 0$).
+
+> **Definition — intercept ($b$):** the value of the output when the input is **zero**, i.e. the $y$-value at which the line crosses the vertical axis, the point $(0, b)$. Formally $b = y(0)$ — setting $x = 0$ in $y = wx + b$ leaves $y = b$. Geometrically it is the line's **vertical offset**: changing $b$ translates the whole line up or down without altering its tilt.
+
+| Symbol | Name | Definition | Role in the layer |
+|---|---|---|---|
+| $w$ | **slope** | $w = \dfrac{\Delta y}{\Delta x}$ — output change per unit input change | the **weight** (sets the tilt) |
+| $b$ | **intercept** | $b = y(0)$ — output when the input is zero, at the point $(0, b)$ | the **bias** (vertical shift) |
+
 ```mermaid
 graph LR
     X["input x"] -->|"multiply by weight w<br/>(SLOPE — sets the tilt)"| MUL["w · x"]
