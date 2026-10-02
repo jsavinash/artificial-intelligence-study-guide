@@ -294,6 +294,18 @@ The formula splits geometric space manipulation into two clean, distinct parts:
 1. **Linear Scaling & Rotation ($xW^T$):** The matrix multiplication combines, rotates, scales, or squashes the input coordinates. This step acts like an audio mixing console, where every input is weighted and blended together. Crucially, without a bias, this operation is locked to the origin: if the input $x$ is entirely zeros, the product $xW^T$ is unconditionally zero.
 2. **Translation ($+b$):** Adding the bias vector shifts the entire geometric plane away from the origin point. This gives the neural network the flexibility to shift its baseline predictions up or down, allowing it to output meaningful values even when the incoming feature indicators are dead silent.
 
+![The two steps of a linear layer in 2-D: a square is first scaled and rotated about the fixed origin by xWᵀ, then translated off the origin by adding the bias b](../../figures/00-math/34_affine_scale_rotate_translate.png)
+
+Reading the three panels:
+
+| Panel | Operation | What the plot shows |
+|---|---|---|
+| 1 · Original $x$ | input | The square sits in feature space; the origin `(0,0)` is marked |
+| 2 · Linear $xW^T$ | scale + rotate | The square is squashed (scaled per-axis) and tilted (rotated), but the origin **stays fixed** — a zero input would map to a zero output |
+| 3 · Affine $xW^T + b$ | $+$ translation | The dashed red shadow is the pre-bias shape; the orange arrow is $b$, sliding the whole shape **off the origin** |
+
+The key contrast is panel 2 vs. panel 3: the linear map can only scale, rotate, or squash while pinned to the origin, so without the bias the network's output is forced through zero. The bias $b$ supplies the missing **translation**, decoupling the output baseline from the input magnitude.
+
 ---
 
 ## 3. CAUSATION & BEHAVIOR

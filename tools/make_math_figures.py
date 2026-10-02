@@ -301,6 +301,65 @@ def fig_linear_layer_affine():
     ax.legend(loc="upper left", fontsize=8.5, framealpha=0.9)
     return save(fig, "33_linear_layer_affine.png")
 
+
+def fig_affine_two_steps():
+    """The linear layer as geometry: a scale/rotation, then a translation.
+
+    Splits the affine map into the two steps named in the "Logical Intuition"
+    section — the linear map xWᵀ (which can only scale, rotate or squash, and
+    is pinned to the origin) and the translation +b that slides the whole shape
+    off the origin. Three panels show the same square before, after the linear
+    map, and after the bias shift.
+    """
+    theta = np.radians(30.0)                      # rotation angle
+    R = np.array([[np.cos(theta), -np.sin(theta)],
+                  [np.sin(theta), np.cos(theta)]])
+    S = np.diag([1.6, 0.7])                       # scale (x) + squash (y)
+    A = R @ S                                     # the linear map  xWᵀ
+    b = np.array([2.2, 1.1])                      # the bias (translation)
+    # a square centred on the origin: its edges expose both rotation and scaling
+    sq = np.array([[-0.6, -0.6], [0.6, -0.6], [0.6, 0.6], [-0.6, 0.6],
+                   [-0.6, -0.6]])
+    lin = sq @ A.T                                # after xWᵀ
+    aff = lin + b                                 # after +b
+
+    fig, axes = plt.subplots(1, 3, figsize=(11.4, 3.9))
+    panels = [
+        (sq, C["b"], "1 · Original  x", "input feature space"),
+        (lin, C["r"], "2 · Linear  xWᵀ",
+         "scale + rotate — origin stays fixed"),
+        (aff, C["g"], "3 · Affine  xWᵀ + b",
+         "translation — the shape slides off the origin"),
+    ]
+    for ax, (pts, col, title, sub) in zip(axes, panels):
+        ax.fill(pts[:, 0], pts[:, 1], color=col, alpha=0.18)
+        ax.plot(pts[:, 0], pts[:, 1], color=col, lw=2.2)
+        ax.plot([0], [0], marker="o", color=C["k"], ms=6, zorder=5)
+        ax.annotate("origin (0,0)", (0, 0), (0.25, -2.35), color=C["k"],
+                    fontsize=8,
+                    arrowprops=dict(arrowstyle="-", color="gray", lw=0.8))
+        ax.axhline(0, color="gray", lw=0.9, zorder=1)
+        ax.axvline(0, color="gray", lw=0.9, zorder=1)
+        ax.set_title(title, fontsize=10)
+        ax.text(0.03, 0.95, sub, transform=ax.transAxes, fontsize=8,
+                va="top", color=col, weight="bold")
+        ax.set_aspect("equal")
+        ax.set_xlim(-2.6, 4.3); ax.set_ylim(-2.6, 4.3)
+        ax.set_xlabel("feature 1"); ax.set_ylabel("feature 2")
+    # panel 3: overlay the pre-translation shadow + the bias arrow
+    ax = axes[2]
+    ax.plot(lin[:, 0], lin[:, 1], ls="--", color=C["r"], lw=1.3, alpha=0.75,
+            zorder=2)
+    c0, c1 = lin.mean(0), aff.mean(0)
+    ax.annotate("", xy=c1, xytext=c0,
+                arrowprops=dict(arrowstyle="-|>", color=C["o"], lw=2.2))
+    ax.text(*((c0 + c1) / 2 + np.array([0.0, 0.28])), "b",
+            color=C["o"], weight="bold", fontsize=11)
+    fig.suptitle("One linear layer = a scale/rotation, then a translation",
+                 fontsize=12, weight="bold")
+    fig.tight_layout()
+    return save(fig, "34_affine_scale_rotate_translate.png")
+
 # =========================================================================
 # §2 Calculus & gradients
 # =========================================================================
@@ -1046,7 +1105,7 @@ FIGURES = [
     fig_entropy, fig_cross_entropy, fig_kl_divergence,
     fig_mutual_information,
     fig_probability_tree, fig_learning_loop, fig_linalg_card,
-    fig_linear_layer_affine,
+    fig_linear_layer_affine, fig_affine_two_steps,
 ]
 
 
