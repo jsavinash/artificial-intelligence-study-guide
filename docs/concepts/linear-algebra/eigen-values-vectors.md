@@ -82,13 +82,13 @@ $$(\mathbf{A} - \lambda\mathbf{I})\mathbf{v} = \mathbf{0} \implies \det(\mathbf{
 
 ```mermaid
 graph TD
-    MatrixA[Square Matrix A] --> Transformation(Linear Spatial Transformation)
-    VectorV[Eigenvector v] --> Transformation
-    Transformation -->|Resulting Output| EqualValue[Scaled Vector λv]
-    
-    SubMatrix[A - λI] --> DetCompute(Calculate Determinant)
-    DetCompute -->|Force Squashed Space| ZeroOutput[det = 0]
-    ZeroOutput -->|Extracts| FinalEigenvalues[Eigenvalues λ]
+    MatrixA["Square Matrix A"] --> Transformation("Linear spatial transformation")
+    VectorV["Eigenvector v"] --> Transformation
+    Transformation -->|"Resulting output"| EqualValue["Scaled Vector λv"]
+
+    SubMatrix["A - λI"] --> DetCompute("Calculate determinant")
+    DetCompute -->|"Force squashed space"| ZeroOutput["det = 0"]
+    ZeroOutput -->|"Extracts"| FinalEigenvalues["Eigenvalues λ"]
 ```
 
 The equation $\mathbf{A}\mathbf{v} = \lambda\mathbf{v}$ sets up a profound equivalence: matrix multiplication (which is computationally expensive and changes directions) becomes perfectly identical to scalar multiplication (which is cheap and preserves direction). 
