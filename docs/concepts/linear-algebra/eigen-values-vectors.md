@@ -147,6 +147,7 @@ We are engineering a computer vision model. We have computed the highly simplifi
 
 #### Toy Dataset
 Let the symmetric covariance matrix be:
+
 $$\mathbf{A} = \begin{bmatrix} 4 & 2 \\ 2 & 7 \end{bmatrix}$$
 
 We will calculate the eigenvalues ($\lambda$) and the primary eigenvector ($\mathbf{v}$).
@@ -154,23 +155,33 @@ We will calculate the eigenvalues ($\lambda$) and the primary eigenvector ($\mat
 #### Step-by-Step Arithmetic
 
 **Step 1: Set up the Characteristic Equation to solve for $\lambda$.**
+
 $$\det(\mathbf{A} - \lambda\mathbf{I}) = 0$$
+
 $$\det\left( \begin{bmatrix} 4 & 2 \\ 2 & 7 \end{bmatrix} - \begin{bmatrix} \lambda & 0 \\ 0 & \lambda \end{bmatrix} \right) = 0$$
+
 $$\det \begin{bmatrix} 4 - \lambda & 2 \\ 2 & 7 - \lambda \end{bmatrix} = 0$$
 
 **Step 2: Expand the determinant equation (ad - bc) into a quadratic polynomial.**
+
 $$(4 - \lambda)(7 - \lambda) - (2 \times 2) = 0$$
+
 $$28 - 4\lambda - 7\lambda + \lambda^2 - 4 = 0$$
+
 $$\lambda^2 - 11\lambda + 24 = 0$$
 
 **Step 3: Factor the quadratic equation to find the two eigenvalues.**
+
 $$(\lambda - 3)(\lambda - 8) = 0$$
+
 * $\lambda_1 = 8$ (This represents the axis of **maximum variance**—our primary component)
 * $\lambda_2 = 3$ (Secondary variance)
 
 **Step 4: Solve for the primary Eigenvector ($\mathbf{v}$) using the dominant eigenvalue ($\lambda_1 = 8$).**
 Substitute $\lambda = 8$ back into $(\mathbf{A} - \lambda\mathbf{I})\mathbf{v} = \mathbf{0}$:
+
 $$\begin{bmatrix} 4 - 8 & 2 \\ 2 & 7 - 8 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}$$
+
 $$\begin{bmatrix} -4 & 2 \\ 2 & -1 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}$$
 
 This gives us a system of dependent linear equations:
@@ -179,10 +190,13 @@ This gives us a system of dependent linear equations:
 
 **Step 5: Pick a base value to define the eigenvector and normalize it.**
 Setting $v_1 = 1$ yields $v_2 = 2$. Thus, our unnormalized eigenvector is:
+
 $$\mathbf{v} = \begin{bmatrix} 1 \\ 2 \end{bmatrix}$$
 
 To finalize it for standard AI software (unit length norm of 1.0):
+
 $$\Vert\mathbf{v}\Vert = \sqrt{1^2 + 2^2} = \sqrt{5}$$
+
 $$\mathbf{v}_{\text{normalized}} = \begin{bmatrix} \frac{1}{\sqrt{5}} \\ \frac{2}{\sqrt{5}} \end{bmatrix} \approx \begin{bmatrix} 0.447 \\ 0.894 \end{bmatrix}$$
 
 **Conclusion:** The direction vector `[0.447, 0.894]` captures the core structural lineage of our data variance. Our AI compression system will discard the orthogonal axis ($\lambda_2 = 3$) and project the entire dataset directly onto this line, successfully compressing the dimensional footprint by half while retaining maximum information.
