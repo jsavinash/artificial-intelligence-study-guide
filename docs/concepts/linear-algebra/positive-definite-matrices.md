@@ -28,8 +28,7 @@ Without positive-definite matrices, modern Artificial Intelligence would collaps
 
 The foundational quadratic form that defines a positive-definite matrix $A$ is:
 
-$$x^T A x > 0 \quad 	ext{for all } x 
-eq 0$$
+$$x^T A x > 0 \quad \text{for all } x \neq 0$$
 
 ### The Transformation Pipeline
 Below is a Mermaid flowchart visualizing how a vector passes through the quadratic form mapping pipeline to yield a strictly positive scalar.
@@ -46,19 +45,18 @@ graph LR
 ```
 
 ### Variable and Symbol Definitions
-* **$A$**: A real, symmetric square matrix of size $n 	imes n$.
-* **$x$**: A non-zero column vector of size $n 	imes 1$.
-* **$x^T$**: The transpose of vector $x$, converting it into a row vector of size $1 	imes n$.
+* **$A$**: A real, symmetric square matrix of size $n \times n$.
+* **$x$**: A non-zero column vector of size $n \times 1$.
+* **$x^T$**: The transpose of vector $x$, converting it into a row vector of size $1 \times n$.
 * **$> 0$**: Strictly greater than zero (positive).
-* **$
-eq 0$**: The vector $x$ cannot be the zero vector (since multiplying by all zeros trivially yields zero).
+* **$\neq 0$**: The vector $x$ cannot be the zero vector (since multiplying by all zeros trivially yields zero).
 
 ### The Logical Intuition
 The structure $x^T A x$ is known as a **quadratic form**. It maps a multi-dimensional vector $x$ to a single, real scalar value. 
 
 1. First, $Ax$ transforms the vector $x$ by rotating or scaling it based on the matrix $A$.
 2. Next, multiplying that result by $x^T$ computes the **dot product** between the original vector $x$ and the transformed vector $Ax$.
-3. The dot product measures alignment. Because $x^T (Ax) > 0$, the angle between the original vector $x$ and its transformed version $Ax$ is always less than 90 degrees ($\cos(	heta) > 0$). The matrix $A$ **never forces any vector to turn away from itself or oppose its original direction**.
+3. The dot product measures alignment. Because $x^T (Ax) > 0$, the angle between the original vector $x$ and its transformed version $Ax$ is always less than 90 degrees ($\cos(\theta) > 0$). The matrix $A$ **never forces any vector to turn away from itself or oppose its original direction**.
 
 ---
 
@@ -69,9 +67,8 @@ The structure $x^T A x$ is known as a **quadratic form**. It maps a multi-dimens
 * **Approaching an Eigenvalue of Zero (Input B):** The eigenvalues ($\lambda$) of $A$ dictate its minimum and maximum curvature. If the smallest eigenvalue of $A$ approaches zero, the matrix approaches a state called **positive semi-definite**. The output value $x^T Ax$ along that specific eigenvalue's vector direction drops toward zero, flattening out the U-shaped valley into a flat trough.
 
 ### Edge Cases, Constraints, and Limitations
-* **The Zero Vector Constraint:** The formula *only* holds true for $x 
-eq 0$. If $x = 0$, $x^T A x = 0$ instantly.
-* **Symmetry Assumption:** In AI applications, we typically enforce that $A$ is symmetric ($A = A^T$). If a matrix is non-symmetric but satisfies $x^T Ax > 0$, its symmetric part $rac{A + A^T}{2}$ must be positive-definite.
+* **The Zero Vector Constraint:** The formula *only* holds true for $x \neq 0$. If $x = 0$, $x^T A x = 0$ instantly.
+* **Symmetry Assumption:** In AI applications, we typically enforce that $A$ is symmetric ($A = A^T$). If a matrix is non-symmetric but satisfies $x^T Ax > 0$, its symmetric part $\frac{A + A^T}{2}$ must be positive-definite.
 * **Numerical Instability (Ill-conditioned Matrices):** If the ratio of the largest eigenvalue to the smallest eigenvalue is massive, the matrix becomes "ill-conditioned." In deep learning, this creates a steep canyon where gradients bounce violently back and forth, stalling gradient descent.
 
 ---
@@ -109,34 +106,43 @@ If you plot this in Matplotlib using `plot_surface` or `contour`, look for:
 Let's look at a second-derivative Hessian matrix $H$ used during optimization to evaluate if our model has reached a secure local minimum.
 
 ### The Toy Dataset
-Let's define a tiny $2 	imes 2$ symmetric matrix $H$ representing our Hessian, and a non-zero direction vector $x$:
+Let's define a tiny $2 \times 2$ symmetric matrix $H$ representing our Hessian, and a non-zero direction vector $x$:
 
-$$H = egin{pmatrix} 2 & 1 \ 1 & 3 \end{pmatrix}, \quad x = egin{pmatrix} -1 \ 2 \end{pmatrix}$$
+$$H = \begin{pmatrix} 2 & 1 \\ 1 & 3 \end{pmatrix}, \quad x = \begin{pmatrix} -1 \\ 2 \end{pmatrix}$$
 
 ### Step-by-Step Algebraic Calculation
 We must compute the quadratic form $x^T H x$ and prove that it results in a value $> 0$.
 
 **Step 1: Write out the full matrix equation**
-$$x^T H x = egin{pmatrix} -1 & 2 \end{pmatrix} egin{pmatrix} 2 & 1 \ 1 & 3 \end{pmatrix} egin{pmatrix} -1 \ 2 \end{pmatrix}$$
+
+$$x^T H x = \begin{pmatrix} -1 & 2 \end{pmatrix} \begin{pmatrix} 2 & 1 \\ 1 & 3 \end{pmatrix} \begin{pmatrix} -1 \\ 2 \end{pmatrix}$$
 
 **Step 2: Multiply the matrix $H$ by the column vector $x$ (Right side first)**
 Let's find the intermediate vector $v = Hx$:
-$$v = egin{pmatrix} (2 \cdot -1) + (1 \cdot 2) \ (1 \cdot -1) + (3 \cdot 2) \end{pmatrix}$$
-$$v = egin{pmatrix} -2 + 2 \ -1 + 6 \end{pmatrix} = egin{pmatrix} 0 \ 5 \end{pmatrix}$$
+
+$$v = \begin{pmatrix} (2 \cdot -1) + (1 \cdot 2) \\ (1 \cdot -1) + (3 \cdot 2) \end{pmatrix}$$
+
+$$v = \begin{pmatrix} -2 + 2 \\ -1 + 6 \end{pmatrix} = \begin{pmatrix} 0 \\ 5 \end{pmatrix}$$
 
 **Step 3: Multiply the row vector $x^T$ by our intermediate vector $v$**
-$$x^T v = egin{pmatrix} -1 & 2 \end{pmatrix} egin{pmatrix} 0 \ 5 \end{pmatrix}$$
+
+$$x^T v = \begin{pmatrix} -1 & 2 \end{pmatrix} \begin{pmatrix} 0 \\ 5 \end{pmatrix}$$
+
 $$x^T v = (-1 \cdot 0) + (2 \cdot 5)$$
+
 $$x^T v = 0 + 10 = 10$$
 
 ### Conclusion of the Math
 Because our final scalar result is **10**, which is strictly **$> 0$**, the matrix passes the test for this specific vector. 
 
 To prove it holds true universally, we calculate the eigenvalues of $H$ using the characteristic equation $\det(H - \lambda I) = 0$:
+
 $$(2-\lambda)(3-\lambda) - (1)(1) = 0$$
+
 $$\lambda^2 - 5\lambda + 5 = 0$$
 
 Using the quadratic formula, the eigenvalues are:
-$$\lambda_1 pprox 3.62, \quad \lambda_2 pprox 1.38$$
+
+$$\lambda_1 \approx 3.62, \quad \lambda_2 \approx 1.38$$
 
 Because both eigenvalues are strictly positive ($\lambda_1, \lambda_2 > 0$), **the matrix $H$ is definitively positive-definite**, guaranteeing a stable minimum valley.

@@ -19,7 +19,7 @@ graph LR
 ```
 
 ### Technical Definition
-SVD is a matrix factorization method that generalizes the concept of eigendecomposition to non-square matrices. Mathematically, it states that any real $m 	imes n$ matrix $\mathbf{A}$ can be factorized into three matrices:
+SVD is a matrix factorization method that generalizes the concept of eigendecomposition to non-square matrices. Mathematically, it states that any real $m \times n$ matrix $\mathbf{A}$ can be factorized into three matrices:
 
 $$\mathbf{A} = \mathbf{U} \mathbf{\Sigma} \mathbf{V}^T$$
 
@@ -36,13 +36,13 @@ Where $\mathbf{U}$ and $\mathbf{V}$ are **orthogonal matrices** (meaning their c
 
 The mathematical definition of Singular Value Decomposition is structured as follows:
 
-$$\mathbf{A}_{m 	imes n} = \mathbf{U}_{m 	imes m} \mathbf{\Sigma}_{m 	imes n} \mathbf{V}^T_{n 	imes n}$$
+$$\mathbf{A}_{m \times n} = \mathbf{U}_{m \times m} \mathbf{\Sigma}_{m \times n} \mathbf{V}^T_{n \times n}$$
 
 ### Variable Breakdown
-* $\mathbf{A}$: The **Original Data Matrix** of size $m 	imes n$ representing $m$ samples and $n$ features.
-* $\mathbf{U}$: The **Left Singular Vectors** matrix ($m 	imes m$). Its columns are eigenvectors of $\mathbf{A}\mathbf{A}^T$, forming an orthonormal basis for the output space.
-* $\mathbf{\Sigma}$: The **Singular Values Matrix** ($m 	imes n$). It is zero everywhere except along its main diagonal. The non-zero elements, $\sigma_1 \ge \sigma_2 \ge \dots \ge \sigma_r > 0$, quantify the operational energy or variance captured along each axis.
-* $\mathbf{V}^T$: The **Transposed Right Singular Vectors** matrix ($n 	imes n$). Its rows are eigenvectors of $\mathbf{A}^T\mathbf{A}$, forming an orthonormal basis for the input space.
+* $\mathbf{A}$: The **Original Data Matrix** of size $m \times n$ representing $m$ samples and $n$ features.
+* $\mathbf{U}$: The **Left Singular Vectors** matrix ($m \times m$). Its columns are eigenvectors of $\mathbf{A}\mathbf{A}^T$, forming an orthonormal basis for the output space.
+* $\mathbf{\Sigma}$: The **Singular Values Matrix** ($m \times n$). It is zero everywhere except along its main diagonal. The non-zero elements, $\sigma_1 \ge \sigma_2 \ge \dots \ge \sigma_r > 0$, quantify the operational energy or variance captured along each axis.
+* $\mathbf{V}^T$: The **Transposed Right Singular Vectors** matrix ($n \times n$). Its rows are eigenvectors of $\mathbf{A}^T\mathbf{A}$, forming an orthonormal basis for the input space.
 
 ### Logical Intuition Behind the Structure
 Matrix transformations usually alter vectors by stretching and turning them at the same time, making them difficult to track. SVD decouples these operations completely:
@@ -73,12 +73,12 @@ Below is a visualization mapping how an initial unit boundary circle transforms 
 ```mermaid
 quadrantChart
     title SVD Transformation Space Matrix Scaling Effects
-    x-axis Left Singular Space (u1 Direction) --> Right Singular Space
-    y-axis Minor Axis Extension (u2 Direction) --> Major Axis Extension
+    x-axis "Left Singular Space (u1 Direction)" --> "Right Singular Space"
+    y-axis "Minor Axis Extension (u2 Direction)" --> "Major Axis Extension"
     quadrant-1 Elongated Ellipse Boundary
-    quadrant-2 Major Vector Focus u1 (Length = σ1)
+    quadrant-2 "Major Vector Focus u1 (Length = σ1)"
     quadrant-3 Original Unit Square Reference Context
-    quadrant-4 Minor Vector Focus u2 (Length = σ2)
+    quadrant-4 "Minor Vector Focus u2 (Length = σ2)"
 ```
 
 ### What to Look for in a Dynamic Python Plot (e.g., Matplotlib)
@@ -92,9 +92,9 @@ quadrantChart
 ## 5. AI EXAMPLE WITH STEP-BY-STEP CALCULATION
 
 ### The Use Case
-We want to extract hidden latent relationships from a simple $2 	imes 2$ user-feature matrix representing a tiny embedding layer inside a machine learning model:
+We want to extract hidden latent relationships from a simple $2 \times 2$ user-feature matrix representing a tiny embedding layer inside a machine learning model:
 
-$$\mathbf{A} = egin{bmatrix} 1 & 2 \ 2 & 1 \end{bmatrix}$$
+$$\mathbf{A} = \begin{bmatrix} 1 & 2 \\ 2 & 1 \end{bmatrix}$$
 
 We will decompose this using explicit, step-by-step arithmetic.
 
@@ -103,14 +103,14 @@ We will decompose this using explicit, step-by-step arithmetic.
 ### Step 1: Compute $\mathbf{A}^T\mathbf{A}$ to Find Right Singular Vectors ($\mathbf{V}$)
 First, compute the dot product of the transposed matrix and itself:
 
-$$\mathbf{A}^T\mathbf{A} = egin{bmatrix} 1 & 2 \ 2 & 1 \end{bmatrix} egin{bmatrix} 1 & 2 \ 2 & 1 \end{bmatrix} = egin{bmatrix} (1\cdot1 + 2\cdot2) & (1\cdot2 + 2\cdot1) \ (2\cdot1 + 1\cdot2) & (2\cdot2 + 1\cdot1) \end{bmatrix} = egin{bmatrix} 5 & 4 \ 4 & 5 \end{bmatrix}$$
+$$\mathbf{A}^T\mathbf{A} = \begin{bmatrix} 1 & 2 \\ 2 & 1 \end{bmatrix} \begin{bmatrix} 1 & 2 \\ 2 & 1 \end{bmatrix} = \begin{bmatrix} (1\cdot1 + 2\cdot2) & (1\cdot2 + 2\cdot1) \\ (2\cdot1 + 1\cdot2) & (2\cdot2 + 1\cdot1) \end{bmatrix} = \begin{bmatrix} 5 & 4 \\ 4 & 5 \end{bmatrix}$$
 
 ---
 
 ### Step 2: Extract Eigenvalues ($\lambda$) for Singular Value Scales
 Set up the characteristic determinant equation $\det(\mathbf{A}^T\mathbf{A} - \lambda\mathbf{I}) = 0$:
 
-$$\det egin{bmatrix} 5 - \lambda & 4 \ 4 & 5 - \lambda \end{bmatrix} = 0$$
+$$\det \begin{bmatrix} 5 - \lambda & 4 \\ 4 & 5 - \lambda \end{bmatrix} = 0$$
 
 $$(5 - \lambda)(5 - \lambda) - (4)(4) = 0$$
 
@@ -124,7 +124,7 @@ Singular values ($\sigma$) are the square roots of these eigenvalues:
 * $\sigma_1 = \sqrt{9} = 3$
 * $\sigma_2 = \sqrt{1} = 1$
 
-$$\mathbf{\Sigma} = egin{bmatrix} 3 & 0 \ 0 & 1 \end{bmatrix}$$
+$$\mathbf{\Sigma} = \begin{bmatrix} 3 & 0 \\ 0 & 1 \end{bmatrix}$$
 
 ---
 
@@ -132,44 +132,53 @@ $$\mathbf{\Sigma} = egin{bmatrix} 3 & 0 \ 0 & 1 \end{bmatrix}$$
 Find the normalized eigenvectors of $\mathbf{A}^T\mathbf{A}$.
 
 **For $\lambda_1 = 9$:**
-$$egin{bmatrix} 5 - 9 & 4 \ 4 & 5 - 9 \end{bmatrix} egin{bmatrix} x_1 \ x_2 \end{bmatrix} = egin{bmatrix} 0 \ 0 \end{bmatrix} \implies egin{bmatrix} -4 & 4 \ 4 & -4 \end{bmatrix} egin{bmatrix} x_1 \ x_2 \end{bmatrix} = egin{bmatrix} 0 \ 0 \end{bmatrix}$$
+
+$$\begin{bmatrix} 5 - 9 & 4 \\ 4 & 5 - 9 \end{bmatrix} \begin{bmatrix} x_1 \\ x_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix} \implies \begin{bmatrix} -4 & 4 \\ 4 & -4 \end{bmatrix} \begin{bmatrix} x_1 \\ x_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}$$
+
 This means $-4x_1 + 4x_2 = 0 \implies x_1 = x_2$. Normalizing to unit length:
 
-$$\mathbf{v}_1 = egin{bmatrix} rac{1}{\sqrt{2}} \ rac{1}{\sqrt{2}} \end{bmatrix}$$
+$$\mathbf{v}_1 = \begin{bmatrix} \frac{1}{\sqrt{2}} \\ \frac{1}{\sqrt{2}} \end{bmatrix}$$
 
 **For $\lambda_2 = 1$:**
-$$egin{bmatrix} 5 - 1 & 4 \ 4 & 5 - 1 \end{bmatrix} egin{bmatrix} x_1 \ x_2 \end{bmatrix} = egin{bmatrix} 0 \ 0 \end{bmatrix} \implies egin{bmatrix} 4 & 4 \ 4 & 4 \end{bmatrix} egin{bmatrix} x_1 \ x_2 \end{bmatrix} = egin{bmatrix} 0 \ 0 \end{bmatrix}$$
+
+$$\begin{bmatrix} 5 - 1 & 4 \\ 4 & 5 - 1 \end{bmatrix} \begin{bmatrix} x_1 \\ x_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix} \implies \begin{bmatrix} 4 & 4 \\ 4 & 4 \end{bmatrix} \begin{bmatrix} x_1 \\ x_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}$$
+
 This means $4x_1 + 4x_2 = 0 \implies x_1 = -x_2$. Normalizing to unit length:
 
-$$\mathbf{v}_2 = egin{bmatrix} rac{1}{\sqrt{2}} \ -rac{1}{\sqrt{2}} \end{bmatrix}$$
+$$\mathbf{v}_2 = \begin{bmatrix} \frac{1}{\sqrt{2}} \\ -\frac{1}{\sqrt{2}} \end{bmatrix}$$
 
 Assemble $\mathbf{V}$ and transpose to get $\mathbf{V}^T$:
-$$\mathbf{V} = egin{bmatrix} rac{1}{\sqrt{2}} & rac{1}{\sqrt{2}} \ rac{1}{\sqrt{2}} & -rac{1}{\sqrt{2}} \end{bmatrix} \implies \mathbf{V}^T = egin{bmatrix} rac{1}{\sqrt{2}} & rac{1}{\sqrt{2}} \ rac{1}{\sqrt{2}} & -rac{1}{\sqrt{2}} \end{bmatrix}$$
+
+$$\mathbf{V} = \begin{bmatrix} \frac{1}{\sqrt{2}} & \frac{1}{\sqrt{2}} \\ \frac{1}{\sqrt{2}} & -\frac{1}{\sqrt{2}} \end{bmatrix} \implies \mathbf{V}^T = \begin{bmatrix} \frac{1}{\sqrt{2}} & \frac{1}{\sqrt{2}} \\ \frac{1}{\sqrt{2}} & -\frac{1}{\sqrt{2}} \end{bmatrix}$$
 
 ---
 
 ### Step 4: Compute Left Singular Vectors Matrix ($\mathbf{U}$)
-Use the relationship formula $\mathbf{u}_i = rac{1}{\sigma_i} \mathbf{A} \mathbf{v}_i$:
+Use the relationship formula $\mathbf{u}_i = \frac{1}{\sigma_i} \mathbf{A} \mathbf{v}_i$:
 
 **For $\mathbf{u}_1$:**
-$$\mathbf{u}_1 = rac{1}{3} egin{bmatrix} 1 & 2 \ 2 & 1 \end{bmatrix} egin{bmatrix} rac{1}{\sqrt{2}} \ rac{1}{\sqrt{2}} \end{bmatrix} = rac{1}{3} egin{bmatrix} rac{3}{\sqrt{2}} \ rac{3}{\sqrt{2}} \end{bmatrix} = egin{bmatrix} rac{1}{\sqrt{2}} \ rac{1}{\sqrt{2}} \end{bmatrix}$$
+
+$$\mathbf{u}_1 = \frac{1}{3} \begin{bmatrix} 1 & 2 \\ 2 & 1 \end{bmatrix} \begin{bmatrix} \frac{1}{\sqrt{2}} \\ \frac{1}{\sqrt{2}} \end{bmatrix} = \frac{1}{3} \begin{bmatrix} \frac{3}{\sqrt{2}} \\ \frac{3}{\sqrt{2}} \end{bmatrix} = \begin{bmatrix} \frac{1}{\sqrt{2}} \\ \frac{1}{\sqrt{2}} \end{bmatrix}$$
 
 **For $\mathbf{u}_2$:**
-$$\mathbf{u}_2 = rac{1}{1} egin{bmatrix} 1 & 2 \ 2 & 1 \end{bmatrix} egin{bmatrix} rac{1}{\sqrt{2}} \ -rac{1}{\sqrt{2}} \end{bmatrix} = egin{bmatrix} rac{1 - 2}{\sqrt{2}} \ rac{2 - 1}{\sqrt{2}} \end{bmatrix} = egin{bmatrix} -rac{1}{\sqrt{2}} \ rac{1}{\sqrt{2}} \end{bmatrix}$$
+
+$$\mathbf{u}_2 = \frac{1}{1} \begin{bmatrix} 1 & 2 \\ 2 & 1 \end{bmatrix} \begin{bmatrix} \frac{1}{\sqrt{2}} \\ -\frac{1}{\sqrt{2}} \end{bmatrix} = \begin{bmatrix} \frac{1 - 2}{\sqrt{2}} \\ \frac{2 - 1}{\sqrt{2}} \end{bmatrix} = \begin{bmatrix} -\frac{1}{\sqrt{2}} \\ \frac{1}{\sqrt{2}} \end{bmatrix}$$
 
 Assemble the left singular vectors matrix $\mathbf{U}$:
-$$\mathbf{U} = egin{bmatrix} rac{1}{\sqrt{2}} & -rac{1}{\sqrt{2}} \ rac{1}{\sqrt{2}} & rac{1}{\sqrt{2}} \end{bmatrix}$$
+
+$$\mathbf{U} = \begin{bmatrix} \frac{1}{\sqrt{2}} & -\frac{1}{\sqrt{2}} \\ \frac{1}{\sqrt{2}} & \frac{1}{\sqrt{2}} \end{bmatrix}$$
 
 ---
 
 ### Verification Checkout
 Let's multiply our decomposed matrices back together ($\mathbf{U} \mathbf{\Sigma} \mathbf{V}^T$) to verify correctness:
 
-$$\mathbf{U}\mathbf{\Sigma} = egin{bmatrix} rac{1}{\sqrt{2}} & -rac{1}{\sqrt{2}} \ rac{1}{\sqrt{2}} & rac{1}{\sqrt{2}} \end{bmatrix} egin{bmatrix} 3 & 0 \ 0 & 1 \end{bmatrix} = egin{bmatrix} rac{3}{\sqrt{2}} & -rac{1}{\sqrt{2}} \ rac{3}{\sqrt{2}} & rac{1}{\sqrt{2}} \end{bmatrix}$$
+$$\mathbf{U}\mathbf{\Sigma} = \begin{bmatrix} \frac{1}{\sqrt{2}} & -\frac{1}{\sqrt{2}} \\ \frac{1}{\sqrt{2}} & \frac{1}{\sqrt{2}} \end{bmatrix} \begin{bmatrix} 3 & 0 \\ 0 & 1 \end{bmatrix} = \begin{bmatrix} \frac{3}{\sqrt{2}} & -\frac{1}{\sqrt{2}} \\ \frac{3}{\sqrt{2}} & \frac{1}{\sqrt{2}} \end{bmatrix}$$
 
 Now multiply by $\mathbf{V}^T$:
-$$\mathbf{A} = (\mathbf{U}\mathbf{\Sigma})\mathbf{V}^T = egin{bmatrix} rac{3}{\sqrt{2}} & -rac{1}{\sqrt{2}} \ rac{3}{\sqrt{2}} & rac{1}{\sqrt{2}} \end{bmatrix} egin{bmatrix} rac{1}{\sqrt{2}} & rac{1}{\sqrt{2}} \ rac{1}{\sqrt{2}} & -rac{1}{\sqrt{2}} \end{bmatrix}$$
 
-$$\mathbf{A} = egin{bmatrix} (rac{3}{2} - rac{1}{2}) & (rac{3}{2} + rac{1}{2}) \ (rac{3}{2} + rac{1}{2}) & (rac{3}{2} - rac{1}{2}) \end{bmatrix} = egin{bmatrix} 1 & 2 \ 2 & 1 \end{bmatrix}$$
+$$\mathbf{A} = (\mathbf{U}\mathbf{\Sigma})\mathbf{V}^T = \begin{bmatrix} \frac{3}{\sqrt{2}} & -\frac{1}{\sqrt{2}} \\ \frac{3}{\sqrt{2}} & \frac{1}{\sqrt{2}} \end{bmatrix} \begin{bmatrix} \frac{1}{\sqrt{2}} & \frac{1}{\sqrt{2}} \\ \frac{1}{\sqrt{2}} & -\frac{1}{\sqrt{2}} \end{bmatrix}$$
+
+$$\mathbf{A} = \begin{bmatrix} (\frac{3}{2} - \frac{1}{2}) & (\frac{3}{2} + \frac{1}{2}) \\ (\frac{3}{2} + \frac{1}{2}) & (\frac{3}{2} - \frac{1}{2}) \end{bmatrix} = \begin{bmatrix} 1 & 2 \\ 2 & 1 \end{bmatrix}$$
 
 The math resolves perfectly back to our raw input matrix $\mathbf{A}$.

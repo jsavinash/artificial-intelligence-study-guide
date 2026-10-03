@@ -144,27 +144,41 @@ Let's assume our embedding model outputs vectors in a 3-dimensional space repres
 #### Step-by-Step Arithmetic
 
 **Step 1: Calculate the algebraic Dot Product ($\mathbf{q} \cdot \mathbf{d}$) in the numerator.**
+
 $$\mathbf{q} \cdot \mathbf{d} = (q_1 \times d_1) + (q_2 \times d_2) + (q_3 \times d_3)$$
+
 $$\mathbf{q} \cdot \mathbf{d} = (1.0 \times 3.0) + (2.0 \times 6.0) + (0.0 \times 0.0)$$
+
 $$\mathbf{q} \cdot \mathbf{d} = 3.0 + 12.0 + 0.0$$
+
 $$\mathbf{q} \cdot \mathbf{d} = 15.0$$
 
 **Step 2: Calculate the Euclidean Norm (L₂) of the Query Vector ($\Vert\mathbf{q}\Vert_2$).**
+
 $$\Vert\mathbf{q}\Vert_2 = \sqrt{1.0^2 + 2.0^2 + 0.0^2}$$
+
 $$\Vert\mathbf{q}\Vert_2 = \sqrt{1.0 + 4.0 + 0.0}$$
+
 $$\Vert\mathbf{q}\Vert_2 = \sqrt{5.0} \approx 2.236068$$
 
 **Step 3: Calculate the Euclidean Norm (L₂) of the Document Vector ($\Vert\mathbf{d}\Vert_2$).**
+
 $$\Vert\mathbf{d}\Vert_2 = \sqrt{3.0^2 + 6.0^2 + 0.0^2}$$
+
 $$\Vert\mathbf{d}\Vert_2 = \sqrt{9.0 + 36.0 + 0.0}$$
+
 $$\Vert\mathbf{d}\Vert_2 = \sqrt{45.0} \approx 6.708204$$
 
 **Step 4: Multiply the two norms together to construct the denominator.**
+
 $$\Vert\mathbf{q}\Vert_2 \times \Vert\mathbf{d}\Vert_2 = \sqrt{5.0} \times \sqrt{45.0}$$
+
 $$\Vert\mathbf{q}\Vert_2 \times \Vert\mathbf{d}\Vert_2 = \sqrt{5.0 \times 45.0} = \sqrt{225.0}$$
+
 $$\Vert\mathbf{q}\Vert_2 \times \Vert\mathbf{d}\Vert_2 = 15.0$$
 
 **Step 5: Divide the dot product by the multiplied norms.**
+
 $$S_C(\mathbf{q}, \mathbf{d}) = \frac{15.0}{15.0} = 1.0$$
 
 **Conclusion:** The cosine similarity is exactly **`1.0`**. Even though the document vector was physically much longer and had larger numerical coordinates due to document length, the cosine similarity successfully recognized that their underlying paths are perfectly parallel. The database returns this document as an exact semantic match.

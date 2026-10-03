@@ -203,12 +203,15 @@ quadrantChart
 We can group these outputs into our final matrix components.
 
 The collective eigenvector basis matrix $V$ is:
+
 $$V = \begin{bmatrix} 1 & 1 \\ 1 & -1 \end{bmatrix}$$
 
 The sorted diagonal eigenvalue matrix $\Lambda$ is:
+
 $$\Lambda = \begin{bmatrix} 3 & 0 \\ 0 & 1 \end{bmatrix}$$
 
 To verify, we compute the inverse matrix $V^{-1}$:
+
 $$V^{-1} = \frac{1}{(1)(-1) - (1)(1)} \begin{bmatrix} -1 & -1 \\ -1 & 1 \end{bmatrix} = -\frac{1}{2} \begin{bmatrix} -1 & -1 \\ -1 & 1 \end{bmatrix} = \begin{bmatrix} 0.5 & 0.5 \\ 0.5 & -0.5 \end{bmatrix}$$
 
 The three assembled components feeding the decomposition formula:

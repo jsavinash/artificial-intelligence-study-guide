@@ -27,29 +27,27 @@ Without the covariance matrix, Modern AI would collapse under the weight of redu
 
 For a multi-dimensional dataset represented as a data matrix, the population covariance matrix $\Sigma$ (or sample covariance matrix $S$) for a random vector $\mathbf{X} = [X_1, X_2, \dots, X_d]^T$ is mathematically structured as:
 
-$$\Sigma = \mathbb{E}\left[(\mathbf{X} - oldsymbol{\mu})(\mathbf{X} - oldsymbol{\mu})^T
-ight]$$
+$$\Sigma = \mathbb{E}\left[(\mathbf{X} - \boldsymbol{\mu})(\mathbf{X} - \boldsymbol{\mu})^T \right]$$
 
 For a discrete sample dataset consisting of $n$ observations, the entry at row $i$ and column $j$ of the matrix is computed as:
 
-$$Q_{ij} =
-rac{1}{n - 1} \sum_{k=1}^{n} (x_{ki} - ar{x}_i)(x_{kj} - ar{x}_j)$$
+$$Q_{ij} = \frac{1}{n - 1} \sum_{k=1}^{n} (x_{ki} - \bar{x}_i)(x_{kj} - \bar{x}_j)$$
 
 #### Variable and Symbol Definitions
-* **$\Sigma$ or $Q$:** The resulting $d 	imes d$ covariance matrix (where $d$ is the number of features).
+* **$\Sigma$ or $Q$:** The resulting $d \times d$ covariance matrix (where $d$ is the number of features).
 * **$\mathbb{E}[\cdot]$:** The Expected Value (statistical mean) operator.
 * **$\mathbf{X}$:** A column vector containing the random variables representing your features.
-* **$oldsymbol{\mu}$:** The mean vector containing the expected values (means) of each feature.
+* **$\boldsymbol{\mu}$:** The mean vector containing the expected values (means) of each feature.
 * **$n$:** The total number of data points (samples) in your dataset.
 * **$x_{ki}$:** The specific value of feature $i$ for the $k$-th data sample.
-* **$ar{x}_i$:** The calculated scalar sample mean of feature $i$.
+* **$\bar{x}_i$:** The calculated scalar sample mean of feature $i$.
 * **$(\cdot)^T$:** The transpose operation, turning a column vector into a row vector (or vice versa).
 
 #### Logical Intuition Behind the Structure
-The magic of this formula lies in the **centered vector multiplication**, $(\mathbf{X} - oldsymbol{\mu})(\mathbf{X} - oldsymbol{\mu})^T$.
+The magic of this formula lies in the **centered vector multiplication**, $(\mathbf{X} - \boldsymbol{\mu})(\mathbf{X} - \boldsymbol{\mu})^T$.
 
-By subtracting the mean ($oldsymbol{\mu}$), we shift our coordinate system so that the data's center sits exactly at the origin $(0,0,\dots,0)$.
-When you multiply a column vector of deviations by its own transpose (row vector), linear algebra forces an **outer product**. This outer product squares the deviations on the diagonal (yielding variance, $(x-ar{x})^2$) and cross-multiplies different features on the off-diagonals (yielding covariance, $(x_i-ar{x}_i)(x_j-ar{x}_j)$).
+By subtracting the mean ($\boldsymbol{\mu}$), we shift our coordinate system so that the data's center sits exactly at the origin $(0,0,\dots,0)$.
+When you multiply a column vector of deviations by its own transpose (row vector), linear algebra forces an **outer product**. This outer product squares the deviations on the diagonal (yielding variance, $(x-\bar{x})^2$) and cross-multiplies different features on the off-diagonals (yielding covariance, $(x_i-\bar{x}_i)(x_j-\bar{x}_j)$).
 
 The summation $\sum$ accumulates these cross-products across all samples. If two features consistently deviate in the *same* direction (e.g., both positive or both negative), their product is positive, building a positive covariance. If they deviate in opposite directions, the product is negative, creating a negative covariance. Division by $n-1$ normalizes this accumulation to provide an unbiased average structural spread.
 
@@ -58,8 +56,8 @@ The summation $\sum$ accumulates these cross-products across all samples. If two
 ### 3. CAUSATION & BEHAVIOR
 
 #### Cause-and-Effect Relationships within the Math
-* **When Input A increases concurrently with Input B:** The term $(x_{ki} - ar{x}_i)$ and $(x_{kj} - ar{x}_j)$ will carry the **same mathematical sign** (either both positive or both negative). Their product will always be positive. Consequently, the off-diagonal covariance entry $Q_{ij}$ scales upward in the positive direction, causing the data distribution to tilt diagonally upward.
-* **When Input B approaches zero variance:** If a feature's values sit tightly around its mean, its deviation term $(x_{kj} - ar{x}_j)$ approaches $0$ for nearly all data points. Because you are multiplying by approximately zero, the entire sum for covariance collapses. The corresponding off-diagonal entry shrinks toward $0$, signaling to an AI model that Input B shares no linear structural relationship with the other feature.
+* **When Input A increases concurrently with Input B:** The term $(x_{ki} - \bar{x}_i)$ and $(x_{kj} - \bar{x}_j)$ will carry the **same mathematical sign** (either both positive or both negative). Their product will always be positive. Consequently, the off-diagonal covariance entry $Q_{ij}$ scales upward in the positive direction, causing the data distribution to tilt diagonally upward.
+* **When Input B approaches zero variance:** If a feature's values sit tightly around its mean, its deviation term $(x_{kj} - \bar{x}_j)$ approaches $0$ for nearly all data points. Because you are multiplying by approximately zero, the entire sum for covariance collapses. The corresponding off-diagonal entry shrinks toward $0$, signaling to an AI model that Input B shares no linear structural relationship with the other feature.
 
 #### Edge Cases, Constraints, and Limitations
 1. **The Linearity Constraint:** Covariance strictly measures *linear* relationships. If Feature Y is related to Feature X by a perfect circle ($Y^2 + X^2 = r^2$) or a sine wave, their covariance can equal exactly $0$. An AI algorithm relying solely on a covariance matrix will completely miss non-linear feature interactions.
@@ -75,15 +73,15 @@ Below is a geometric representation of the covariance layout mapped out using a 
 ```mermaid
 quadrantChart
     title Covariance Spread and Data Alignment
-    x-axis Feature 1 (Study Hours) --> Positive Deviations
-    y-axis Feature 2 (Test Scores) --> Positive Deviations
-    quadrant-1 Strong Positive Joint Deviations (Sample 3)
+    x-axis "Feature 1 (Study Hours)" --> "Positive Deviations"
+    y-axis "Feature 2 (Test Scores)" --> "Positive Deviations"
+    quadrant-1 "Strong Positive Joint Deviations (Sample 3)"
     quadrant-2 Low X, High Y Shifts
-    quadrant-3 Strong Negative Joint Deviations (Sample 1)
+    quadrant-3 "Strong Negative Joint Deviations (Sample 1)"
     quadrant-4 High X, Low Y Shifts
-    Sample 1 (Negative Deviations): [0.25, 0.25]
-    Sample 2 (Mean Centered Data): [0.50, 0.50]
-    Sample 3 (Positive Deviations): [0.75, 0.75]
+    "Sample 1 (Negative Deviations)": [0.25, 0.25]
+    "Sample 2 (Mean Centered Data)": [0.50, 0.50]
+    "Sample 3 (Positive Deviations)": [0.75, 0.75]
 ```
 
 #### What to Look for in a Dynamic Python Plot
@@ -101,28 +99,22 @@ Let's build a tiny preprocessing pipeline for an AI model predicting student per
 
 #### The Toy Dataset
 We sample $n = 3$ students:
-* Student 1: 2 Hours, Score of 30 $
-ightarrow \mathbf{s}_1 = [2, 30]^T$
-* Student 2: 4 Hours, Score of 50 $
-ightarrow \mathbf{s}_2 = [4, 50]^T$
-* Student 3: 6 Hours, Score of 70 $
-ightarrow \mathbf{s}_3 = [6, 70]^T$
+* Student 1: 2 Hours, Score of 30 $\rightarrow \mathbf{s}_1 = [2, 30]^T$
+* Student 2: 4 Hours, Score of 50 $\rightarrow \mathbf{s}_2 = [4, 50]^T$
+* Student 3: 6 Hours, Score of 70 $\rightarrow \mathbf{s}_3 = [6, 70]^T$
 
 #### Step-by-Step Execution
 
 ##### Step 1: Calculate the Mean for Each Feature
-$$ar{x} =
-rac{2 + 4 + 6}{3} =
-rac{12}{3} = 4$$
 
-$$ar{y} =
-rac{30 + 50 + 70}{3} =
-rac{150}{3} = 50$$
+$$\bar{x} = \frac{2 + 4 + 6}{3} = \frac{12}{3} = 4$$
 
-Our Mean Vector is: $oldsymbol{\mu} = egin{bmatrix} 4 \ 50 \end{bmatrix}$
+$$\bar{y} = \frac{30 + 50 + 70}{3} = \frac{150}{3} = 50$$
+
+Our Mean Vector is: $\boldsymbol{\mu} = \begin{bmatrix} 4 \\ 50 \end{bmatrix}$
 
 ##### Step 2: Compute Deviations (Mean-Centering) for Every Sample
-Subtract the mean vector from each sample vector ($x_i - ar{x}$, $y_i - ar{y}$):
+Subtract the mean vector from each sample vector ($x_i - \bar{x}$, $y_i - \bar{y}$):
 * Student 1: $[2 - 4, 30 - 50] = [-2, -20]$
 * Student 2: $[4 - 4, 50 - 50] = [0, 0]$
 * Student 3: $[6 - 4, 70 - 50] = [2, 20]$
@@ -130,42 +122,30 @@ Subtract the mean vector from each sample vector ($x_i - ar{x}$, $y_i - ar{y}$
 ##### Step 3: Compute Covariance Matrix Elements ($Q_{11}, Q_{22}, Q_{12}, Q_{21}$)
 
 **Calculate $Q_{11}$ (Variance of Feature 1 - Study Hours):**
-$$Q_{11} =
-rac{1}{3-1} \sum_{k=1}^{3} (x_k - ar{x})^2$$
 
-$$Q_{11} =
-rac{1}{2} \left[ (-2)^2 + (0)^2 + (2)^2
-ight] =
-rac{1}{2} [4 + 0 + 4] =
-rac{8}{2} = 4$$
+$$Q_{11} = \frac{1}{3-1} \sum_{k=1}^{3} (x_k - \bar{x})^2$$
+
+$$Q_{11} = \frac{1}{2} \left[ (-2)^2 + (0)^2 + (2)^2 \right] = \frac{1}{2} [4 + 0 + 4] = \frac{8}{2} = 4$$
 
 **Calculate $Q_{22}$ (Variance of Feature 2 - Test Scores):**
-$$Q_{22} =
-rac{1}{3-1} \sum_{k=1}^{3} (y_k - ar{y})^2$$
 
-$$Q_{22} =
-rac{1}{2} \left[ (-20)^2 + (0)^2 + (20)^2
-ight] =
-rac{1}{2} [400 + 0 + 400] =
-rac{800}{2} = 400$$
+$$Q_{22} = \frac{1}{3-1} \sum_{k=1}^{3} (y_k - \bar{y})^2$$
+
+$$Q_{22} = \frac{1}{2} \left[ (-20)^2 + (0)^2 + (20)^2 \right] = \frac{1}{2} [400 + 0 + 400] = \frac{800}{2} = 400$$
 
 **Calculate $Q_{12}$ and $Q_{21}$ (Covariance between Study Hours and Test Scores):**
 Because a covariance matrix is symmetric, $Q_{12} = Q_{21}$.
-$$Q_{12} =
-rac{1}{3-1} \sum_{k=1}^{3} (x_k - ar{x})(y_k - ar{y})$$
 
-$$Q_{12} =
-rac{1}{2} \left[ (-2)(-20) + (0)(0) + (2)(20)
-ight]$$
+$$Q_{12} = \frac{1}{3-1} \sum_{k=1}^{3} (x_k - \bar{x})(y_k - \bar{y})$$
 
-$$Q_{12} =
-rac{1}{2} [40 + 0 + 40] =
-rac{80}{2} = 40$$
+$$Q_{12} = \frac{1}{2} \left[ (-2)(-20) + (0)(0) + (2)(20) \right]$$
+
+$$Q_{12} = \frac{1}{2} [40 + 0 + 40] = \frac{80}{2} = 40$$
 
 ##### Step 4: Assemble the Final Covariance Matrix
 Placing our computed elements into the structural grid layout:
 
-$$Q = egin{bmatrix} Q_{11} & Q_{12} \ Q_{21} & Q_{22} \end{bmatrix} = egin{bmatrix} 4 & 40 \ 40 & 400 \end{bmatrix}$$
+$$Q = \begin{bmatrix} Q_{11} & Q_{12} \\ Q_{21} & Q_{22} \end{bmatrix} = \begin{bmatrix} 4 & 40 \\ 40 & 400 \end{bmatrix}$$
 
 #### AI Interpretation of the Output
 An AI model analyzing this output matrix sees that the variance of the test scores ($400$) is vastly larger than that of study hours ($4$). Crucially, the off-diagonal entries ($40$) are strongly positive, indicating that as a student's study hours rise, their test scores shift upward in a tightly coupled, predictable linear path. PCA can now process this matrix to collapse these two overlapping features into a single optimized principal component.

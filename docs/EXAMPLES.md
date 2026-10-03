@@ -157,9 +157,9 @@ PASS m18 agents | tools=['calculator', 'search_docs'] goal1_steps=2 tool_calls=1
 
 ### m19 · LLM App Engineering — **evals, guardrails, cost tracking**
 → [19](curriculum/19-llm-application-engineering.md) · `make run M=19`
-Golden-set harness with latency + $ cost per case, injection/PII input guards, output leak checks, LLM-as-judge rubric score, semantic cache (1 hit saved).
+Golden-set harness with latency + \$ cost per case, injection/PII input guards, output leak checks, LLM-as-judge rubric score, semantic cache (1 hit saved).
 ```text
-PASS m19 llm-app | eval_pass=100% p95=0.14ms total_cost=$0.000122 guards[injection_blocked=True pii_flagged=True] judge=1.0 cache_hits=1 provider=mock-llm
+PASS m19 llm-app | eval_pass=100% p95=0.14ms total_cost=\$0.000122 guards[injection_blocked=True pii_flagged=True] judge=1.0 cache_hits=1 provider=mock-llm
 ```
 
 ---

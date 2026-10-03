@@ -38,20 +38,20 @@ graph LR
 
 PCA relies on computing the structural matrix of your dataset and decomposing it into its structural vectors. The core operations are governed by the following mathematical framework:
 
-$$\mathbf{\Sigma} = rac{1}{n} \mathbf{X}_{c}^T \mathbf{X}_{c}$$
+$$\mathbf{\Sigma} = \frac{1}{n} \mathbf{X}_{c}^T \mathbf{X}_{c}$$
 
 $$\mathbf{\Sigma} \mathbf{v} = \lambda \mathbf{v}$$
 
 $$\mathbf{Z} = \mathbf{X}_{c} \mathbf{V}_k$$
 
 ### Variable Breakdown
-* $\mathbf{X}_{c}$: The **Mean-Centered Data Matrix** of size $n 	imes d$ (where $n$ is the number of samples and $d$ is the number of raw features). It is created by subtracting the mean of each column from every value in that column.
-* $\mathbf{\Sigma}$: The $d 	imes d$ **Covariance Matrix**. It measures how much each feature varies both by itself and in tandem with every other feature.
+* $\mathbf{X}_{c}$: The **Mean-Centered Data Matrix** of size $n \times d$ (where $n$ is the number of samples and $d$ is the number of raw features). It is created by subtracting the mean of each column from every value in that column.
+* $\mathbf{\Sigma}$: The $d \times d$ **Covariance Matrix**. It measures how much each feature varies both by itself and in tandem with every other feature.
 * $n$: The **Total Number of Samples** in your dataset.
 * $\mathbf{v}$: An **Eigenvector** of the covariance matrix. This represents the spatial direction of a principal component axis.
 * $\lambda$: An **Eigenvalue** corresponding to the eigenvector $\mathbf{v}$. This scalar value explicitly measures the amount of variance absolute to that axis.
-* $\mathbf{V}_k$: The **Feature Matrix** containing the top $k$ chosen eigenvectors ($d 	imes k$).
-* $\mathbf{Z}$: The final $n 	imes k$ **Projected Low-Dimensional Data Matrix**.
+* $\mathbf{V}_k$: The **Feature Matrix** containing the top $k$ chosen eigenvectors ($d \times k$).
+* $\mathbf{Z}$: The final $n \times k$ **Projected Low-Dimensional Data Matrix**.
 
 ### Logical Intuition of the Structure
 1. **Mean Centering ($\mathbf{X}_c$):** Shifts the origin of the dataset's coordinate system to its geometric center $(0,0,\dots,0)$. Without this, the first principal component would mistakenly point from the physical origin $(0,0)$ to the center of the data cluster, rather than along the axis of maximum variance.
@@ -63,8 +63,7 @@ $$\mathbf{Z} = \mathbf{X}_{c} \mathbf{V}_k$$
 ## 3. CAUSATION & BEHAVIOR
 
 ### Mathematical Dynamics
-* **When Off-Diagonal Covariances Increase:** If the values inside $\mathbf{\Sigma}$ (where $i 
-eq j$) skyrocket, it means features are highly redundant. Consequently, the primary eigenvalue ($\lambda_1$) grows massively dominant, allowing a single principal component to capture almost $100\%$ of the dataset's total information.
+* **When Off-Diagonal Covariances Increase:** If the values inside $\mathbf{\Sigma}$ (where $i \neq j$) skyrocket, it means features are highly redundant. Consequently, the primary eigenvalue ($\lambda_1$) grows massively dominant, allowing a single principal component to capture almost $100\%$ of the dataset's total information.
 * **When an Eigenvalue ($\lambda_i$) Approaches Zero:** This dictates that there is virtually no variation along that specific eigenvector's path. In an AI pipeline, this component can be discarded instantly without losing predictive accuracy.
 * **Sensitivity to Scale:** If **Feature A** ranges from $0$ to $1,000,000$ and **Feature B** ranges from $0$ to $1$, the variance of Feature A will completely dominate the covariance matrix. PCA will blindly align PC1 along Feature A simply because of its units, completely ignoring patterns in Feature B.
 
@@ -82,8 +81,8 @@ The diagram below represents a two-dimensional dataset $(X_1, X_2)$ compressed i
 ```mermaid
 quadrantChart
     title PCA Geometric Variance Decomposition
-    x-axis Feature 1 (Low Variance) --> Feature 1 (High Variance)
-    y-axis Feature 2 (Low Variance) --> Feature 2 (High Variance)
+    x-axis "Feature 1 (Low Variance)" --> "Feature 1 (High Variance)"
+    y-axis "Feature 2 (Low Variance)" --> "Feature 2 (High Variance)"
     quadrant-1 Low Variance Noise Outliers
     quadrant-2 Primary Data Cluster Extent
     quadrant-3 Data Core Origin Center
@@ -109,91 +108,86 @@ We are building a computer vision model to recognize shapes. Our preprocessing s
 ### The Toy Dataset
 Our dataset consists of $n=3$ image samples, each containing $d=2$ features (Pixel 1, Pixel 2):
 
-$$\mathbf{X} = egin{bmatrix} 1 & 1 \ 2 & 3 \ 3 & 5 \end{bmatrix}$$
+$$\mathbf{X} = \begin{bmatrix} 1 & 1 \\ 2 & 3 \\ 3 & 5 \end{bmatrix}$$
 
 ---
 
 ### Step 1: Compute Feature Means
 Find the mean value for both columns:
-* $\mu_{	ext{Pixel 1}} = rac{1 + 2 + 3}{3} = 2$
-* $\mu_{	ext{Pixel 2}} = rac{1 + 3 + 5}{3} = 3$
+* $\mu_{\text{Pixel 1}} = \frac{1 + 2 + 3}{3} = 2$
+* $\mu_{\text{Pixel 2}} = \frac{1 + 3 + 5}{3} = 3$
 
-$$\mathbf{\mu} = egin{bmatrix} 2 & 3 \end{bmatrix}$$
+$$\mathbf{\mu} = \begin{bmatrix} 2 & 3 \end{bmatrix}$$
 
 ---
 
 ### Step 2: Calculate the Mean-Centered Matrix ($\mathbf{X}_c$)
 Subtract the column means from every individual row value:
 
-$$\mathbf{X}_c = egin{bmatrix} 1-2 & 1-3 \ 2-2 & 3-3 \ 3-2 & 5-3 \end{bmatrix} = egin{bmatrix} -1 & -2 \ 0 & 0 \ 1 & 2 \end{bmatrix}$$
+$$\mathbf{X}_c = \begin{bmatrix} 1-2 & 1-3 \\ 2-2 & 3-3 \\ 3-2 & 5-3 \end{bmatrix} = \begin{bmatrix} -1 & -2 \\ 0 & 0 \\ 1 & 2 \end{bmatrix}$$
 
 ---
 
-### Step 3: Compute the Covariance Matrix ($\mathbf{\Sigma}$) using $rac{1}{n}\mathbf{X}_c^T\mathbf{X}_c$
+### Step 3: Compute the Covariance Matrix ($\mathbf{\Sigma}$) using $\frac{1}{n}\mathbf{X}_c^T\mathbf{X}_c$
 First, calculate the matrix transpose $\mathbf{X}_c^T$:
 
-$$\mathbf{X}_c^T = egin{bmatrix} -1 & 0 & 1 \ -2 & 0 & 2 \end{bmatrix}$$
+$$\mathbf{X}_c^T = \begin{bmatrix} -1 & 0 & 1 \\ -2 & 0 & 2 \end{bmatrix}$$
 
 Now, multiply $\mathbf{X}_c^T$ by $\mathbf{X}_c$:
 
-$$\mathbf{X}_c^T \mathbf{X}_c = egin{bmatrix} (-1)(-1) + (0)(0) + (1)(1) & (-1)(-2) + (0)(0) + (1)(2) \ (-2)(-1) + (0)(0) + (2)(1) & (-2)(-2) + (0)(0) + (2)(2) \end{bmatrix}$$
+$$\mathbf{X}_c^T \mathbf{X}_c = \begin{bmatrix} (-1)(-1) + (0)(0) + (1)(1) & (-1)(-2) + (0)(0) + (1)(2) \\ (-2)(-1) + (0)(0) + (2)(1) & (-2)(-2) + (0)(0) + (2)(2) \end{bmatrix}$$
 
-$$\mathbf{X}_c^T \mathbf{X}_c = egin{bmatrix} 1+0+1 & 2+0+2 \ 2+0+2 & 4+0+4 \end{bmatrix} = egin{bmatrix} 2 & 4 \ 4 & 8 \end{bmatrix}$$
+$$\mathbf{X}_c^T \mathbf{X}_c = \begin{bmatrix} 1+0+1 & 2+0+2 \\ 2+0+2 & 4+0+4 \end{bmatrix} = \begin{bmatrix} 2 & 4 \\ 4 & 8 \end{bmatrix}$$
 
 Divide by $n=3$ to finalize the population covariance matrix:
 
-$$\mathbf{\Sigma} = egin{bmatrix} rac{2}{3} & rac{4}{3} \ rac{4}{3} & rac{8}{3} \end{bmatrix}$$
+$$\mathbf{\Sigma} = \begin{bmatrix} \frac{2}{3} & \frac{4}{3} \\ \frac{4}{3} & \frac{8}{3} \end{bmatrix}$$
 
 ---
 
 ### Step 4: Calculate Eigenvalues ($\lambda$)
 To extract the eigenvalues, solve the characteristic determinant equation $\det(\mathbf{\Sigma} - \lambda\mathbf{I}) = 0$:
 
-$$\det egin{bmatrix} rac{2}{3} - \lambda & rac{4}{3} \ rac{4}{3} & rac{8}{3} - \lambda \end{bmatrix} = 0$$
+$$\det \begin{bmatrix} \frac{2}{3} - \lambda & \frac{4}{3} \\ \frac{4}{3} & \frac{8}{3} - \lambda \end{bmatrix} = 0$$
 
-$$\left(rac{2}{3} - \lambda
-ight)\left(rac{8}{3} - \lambda
-ight) - \left(rac{4}{3}
-ight)\left(rac{4}{3}
-ight) = 0$$
+$$\left(\frac{2}{3} - \lambda \right)\left(\frac{8}{3} - \lambda \right) - \left(\frac{4}{3} \right)\left(\frac{4}{3} \right) = 0$$
 
-$$rac{16}{9} - rac{2}{3}\lambda - rac{8}{3}\lambda + \lambda^2 - rac{16}{9} = 0$$
+$$\frac{16}{9} - \frac{2}{3}\lambda - \frac{8}{3}\lambda + \lambda^2 - \frac{16}{9} = 0$$
 
-$$\lambda^2 - rac{10}{3}\lambda = 0 \implies \lambda\left(\lambda - rac{10}{3}
-ight) = 0$$
+$$\lambda^2 - \frac{10}{3}\lambda = 0 \implies \lambda\left(\lambda - \frac{10}{3} \right) = 0$$
 
 Our two resulting eigenvalues are:
-* $\lambda_1 = rac{10}{3} pprox 3.333$ (Accounts for 100% of the variance)
+* $\lambda_1 = \frac{10}{3} \approx 3.333$ (Accounts for 100% of the variance)
 * $\lambda_2 = 0$ (Accounts for 0% of the variance)
 
 ---
 
 ### Step 5: Compute the Principal Eigenvector ($\mathbf{v}_1$)
-Using the highest eigenvalue ($\lambda_1 = rac{10}{3}$), solve $(\mathbf{\Sigma} - \lambda_1\mathbf{I})\mathbf{v}_1 = 0$:
+Using the highest eigenvalue ($\lambda_1 = \frac{10}{3}$), solve $(\mathbf{\Sigma} - \lambda_1\mathbf{I})\mathbf{v}_1 = 0$:
 
-$$egin{bmatrix} rac{2}{3} - rac{10}{3} & rac{4}{3} \ rac{4}{3} & rac{8}{3} - rac{10}{3} \end{bmatrix} egin{bmatrix} x_1 \ x_2 \end{bmatrix} = egin{bmatrix} 0 \ 0 \end{bmatrix}$$
+$$\begin{bmatrix} \frac{2}{3} - \frac{10}{3} & \frac{4}{3} \\ \frac{4}{3} & \frac{8}{3} - \frac{10}{3} \end{bmatrix} \begin{bmatrix} x_1 \\ x_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}$$
 
-$$egin{bmatrix} -rac{8}{3} & rac{4}{3} \ rac{4}{3} & -rac{2}{3} \end{bmatrix} egin{bmatrix} x_1 \ x_2 \end{bmatrix} = egin{bmatrix} 0 \ 0 \end{bmatrix}$$
+$$\begin{bmatrix} -\frac{8}{3} & \frac{4}{3} \\ \frac{4}{3} & -\frac{2}{3} \end{bmatrix} \begin{bmatrix} x_1 \\ x_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}$$
 
-This yields the linear relationship row: $-rac{8}{3}x_1 + rac{4}{3}x_2 = 0 \implies 4x_2 = 8x_1 \implies x_2 = 2x_1$.
-Setting $x_1 = 1$ gives an unnormalized vector of $egin{bmatrix} 1 \ 2 \end{bmatrix}$.
+This yields the linear relationship row: $-\frac{8}{3}x_1 + \frac{4}{3}x_2 = 0 \implies 4x_2 = 8x_1 \implies x_2 = 2x_1$.
+Setting $x_1 = 1$ gives an unnormalized vector of $\begin{bmatrix} 1 \\ 2 \end{bmatrix}$.
 
 Normalize the vector to unit length ($\Vert{}\mathbf{v}\Vert{} = \sqrt{1^2 + 2^2} = \sqrt{5}$):
 
-$$\mathbf{v}_1 = egin{bmatrix} rac{1}{\sqrt{5}} \ rac{2}{\sqrt{5}} \end{bmatrix} pprox egin{bmatrix} 0.447 \ 0.894 \end{bmatrix}$$
+$$\mathbf{v}_1 = \begin{bmatrix} \frac{1}{\sqrt{5}} \\ \frac{2}{\sqrt{5}} \end{bmatrix} \approx \begin{bmatrix} 0.447 \\ 0.894 \end{bmatrix}$$
 
 ---
 
 ### Step 6: Project the Data Onto the New 1D Space ($\mathbf{Z}$)
 Multiply our mean-centered data matrix $\mathbf{X}_c$ by the principal eigenvector $\mathbf{v}_1$:
 
-$$\mathbf{Z} = \mathbf{X}_c \mathbf{v}_1 = egin{bmatrix} -1 & -2 \ 0 & 0 \ 1 & 2 \end{bmatrix} egin{bmatrix} rac{1}{\sqrt{5}} \ rac{2}{\sqrt{5}} \end{bmatrix}$$
+$$\mathbf{Z} = \mathbf{X}_c \mathbf{v}_1 = \begin{bmatrix} -1 & -2 \\ 0 & 0 \\ 1 & 2 \end{bmatrix} \begin{bmatrix} \frac{1}{\sqrt{5}} \\ \frac{2}{\sqrt{5}} \end{bmatrix}$$
 
-* **Row 1 Projection:** $(-1)(rac{1}{\sqrt{5}}) + (-2)(rac{2}{\sqrt{5}}) = -rac{5}{\sqrt{5}} = -\sqrt{5} pprox -2.236$
-* **Row 2 Projection:** $(0)(rac{1}{\sqrt{5}}) + (0)(rac{2}{\sqrt{5}}) = 0$
-* **Row 3 Projection:** $(1)(rac{1}{\sqrt{5}}) + (2)(rac{2}{\sqrt{5}}) = rac{5}{\sqrt{5}} = \sqrt{5} pprox 2.236$
+* **Row 1 Projection:** $(-1)(\frac{1}{\sqrt{5}}) + (-2)(\frac{2}{\sqrt{5}}) = -\frac{5}{\sqrt{5}} = -\sqrt{5} \approx -2.236$
+* **Row 2 Projection:** $(0)(\frac{1}{\sqrt{5}}) + (0)(\frac{2}{\sqrt{5}}) = 0$
+* **Row 3 Projection:** $(1)(\frac{1}{\sqrt{5}}) + (2)(\frac{2}{\sqrt{5}}) = \frac{5}{\sqrt{5}} = \sqrt{5} \approx 2.236$
 
 ### Final Output
 Our transformed, **1-dimensional compressed AI dataset** is:
 
-$$\mathbf{Z} = egin{bmatrix} -2.236 \ 0.000 \ 2.236 \end{bmatrix}$$
+$$\mathbf{Z} = \begin{bmatrix} -2.236 \\ 0.000 \\ 2.236 \end{bmatrix}$$

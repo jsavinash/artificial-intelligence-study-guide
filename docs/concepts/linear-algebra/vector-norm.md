@@ -142,7 +142,9 @@ The two most-used norms differ in exactly one way: whether components are summed
 A high-impact feature weight $w_1 = 10.0$ (square footage) and a useless noise weight $w_2 = 0.1$ (mailbox style), with regularization strength $\lambda = 0.2$.
 
 **L1 (Lasso):** the shrinkage force is constant regardless of weight size.
+
 $$\text{Shrinkage Force} = \lambda \times \text{sign}(w) = 0.2 \times 1 = 0.2$$
+
 * New $w_1 = 10.0 - 0.2 = \mathbf{9.8}$
 * New $w_2 = 0.1 - 0.2 = -0.1$, then **soft-thresholded at zero** $\Rightarrow \mathbf{0.0}$
 
@@ -151,7 +153,9 @@ $$\text{Shrinkage Force} = \lambda \times \text{sign}(w) = 0.2 \times 1 = 0.2$$
 *Outcome:* feature selection eliminates "mailbox style" entirely.
 
 **L2 (Ridge):** the force is proportional to the weight itself.
+
 $$\text{Shrinkage Force} = \lambda \times 2w = 0.2 \times 2w = 0.4w$$
+
 * New $w_1 = 10.0 - (0.4 \times 10.0) = \mathbf{6.0}$ (shrinks drastically because it is large)
 * New $w_2 = 0.1 - (0.4 \times 0.1) = \mathbf{0.06}$ (still alive; force fades as the value drops)
 
@@ -162,11 +166,15 @@ $$\text{Shrinkage Force} = \lambda \times 2w = 0.2 \times 2w = 0.4w$$
 Three deliveries with errors $[-1, 0, 20]$, where $20$ is a truck-breakdown outlier.
 
 **L1 Loss (MAE):**
+
 $$\text{MAE} = \frac{|-1| + |0| + |20|}{3} = \frac{21}{3} = \mathbf{7.0}$$
+
 The outlier accounts for $\approx 95.24\%$ of the total loss.
 
 **L2 Loss (MSE):**
+
 $$\text{MSE} = \frac{(-1)^2 + (0)^2 + (20)^2}{3} = \frac{401}{3} = \mathbf{133.67}$$
+
 The outlier accounts for $\approx 99.75\%$ of the total loss.
 
 *Outcome:* MSE forces the model to shift normal predictions significantly just to mitigate the 400-point penalty from a rare exception.
@@ -182,8 +190,11 @@ An exploding gradient $\mathbf{g} = [10.0, 1.0]$ points at an angle of $\tan^{-1
 *Outcome:* the direction shifted by $\approx \mathbf{98\%}$, roughly doubling. The network now updates along a direction that over-weights the second component relative to the first.
 
 **L2-Style Clipping (by norm):** scale the whole vector by one uniform factor.
+
 $$\Vert\mathbf{g}\Vert_2 = \sqrt{10.0^2 + 1.0^2} = \sqrt{101} \approx 10.05$$
+
 $$\text{Factor} = \frac{\text{Threshold}}{\Vert\mathbf{g}\Vert_2} = \frac{5.0}{10.05} \approx 0.4975$$
+
 * $\mathbf{g_{\text{clipped}}} = [10.0 \times 0.4975,\ 1.0 \times 0.4975] = \mathbf{[4.98, 0.50]}$
 * New direction angle: $\tan^{-1}(0.4975 / 4.975) = \mathbf{5.71^\circ}$ — identical to the original $5.71^\circ$
 
@@ -230,12 +241,17 @@ flowchart LR
 * Component 4: $(0.6)^2 = 0.6 \times 0.6 = 0.36$
 
 #### Step 2: Sum all of the squared component outputs together.
+
 $$\sum_{i=1}^{4} w_i^2 = 0.16 + 1.44 + 0.00 + 0.36$$
+
 $$\sum_{i=1}^{4} w_i^2 = 1.60 + 0.00 + 0.36$$
+
 $$\sum_{i=1}^{4} w_i^2 = 1.96$$
 
 #### Step 3: Take the principal square root of the summed values to determine the final $L_2$ norm.
+
 $$\Vert\mathbf{w}\Vert_2 = \sqrt{1.96}$$
+
 $$\Vert\mathbf{w}\Vert_2 = 1.4$$
 
 ### Conclusion
