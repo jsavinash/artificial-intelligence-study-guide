@@ -148,7 +148,12 @@ We are engineering a computer vision model. We have computed the highly simplifi
 #### Toy Dataset
 Let the symmetric covariance matrix be:
 
-$$\mathbf{A} = \begin{bmatrix} 4 & 2 \\ 2 & 7 \end{bmatrix}$$
+$$
+\mathbf{A} = \begin{bmatrix}
+4 & 2 \\
+2 & 7
+\end{bmatrix}
+$$
 
 We will calculate the eigenvalues ($\lambda$) and the primary eigenvector ($\mathbf{v}$).
 
@@ -158,9 +163,26 @@ We will calculate the eigenvalues ($\lambda$) and the primary eigenvector ($\mat
 
 $$\det(\mathbf{A} - \lambda\mathbf{I}) = 0$$
 
-$$\det\left( \begin{bmatrix} 4 & 2 \\ 2 & 7 \end{bmatrix} - \begin{bmatrix} \lambda & 0 \\ 0 & \lambda \end{bmatrix} \right) = 0$$
+$$
+\det\left(
+\begin{bmatrix}
+4 & 2 \\
+2 & 7
+\end{bmatrix}
+-
+\begin{bmatrix}
+\lambda & 0 \\
+0 & \lambda
+\end{bmatrix}
+\right) = 0
+$$
 
-$$\det \begin{bmatrix} 4 - \lambda & 2 \\ 2 & 7 - \lambda \end{bmatrix} = 0$$
+$$
+\det \begin{bmatrix}
+4 - \lambda & 2 \\
+2 & 7 - \lambda
+\end{bmatrix} = 0
+$$
 
 **Step 2: Expand the determinant equation (ad - bc) into a quadratic polynomial.**
 
@@ -180,9 +202,37 @@ $$(\lambda - 3)(\lambda - 8) = 0$$
 **Step 4: Solve for the primary Eigenvector ($\mathbf{v}$) using the dominant eigenvalue ($\lambda_1 = 8$).**
 Substitute $\lambda = 8$ back into $(\mathbf{A} - \lambda\mathbf{I})\mathbf{v} = \mathbf{0}$:
 
-$$\begin{bmatrix} 4 - 8 & 2 \\ 2 & 7 - 8 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}$$
+$$
+\begin{bmatrix}
+4 - 8 & 2 \\
+2 & 7 - 8
+\end{bmatrix}
+\begin{bmatrix}
+v_1 \\
+v_2
+\end{bmatrix}
+=
+\begin{bmatrix}
+0 \\
+0
+\end{bmatrix}
+$$
 
-$$\begin{bmatrix} -4 & 2 \\ 2 & -1 \end{bmatrix} \begin{bmatrix} v_1 \\ v_2 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}$$
+$$
+\begin{bmatrix}
+-4 & 2 \\
+2 & -1
+\end{bmatrix}
+\begin{bmatrix}
+v_1 \\
+v_2
+\end{bmatrix}
+=
+\begin{bmatrix}
+0 \\
+0
+\end{bmatrix}
+$$
 
 This gives us a system of dependent linear equations:
 1) $-4v_1 + 2v_2 = 0 \implies 2v_2 = 4v_1 \implies v_2 = 2v_1$
@@ -191,12 +241,27 @@ This gives us a system of dependent linear equations:
 **Step 5: Pick a base value to define the eigenvector and normalize it.**
 Setting $v_1 = 1$ yields $v_2 = 2$. Thus, our unnormalized eigenvector is:
 
-$$\mathbf{v} = \begin{bmatrix} 1 \\ 2 \end{bmatrix}$$
+$$
+\mathbf{v} = \begin{bmatrix}
+1 \\
+2
+\end{bmatrix}
+$$
 
 To finalize it for standard AI software (unit length norm of 1.0):
 
 $$\Vert\mathbf{v}\Vert = \sqrt{1^2 + 2^2} = \sqrt{5}$$
 
-$$\mathbf{v}_{\text{normalized}} = \begin{bmatrix} \frac{1}{\sqrt{5}} \\ \frac{2}{\sqrt{5}} \end{bmatrix} \approx \begin{bmatrix} 0.447 \\ 0.894 \end{bmatrix}$$
+$$
+\mathbf{v}_{\text{normalized}} = \begin{bmatrix}
+\frac{1}{\sqrt{5}} \\
+\frac{2}{\sqrt{5}}
+\end{bmatrix}
+\approx
+\begin{bmatrix}
+0.447 \\
+0.894
+\end{bmatrix}
+$$
 
 **Conclusion:** The direction vector `[0.447, 0.894]` captures the core structural lineage of our data variance. Our AI compression system will discard the orthogonal axis ($\lambda_2 = 3$) and project the entire dataset directly onto this line, successfully compressing the dimensional footprint by half while retaining maximum information.
