@@ -75,9 +75,9 @@ quadrantChart
     quadrant-2 Rotated Shear Zone
     quadrant-3 Negative Inversion Zone
     quadrant-4 Rotated Shear Zone
-    Eigenvector 1 (Dominant Axis lambda=3): [0.85, 0.85]
-    Eigenvector 2 (Minor Axis lambda=1): [0.15, 0.45]
-    Standard Vector (Rotated/Shifted): [0.45, 0.70]
+    "Eigenvector 1 (Dominant Axis lambda=3)": [0.85, 0.85]
+    "Eigenvector 2 (Minor Axis lambda=1)": [0.15, 0.45]
+    "Standard Vector (Rotated/Shifted)": [0.45, 0.70]
 ```
 
 ### What to Look for in a Dynamic Python Plot
@@ -105,6 +105,15 @@ $$\det\left( \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix} - \begin{bmatrix} \lam
 
 $$\det\begin{bmatrix} 2 - \lambda & 1 \\ 1 & 2 - \lambda \end{bmatrix} = 0$$
 
+The construction of the shifted matrix behind the characteristic equation:
+
+```mermaid
+flowchart TD
+    A["Weight matrix<br/>A = [[2, 1], [1, 2]]"] --> SUB["Shifted matrix<br/>A - λI = [[2-λ, 1],<br/>[1, 2-λ]]"]
+    LAM["λ-scaled identity<br/>λI = [[λ, 0], [0, λ]]"] --> SUB
+    SUB --> DET["Characteristic equation<br/>det(A - λI) = 0"]
+```
+
 #### Step 2: Compute the Polynomial Roots
 Calculate the standard determinant cross-multiplication:
 
@@ -119,6 +128,16 @@ Factoring the quadratic polynomial yields:
 $$(\lambda - 3)(\lambda - 1) = 0$$
 
 Our isolated eigenvalues are: **$\lambda_1 = 3$** and **$\lambda_2 = 1$**.
+
+A plot of the characteristic polynomial $p(\lambda) = \lambda^2 - 4\lambda + 3$. The curve crosses the horizontal axis exactly where $p(\lambda) = 0$, revealing both eigenvalues:
+
+```mermaid
+xychart-beta
+    title "p(λ) = λ² - 4λ + 3 — the curve crosses zero at λ = 1 and λ = 3"
+    x-axis "λ" ["0", "0.5", "1", "1.5", "2", "2.5", "3", "3.5", "4"]
+    y-axis "p(λ)" -2 --> 4
+    line [3, 1.25, 0, -0.75, -1, -0.75, 0, 1.25, 3]
+```
 
 #### Step 3: Find the First Eigenvector ($\lambda_1 = 3$)
 Substitute $\lambda = 3$ back into the shifted system equation $(A - \lambda I)\mathbf{v} = \mathbf{0}$:
@@ -135,6 +154,21 @@ Setting a baseline value of $x_1 = 1$, our first unnormalized eigenvector is:
 
 $$\mathbf{v}_1 = \begin{bmatrix} 1 \\ 1 \end{bmatrix}$$
 
+The first eigenline plotted — the input and its transformed output sit on the same ray through the origin, so only the length changes, never the direction:
+
+```mermaid
+quadrantChart
+    title Eigenline x1 = x2 — v1 (1,1) is stretched to (3,3) with zero rotation (λ1 = 3)
+    x-axis "Near origin (small x1)" --> "Far out (large x1)"
+    y-axis "Near origin (small x2)" --> "Far out (large x2)"
+    quadrant-1 Far end of the eigenline — output lands here
+    quadrant-2 Off the eigenline — A rotates these inputs
+    quadrant-3 Near end of the eigenline — input starts here
+    quadrant-4 Off the eigenline — A rotates these inputs
+    "v1 input = (1,1)": [0.25, 0.25]
+    "Av1 output = (3,3)": [0.75, 0.75]
+```
+
 #### Step 4: Find the Second Eigenvector ($\lambda_2 = 1$)
 Substitute $\lambda = 1$ back into the system:
 
@@ -150,6 +184,21 @@ Setting a baseline value of $x_2 = -1$, our second unnormalized eigenvector is:
 
 $$\mathbf{v}_2 = \begin{bmatrix} 1 \\ -1 \end{bmatrix}$$
 
+The second eigenline plotted — the $x_2$ axis is flipped (bottom $= 0$, top $= -4$) so the line $x_1 = -x_2$ reads as a rising diagonal; both plotted points are fixed points of the transform:
+
+```mermaid
+quadrantChart
+    title Eigenline x1 = -x2 — v2 (1,-1) is mapped onto itself (λ2 = 1)
+    x-axis "Near origin (small x1)" --> "Far out (large x1)"
+    y-axis "x2 = 0 (bottom)" --> "x2 = -4 (top)"
+    quadrant-1 Far end of the eigenline — output equals input
+    quadrant-2 Off the eigenline — A rotates these inputs
+    quadrant-3 Near end of the eigenline — v2 starts here
+    quadrant-4 Off the eigenline — A rotates these inputs
+    "v2 input and output = (1,-1)": [0.25, 0.25]
+    "Another eigenline point (2.4,-2.4) also unchanged": [0.6, 0.6]
+```
+
 #### Step 5: Assemble the Eigendecomposition Matrix Structure
 We can group these outputs into our final matrix components.
 
@@ -162,6 +211,16 @@ $$\Lambda = \begin{bmatrix} 3 & 0 \\ 0 & 1 \end{bmatrix}$$
 To verify, we compute the inverse matrix $V^{-1}$:
 $$V^{-1} = \frac{1}{(1)(-1) - (1)(1)} \begin{bmatrix} -1 & -1 \\ -1 & 1 \end{bmatrix} = -\frac{1}{2} \begin{bmatrix} -1 & -1 \\ -1 & 1 \end{bmatrix} = \begin{bmatrix} 0.5 & 0.5 \\ 0.5 & -0.5 \end{bmatrix}$$
 
+The three assembled components feeding the decomposition formula:
+
+```mermaid
+flowchart LR
+    V["V — eigenvectors as columns<br/>[[1, 1], [1, -1]]"] --> DEC["Eigendecomposition<br/>A = V · Λ · V⁻¹"]
+    LM["Λ — eigenvalues on the diagonal<br/>[[3, 0], [0, 1]]"] --> DEC
+    VI["V⁻¹ — inverse of the basis<br/>[[0.5, 0.5], [0.5, -0.5]]"] --> DEC
+    DEC --> OUT["Rebuilds the original<br/>A = [[2, 1], [1, 2]]"]
+```
+
 ### Verification Calculation
 Let us multiply the decomposed components back together to verify they return our original matrix $A$:
 
@@ -170,3 +229,11 @@ $$V\Lambda = \begin{bmatrix} 1 & 1 \\ 1 & -1 \end{bmatrix} \begin{bmatrix} 3 & 0
 $$(V\Lambda)V^{-1} = \begin{bmatrix} 3 & 1 \\ 3 & -1 \end{bmatrix} \begin{bmatrix} 0.5 & 0.5 \\ 0.5 & -0.5 \end{bmatrix} = \begin{bmatrix} (1.5+0.5) & (1.5-0.5) \\ (1.5-0.5) & (1.5+0.5) \end{bmatrix} = \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix} = A$$
 
 The math balances perfectly. The transformation layer is fully decomposed into its component parts.
+
+The verification multiplication as a round-trip pipeline:
+
+```mermaid
+flowchart LR
+    P1["First product<br/>V · Λ = [[3, 1],<br/>[3, -1]]"] --> P2["Second product<br/>(VΛ) · V⁻¹ = [[1.5+0.5, 1.5-0.5],<br/>[1.5-0.5, 1.5+0.5]]"]
+    P2 --> OK["Result<br/>= [[2, 1], [1, 2]] = A ✓"]
+```
